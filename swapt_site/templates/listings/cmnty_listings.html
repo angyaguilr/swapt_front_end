@@ -1,0 +1,48 @@
+{% extends 'listings/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 col-sm-12 text-center">
+            <h1>Community Swapts</h1>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8 col-sm-12 text-center">
+            <form method="GET" action="{% url 'listings:cmnty_listings_search' %}">
+                <div class="md-form mt-0 active-cyan-2">
+                    <input class="form-control" name="q" type="text" placeholder="Search Our Community Swapts" aria-label="Search" value="{{ request.GET.q }}">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        {% for item in swapt_items %}
+        <div class="col-md-4 col-sm-12 text-center mb-5">
+            <img class="rounded" src="{{ item.thumbnail.url }}" width="350" height="300">
+            <h5 class="mt-3">{{ item.name }}</h5>
+            <p>Price: {{ item.itemPrice }}</p>
+            <p>{{ item.desc }}</p>
+        </div>
+        <div class="card" style="width: 18rem">
+            <img
+              class="card-img-top"
+              src="{{item.thumbnail.url}}"
+              alt="Card image cap"
+            />
+            <div class="card-body">
+              <h5 class="card-title">{{item.name}}</h5>
+              <p class="card-text">{{item.desc}}</p>
+              <a
+                href="{% url 'listings:cmnty_listing_detail' item.id %}"
+                class="btn btn-primary"
+                >View Detail</a
+              >
+            </div>
+          </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

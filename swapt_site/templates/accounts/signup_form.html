@@ -1,0 +1,31 @@
+{% extends "header.html" %}
+
+{% block header %}
+  <h1> Sign up </h1>
+  <h1>  </h1>
+  <form method="post">
+    {% csrf_token %}
+      {% for field in form %}
+      <p align="left">
+        <div class="form-group row">
+          <label class="col-sm-3 col-form-label">{{ field.label }}</label>
+          <div class="col-sm-9"> {{ field }} </div>
+        </div>
+        {% if field.help_text %}
+          <small style="display: none">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+      {% endfor %}
+      <p>
+        <input type="checkbox" id="terms" required>
+        <label for="terms">I've read and agree to the terms and conditions.</label>
+      </p>
+
+      <button class="btn btn-primary" type="submit">Sign up</button>  
+      <a class="nav-link active" aria-current="page" href="{% url 'accounts:login' %}">Already have an account? Log in</a>
+    
+  </form>
+{% endblock %}

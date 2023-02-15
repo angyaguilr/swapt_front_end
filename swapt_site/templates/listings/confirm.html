@@ -1,0 +1,53 @@
+{% extends "header.html" %}
+{% block header %}
+
+
+
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for listing in listings %}
+        <form commMkt="" method="POST">
+        {% csrf_token %}
+        <div class="col">
+            <div class="listing" style="width: 18rem;">
+                <div class="listing-body">
+                    <div class="listing-body">
+                        <h1> Listing {{ forloop.counter }}</h1>
+                    </div>
+                <!-- <p class="listing-text">Some quick example text to build on the listing title and make up the bulk of the listing's content.</p> -->
+                    <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Title: {{ listing.title }}</li>
+                    <li class="list-group-item">Description: {{ listing.description }}</li>
+                    <li class="list-group-item">Location: {{ listing.location }}</li>
+                    {% for pair in listing.campuspropertyname_set.all %}
+                    <li class="list-group-item">Campus/propertyname pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
+                    {% endfor %}
+                    </ul>
+                    <div class="listing-body">
+                        <a class="btn btn-primary" href="{% url 'listings:edit' listing.id %}" role="button">Edit</a>
+                        {% comment %} <form commMkt="" method="POST"> {% endcomment %}
+                        <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
+                        <input type="hidden" name="id" value={{ listing.id }}>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+        {% endfor %}
+    </div>
+    <form commMkt="" method="POST">
+    {% csrf_token %}
+    <button type="submit" value="confirm" class="btn btn-primary" name="status">Submit</button>
+    <button type="submit" value="cancel" class="btn btn-danger" name="status">Cancel</button>
+    </form>
+
+
+<!-- <script>
+    function deleteListingsq(){
+        
+    }
+    window.onunload = function() {
+        myfun();
+    }
+</script> -->
+{% endblock %}

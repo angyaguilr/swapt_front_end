@@ -1,0 +1,11 @@
+{% extends "base.html" %} 
+{% block title %} Success {% endblock title%} 
+{% block content %}
+<div class="alert alert-success" role="alert">
+  Thanks for purchasing our listing
+  <a
+      href="{% url 'listings:cmnty_listing_list' %}"
+      >Go to listings</a
+    >
+</div>
+{% endblock content %}

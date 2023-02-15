@@ -1,0 +1,17 @@
+{% extends 'listings/base.html' %}
+
+{% block content %}
+<div class="container mb-5">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8 col-sm-12 offset-md-1 p-4 text-center">
+            <h1>Move without moving with Swapt</h1>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-1">
+        <div class="card col-md-5 col-sm-12 offset-md-1 p-4 text-center">
+            <h2>Create a Swapt Listing</h2>
+            <a href="{% url 'listings:swapt_create' %}" class="btn btn-outline-primary">Create Swapt Listing</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

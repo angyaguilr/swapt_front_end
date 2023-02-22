@@ -20,7 +20,7 @@ from django.http import JsonResponse,HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Listing, CampusPropertyNamePair, Order,  Price, PaymentHistory, OrderModel, Category
+from .models import Listing, CampusPropertyNamePair, SwaptListing,  Price, Swapt_Bundle_Price, PaymentHistory, SwaptListingModel, Category
 from .forms import ListingEditForm, ListingRejectForm, CommMktListingCreationForm, ListingCreationForm
 from .serializers import ListingSerializer, ListingReviewSerializer
 
@@ -39,8 +39,8 @@ YOUR_DOMAIN = 'http://127.0.0.1:8000'
 
 # @csrf_exempt
 # def create_checkout_session(request):
-#     #Updated- creating Order object
-#     order=Order(email=" ",paid="False",amount=0,description=" ")
+#     #Updated- creating SwaptListing object
+#     order=SwaptListing(email=" ",paid="False",amount=0,description=" ")
 #     order.save()
 #     session = stripe.checkout.Session.create(
 #         client_reference_id=request.user.id if request.user.is_authenticated else None,
@@ -65,27 +65,42 @@ YOUR_DOMAIN = 'http://127.0.0.1:8000'
 #     )
 #     return JsonResponse({'id': session.id})
 
-class ListingListView(ListView):
+class CmntyListingListView(ListView):
     model = Listing
     context_object_name = "listings"
     template_name = "listings/cmnty_listing_list.html"
 
-class ListingDetailView(DetailView):
+class CmntyListingDetailView(DetailView):
     model = Listing
     context_object_name = "listing"
     template_name = "listings/cmnty_listing_detail.html"
 
     def get_context_data(self, **kwargs):
-        context = super(ListingDetailView, self).get_context_data()
+        context = super(CmntyListingDetailView, self).get_context_data()
         context["prices"] = Price.objects.filter(listing=self.get_object())
         return context           
 
 
+class SwaptListingListView(ListView):
+    model = SwaptListingModel
+    context_object_name = "swapt_bundle_listings"
+    template_name = "listings/swapt_listing_list.html"
+
+class SwaptListingDetailView(DetailView):
+    model = SwaptListingModel
+    context_object_name = "swapt_bundle_listing"
+    template_name = "listings/swapt_listing_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super( SwaptListingDetailView, self).get_context_data()
+        context["swapt_prices"] = Swapt_Bundle_Price.objects.filter(swapt_bundle_listing=self.get_object())
+        return context           
+
 class SuccessView(TemplateView):
-    template_name = "listings/cmnty_success.html"
+    template_name = "listings/success.html"
 
 class CancelView(TemplateView):
-    template_name = "listings/cmnty_cancel.html"
+    template_name = "listings/cancel.html"
 
 
 class CreateStripeCheckoutSessionView(View):
@@ -162,6 +177,108 @@ class StripeWebhookView(View):
         # Can handle other events here.
 
         return HttpResponse(status=200)
+class ListingsCreationView(View):
+    
+    # Shows the teacher the upload form for listings
+    def get(self, request):
+        # Deletes any unconfirmed listings
+        listings = Listing.objects.filter(teacher=request.user.teacher, confirmed=False)
+        listings.delete()
+        template = "listings/upload_form.html"
+        return render(request, template)
+
+    def post(self, request):
+        template = "listings/upload_form.html"
+        csv_file = request.FILES['file']
+        # Checks if uploaded file is a CSV file
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, 'This is not a CSV file.')
+            return render(request, template)
+        data_set = csv_file.read().decode('UTF-8')
+        # setup a stream which is when we loop through each line we are able to handle a data in a stream
+        io_string = io.StringIO(data_set)
+        next(io_string)
+        # Keeps track of row number
+        counter = 1
+
+        # First loop through is for error checking
+        # Checks formatting guidelines that are laid out on the upload form page
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+            if column[0] == "" or len(column[0]) > 250: 
+                messages.error(request, 'Question field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[1] == "" or len(column[1]) > 250:
+                messages.error(request, 'Answer field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[2] == "" or (column[2] != "Math" and column[2] != "Engineering" and column[2] != "Science" and column[2] != "Technology"):
+                messages.error(request, 'Subject field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
+                messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
+                messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[5] != "":
+                if int(column[5]) < 1 or int(column[5]) > 12:
+                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+                    messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+                messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
+                if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
+                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[7] != "":
+                if int(column[7]) < 1 or int(column[7]) > 12:
+                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+                    messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+                messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
+                if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
+                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                    
+            counter += 1
+
+        # If there are any errors, render the upload page with those errors so user can fix them
+        if len(list(messages.get_messages(request))) != 0:
+            return render(request, template)
+
+        io_string = io.StringIO(data_set)
+        next(io_string)
+
+        # Second loop through is for adding cards to database
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+
+            listing = Listing.objects.create(
+                question=column[0],
+                answer=column[1],
+                subject=column[2],
+                stage=1,
+                teacher=request.user.teacher
+            )
+
+            firstPair = GradeDifficultyPair.objects.get_or_create(
+                grade=int(column[3]),
+                difficulty=column[4]
+            )
+            firstPair[0].listings.add(listing)
+
+            # Second and third pairs are optional
+            # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
+            # So, don't need to check both here
+            if column[5] != "":
+                secondPair = GradeDifficultyPair.objects.get_or_create(
+                    grade=int(column[5]),
+                    difficulty=column[6]
+                )
+                secondPair[0].listings.add(listing)
+
+            if column[7] != "":
+                thirdPair = GradeDifficultyPair.objects.get_or_create(
+                    grade=int(column[7]),
+                    difficulty=column[8]
+                )
+                thirdPair[0].listings.add(listing)
+
+        return redirect("listings:confirm")
 
 class ListingsCreationView(ListView):
     model = Listing
@@ -241,8 +358,8 @@ class ListingsReviewView(View):
         template = "listings/review.html"
     
         # Gets different attributes from the query string, but by default will be the most expansive possible
-        locations = self.request.GET.getlist('location', ['Columbia, MD', 'ElonNC', 'Burlington, NC', 'College Park MD'])
-        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'Park Place', 'Mill Point'])
+        locations = self.request.GET.getlist('location', ['ColumbiaMD', 'ElonNC', 'BurlingtonNC', 'CollegeParkMD'])
+        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'ParkPlace', 'MillPoint'])
         lowCampus = int(self.request.GET.get('lowCampus', 1))
         highCampus = int(self.request.GET.get('highCampus', 12))
         lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
@@ -495,14 +612,14 @@ class About(View):
         return render(request, 'listings/about.html')
 
 
-class Order(View):
+class SwaptListing(View):
     def get(self, request, *args, **kwargs):
         # get every item from each category
-        DiningFurnitureSets = Listing.objects.filter(
+        DiningFurnitureSets = Listing.objects.filter(swaptuser=request.user.swaptuser, 
             categoryV2__name__contains='DiningFurniture')
-        BedroomFurnitureSets = Listing.objects.filter(categoryV2__name__contains='BedroomFurniture')
-        OutdoorFurnituresSets = Listing.objects.filter(categoryV2__name__contains='OutdoorFurniture')
-        LivingRmFurnitureSets = Listing.objects.filter(categoryV2__name__contains='LivingRmFurniture')
+        BedroomFurnitureSets = Listing.objects.filter(swaptuser=request.user.swaptuser, categoryV2__name__contains='BedroomFurniture')
+        OutdoorFurnituresSets = Listing.objects.filter(swaptuser=request.user.swaptuser, categoryV2__name__contains='OutdoorFurniture')
+        LivingRmFurnitureSets = Listing.objects.filter(swaptuser=request.user.swaptuser, categoryV2__name__contains='LivingRmFurniture')
 
         # pass into context
         context = {
@@ -546,7 +663,7 @@ class Order(View):
             price += item['price']
             item_ids.append(item['id'])
 
-        order = OrderModel.objects.create(
+        order = SwaptListingModel.objects.create(
             price=price,
             name=name,
             email=email,
@@ -563,7 +680,7 @@ class Order(View):
                 'Thank you again for your order!')
 
         send_mail(
-            'Thank You For Your Order!',
+            'Thank You For Your SwaptListing!',
             body,
             'example@example.com',
             [email],
@@ -575,12 +692,12 @@ class Order(View):
             'price': price
         }
 
-        return redirect('listings:swapt_create-confirmation', pk=order.pk)
+        return redirect('listings:swapt-confirmation', pk=order.pk)
 
 
-class OrderConfirmation(View):
+class SwaptListingConfirmation(View):
     def get(self, request, pk, *args, **kwargs):
-        order = OrderModel.objects.get(pk=pk)
+        order = SwaptListingModel.objects.get(pk=pk)
 
         context = {
             'pk': order.pk,
@@ -588,25 +705,25 @@ class OrderConfirmation(View):
             'price': order.price,
         }
 
-        return render(request, 'listings/swapt-confirmation.html', context)
+        return render(request, 'listings/swapt_create_confirmation.html', context)
 
     def post(self, request, pk, *args, **kwargs):
         data = json.loads(request.body)
 
         if data['isPaid']:
-            order = OrderModel.objects.get(pk=pk)
+            order = SwaptListingModel.objects.get(pk=pk)
             order.is_paid = True
             order.save()
 
         return redirect('listings:payment-confirmation')
 
 
-class OrderPayConfirmation(View):
+class SwaptListingPayConfirmation(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'listings/swapt_pay_confirmation.html')
 
 
-class Menu(View):
+class CmntyListingsUploaded(View):
     def get(self, request, *args, **kwargs):
         swapt_items = Listing.objects.all()
 
@@ -617,7 +734,7 @@ class Menu(View):
         return render(request, 'listings/cmnty_listings.html', context)
 
 
-class MenuSearch(View):
+class CmntyListingsUploadedSearch(View):
     def get(self, request, *args, **kwargs):
         query = self.request.GET.get("q")
 
@@ -632,3 +749,441 @@ class MenuSearch(View):
         }
 
         return render(request, 'listings/cmnty_listings.html', context)
+
+
+class ListingsUploaded(View):
+    def get(self, request, *args, **kwargs):
+        swapt_bundle_items = SwaptListingModel.objects.all()
+
+        context = {
+            'swapt_bundle_items': swapt_bundle_items
+        }
+
+        return render(request, 'listings/swapt_listings.html', context)
+
+
+class ListingsUploadedSearch(View):
+    def get(self, request, *args, **kwargs):
+        query = self.request.GET.get("q")
+
+        swapt_bundle_items = SwaptListingModel.objects.filter(
+            Q(name__icontains=query) |
+            Q(price__icontains=query) |
+            Q(desc__icontains=query)
+        )
+
+        context = {
+            'swapt_bundle_items': swapt_bundle_items
+        }
+
+        return render(request, 'listings/swapt_listings.html', context)
+        
+class FlashcardsCreationView(View):
+    
+    # Shows the teacher the upload form for flashcards
+    def get(self, request):
+        # Deletes any unconfirmed flashcards
+        flashcards = Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)
+        flashcards.delete()
+        template = "flashcards/upload_form.html"
+        return render(request, template)
+
+    def post(self, request):
+        template = "flashcards/upload_form.html"
+        csv_file = request.FILES['file']
+        # Checks if uploaded file is a CSV file
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, 'This is not a CSV file.')
+            return render(request, template)
+        data_set = csv_file.read().decode('UTF-8')
+        # setup a stream which is when we loop through each line we are able to handle a data in a stream
+        io_string = io.StringIO(data_set)
+        next(io_string)
+        # Keeps track of row number
+        counter = 1
+
+        # First loop through is for error checking
+        # Checks formatting guidelines that are laid out on the upload form page
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+            if column[0] == "" or len(column[0]) > 250: 
+                messages.error(request, 'Question field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[1] == "" or len(column[1]) > 250:
+                messages.error(request, 'Answer field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[2] == "" or (column[2] != "Math" and column[2] != "Engineering" and column[2] != "Science" and column[2] != "Technology"):
+                messages.error(request, 'Subject field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
+                messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
+                messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[5] != "":
+                if int(column[5]) < 1 or int(column[5]) > 12:
+                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+                    messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+                messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
+                if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
+                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[7] != "":
+                if int(column[7]) < 1 or int(column[7]) > 12:
+                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+                    messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+                messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
+                if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
+                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                    
+            counter += 1
+
+        # If there are any errors, render the upload page with those errors so user can fix them
+        if len(list(messages.get_messages(request))) != 0:
+            return render(request, template)
+
+        io_string = io.StringIO(data_set)
+        next(io_string)
+
+        # Second loop through is for adding cards to database
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+
+            flashcard = Flashcard.objects.create(
+                question=column[0],
+                answer=column[1],
+                subject=column[2],
+                stage=1,
+                teacher=request.user.teacher
+            )
+
+            firstPair = GradeDifficultyPair.objects.get_or_create(
+                grade=int(column[3]),
+                difficulty=column[4]
+            )
+            firstPair[0].flashcards.add(flashcard)
+
+            # Second and third pairs are optional
+            # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
+            # So, don't need to check both here
+            if column[5] != "":
+                secondPair = GradeDifficultyPair.objects.get_or_create(
+                    grade=int(column[5]),
+                    difficulty=column[6]
+                )
+                secondPair[0].flashcards.add(flashcard)
+
+            if column[7] != "":
+                thirdPair = GradeDifficultyPair.objects.get_or_create(
+                    grade=int(column[7]),
+                    difficulty=column[8]
+                )
+                thirdPair[0].flashcards.add(flashcard)
+
+        return redirect("flashcards:confirm")
+
+class ActionFlashcardCreationView(CreateView):
+    model = Flashcard
+    form_class = ActionFlashcardCreationForm
+    template_name ="flashcards/upload_action_form.html"
+
+    def form_valid(self, form):
+        flashcard = form.save()
+        if self.request.user.is_admin:
+            flashcard.save()
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("flashcards:review") + "#nav-action-tab"
+
+class FlashcardsConfirmationView(View):
+
+    # Returns view of teacher's unconfirmed flashcards (this page is redirected to right after the upload page if successful)
+    # Teacher can delete or edit flashcards
+    def get(self, request):
+        
+        flashcards = Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)
+
+        # Can't access page without unconfirmed flashcards
+        if not flashcards:
+            return redirect("flashcards:upload")
+
+        template = "flashcards/confirm.html"
+        context = {"flashcards": Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)}
+        return render(request, template, context)
+    
+    def post(self, request):
+
+        flashcards = Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)
+
+        # Sets flashcards' and pairs' confirm fields to true if teacher selected the confirm button
+        if request.POST.get('status') == "confirm":
+            for flashcard in flashcards:
+                flashcard.confirmed = True
+                for pair in flashcard.gradedifficultypair_set.all():
+                    pair.confirmed = True
+                    pair.save()
+
+            Flashcard.objects.bulk_update(flashcards, ['confirmed'])
+            return redirect("flashcards:review")
+
+        # If selected the delete button for a specific card, deletes that cards
+        elif request.POST.get('status') == "delete":
+            id = request.POST['id']
+            flashcards.get(id=id).delete()
+            return redirect("flashcards:confirm")
+
+        # The only other button that results in a post request is the cancel button, which deletes all unconfirmed cards
+        else:
+            flashcards.delete()
+            return redirect("flashcards:upload")['Science', 'Technology', 'Engineering', 'Math']
+
+class FlashcardsReviewView(View):
+
+    def get(self, request):
+        template = "flashcards/review.html"
+    
+        # Gets different attributes from the query string, but by default will be the most expansive possible
+        subjects = self.request.GET.getlist('subject', ['Science', 'Technology', 'Engineering', 'Math'])
+        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
+        lowGrade = int(self.request.GET.get('lowGrade', 1))
+        highGrade = int(self.request.GET.get('highGrade', 12))
+        lowCorrect = float(self.request.GET.get('lowCorrect', 0.0))
+        highCorrect = float(self.request.GET.get('highCorrect', 100.0))
+        showNA = self.request.GET.get('showNA', 'true')
+
+        # Filters to relevant pairs, then when filtering flashcards filters by those pairs and other attributes
+        # Also stage 1 is the review stage
+        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        queryset = Flashcard.objects.filter(stage=1, subject__in=subjects, percent_correct__gte=lowCorrect, percent_correct__lte=highCorrect, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        # If the user wants to see cards that have 0 in/correct, add those into the queryset too
+        if(showNA == "true"):
+            queryset = queryset | Flashcard.objects.filter(stage=1, subject__in=subjects, percent_correct=None, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+
+        if request.user.is_teacher:
+            context = {"user": request.user, "review": queryset.filter(teacher=request.user.teacher)}
+        elif request.user.is_admin:
+            context = {"user": request.user, "review": queryset[:3]} # Only show 3 at a time for admin
+        return render(request, template, context)
+
+    def post(self, request):
+        id = request.POST['id']
+        flashcard = Flashcard.objects.get(id=id)
+
+        # Deletes flashcards or changes stage (i.e. if approve or reject button is pressed)
+        if request.POST.get('status'):
+            if request.POST.get('status') == "delete" and (request.user.is_admin or (request.user.is_teacher and flashcard.stage != 2)):
+                flashcard.delete()
+            elif request.user.is_admin:
+                flashcard.stage = int(request.POST.get('status'))
+                if flashcard.stage == 2:
+                    flashcard.issue = None # If the card is approved again, don't keep previous issue in the database
+                flashcard.save()
+        
+        return redirect("flashcards:review")
+
+class FlashcardEditView(UpdateView):
+    form_class = FlashcardEditForm
+    model = Flashcard
+    template_name = 'flashcards/edit_form.html'
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        flashcard = Flashcard.objects.get(id=pk)
+
+        # Conditionals to make sure user has access to review page for the flashcard with the particular id requested
+        if request.user.is_admin:
+            return super().get(self, request, *args, **kwargs)
+        if flashcard.teacher != request.user.teacher or (request.user.is_teacher and flashcard.stage == 2):
+            return redirect('flashcards:review')
+        return super().get(self, request, *args, **kwargs)
+    
+    # This function is used to get the initial values of form fields
+    # Mostly used for pairs since those are part of a related model (through the manytomany field), so model fields
+    # are for the most part automatically filled in with proper intial values
+    def get_initial(self):
+        pk = self.kwargs['pk']
+        flashcard = Flashcard.objects.get(id=pk)
+        pairs = flashcard.gradedifficultypair_set.all()
+        
+        intial = {'stage': flashcard.stage, 'gradeOne': "", 'difficultyOne': "", 'gradeTwo': "", 'difficultyTwo': "", 'gradeThree': "", 'difficultyThree': ""}
+        
+        counter = 1
+        
+        for pair in pairs:
+            if counter == 1:
+                intial['gradeOne'] = pair.grade
+                intial['difficultyOne'] = pair.difficulty
+            if counter == 2:
+                intial['gradeTwo'] = pair.grade
+                intial['difficultyTwo'] = pair.difficulty
+            if counter == 3:
+                intial['gradeThree'] = pair.grade
+                intial['difficultyThree'] = pair.difficulty
+
+            counter += 1
+        
+        return intial
+
+    def get_success_url(self):
+        pk = self.kwargs['pk']
+        # self.request
+        flashcard = Flashcard.objects.get(id=pk)
+
+        # Go back to confirmation page if editing an unconfirmed card, otherwise return to the review page
+        if self.request.user.is_teacher and not flashcard.confirmed:
+            return reverse_lazy("flashcards:confirm")
+        if (self.request.user.is_teacher and flashcard.confirmed) or self.request.user.is_admin:
+            return reverse_lazy("flashcards:review")
+
+    def form_valid(self, form):
+        flashcard = form.save()
+
+        # Change stage, either based on admin changing it or automatic changes when teacher updates rejected/reported card
+        if self.request.user.is_admin:
+            flashcard.stage = int(form.cleaned_data["stage"])
+        elif self.request.user.is_teacher and (flashcard.stage == 3 or flashcard.stage == 4):
+            flashcard.stage = 1
+        flashcard.save()
+
+        return super().form_valid(form)
+
+class FlashcardRejectView(UpdateView):
+    form_class = FlashcardRejectForm
+    model = Flashcard
+    template_name = 'flashcards/reject.html'
+
+    def form_valid(self, form):
+        flashcard = form.save()
+        flashcard.save()
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse("flashcards:review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
+
+class ListFlashcards(generics.ListAPIView):
+    queryset = Flashcard.objects.filter(confirmed=True)
+    serializer_class = FlashcardSerializer
+
+    def get_queryset(self):
+
+        # Get attibutes
+        subjects = self.request.GET.getlist('subject')
+        grades = self.request.GET.getlist('grade')
+        number = self.request.GET.get('number')
+
+        # Get pairs with grade levels specified, then narrow down flashcards based on those pairs and other attributes
+        pairs = GradeDifficultyPair.objects.filter(grade__in=grades)
+        queryset = Flashcard.objects.filter(gradedifficultypair__in=pairs).distinct()
+        queryset = queryset.filter(confirmed=True, stage=2, subject__in=subjects) # Make sure cards returned in request are approved and confirmed
+        queryset = sorted(queryset, key=lambda x: random.random()) # Randomize order as to not give same cards in same order every time to the app
+        queryset = queryset[:int(int(number) * .85)] # Only give up to 85% number of cards specified
+        queryset = sorted(queryset + sorted(Flashcard.objects.filter(stage=5), key=lambda x: random.random())[:int(int(number) * .15)], key=lambda x: random.random()) # Other 15% of cards are action cards
+       
+        return queryset
+
+
+    def list(self, request, **kwargs):
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        queryset = self.get_queryset()
+        # Passes grade list in so that serializer can randomly pick the difficulty levels to return in the request for the cards
+        serializer = FlashcardSerializer(queryset, many=True, context={'grades': self.request.GET.getlist('grade')})  
+        data = serializer.data
+
+        # This is for the animations in the app to work
+        # i = int(self.request.GET.get('number'))
+        i = int(request.GET.get('number')) - 1
+        for entry in data:
+            entry["index"] = i
+            i -= 1
+        return Response(serializer.data)
+
+class ReportFlashcard(generics.UpdateAPIView):
+    queryset = Flashcard.objects.filter(stage=2, confirmed=True)
+    serializer_class = FlashcardSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        return Flashcard.objects.filter(stage=2, confirmed=True)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = queryset.get(pk=self.request.GET.get('id'))
+        return obj
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+
+        instance = self.get_object()
+        # Updates flashcard to be reported with the issue field filled in (it will be whatever the user wrote)
+        serializer = self.get_serializer(instance, data={"stage": 4, "issue": request.data["issue"]}, partial=partial) 
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+class UpdatePercentCorrectFlashcard(generics.UpdateAPIView):
+    queryset = Flashcard.objects.filter(stage=2, confirmed=True)
+    serializer_class = FlashcardSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        return Flashcard.objects.filter(stage=2, confirmed=True)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = queryset.get(pk=self.request.GET.get('id'))
+        return obj
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+
+        instance = self.get_object()
+        
+        # If correct set to true, increment correct count, otherwise (aka set to false), add incrment incorrect count
+        is_correct = self.request.data["correct"]
+        if is_correct:
+            instance.correct += 1
+        else:
+            instance.incorrect += 1
+
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+        
+class ReviewFlashcardsAPI(viewsets.ModelViewSet):
+    queryset = Flashcard.objects.filter(confirmed=True)
+    serializer_class = FlashcardReviewSerializer
+
+    def get_queryset(self):
+
+        # Get attributes from query string
+        stage = int(self.request.GET.get('stage'))
+
+        if(stage == 5): 
+            return Flashcard.objects.filter(stage=5)
+        
+        subjects = self.request.GET.getlist('subject', ['Science', 'Technology', 'Engineering', 'Math'])
+        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
+        lowGrade = int(self.request.GET.get('lowGrade', 1))
+        highGrade = int(self.request.GET.get('highGrade', 12))
+        lowCorrect = float(self.request.GET.get('lowCorrect', 0.0))
+        highCorrect = float(self.request.GET.get('highCorrect', 100.0))
+        showNA = self.request.GET.get('showNA', 'true')
+
+        # Same filtering as in the regular review view
+        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        queryset = Flashcard.objects.filter(stage=stage, subject__in=subjects, percent_correct__gte=lowCorrect, percent_correct__lte=highCorrect, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        if(showNA == "true"):
+            queryset = queryset | Flashcard.objects.filter(stage=stage, subject__in=subjects, percent_correct=None, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        if self.request._request.user.is_teacher:
+            return queryset.filter(teacher=self.request._request.user.teacher)
+        else:
+            return queryset  

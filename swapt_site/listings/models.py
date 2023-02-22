@@ -101,10 +101,10 @@ class Listing(models.Model):
         ('Yellow', 'Yellow'),
     ]
     LOCATION_CHOICES = [
-        ('Elon NC', 'Elon NC'),
-        ('College Park, MD', 'College Park, MD'),
-        ('Burlington, NC', 'Burlington, NC'),
-        ('Columbia, MD', 'Columbia, MD')
+        ('ElonNC', 'ElonNC'),
+        ('CollegeParkMD', 'CollegeParkMD'),
+        ('BurlingtonNC', 'BurlingtonNC'),
+        ('ColumbiaMD', 'ColumbiaMD')
     ]
     name = models.CharField(max_length=200, default='any_name')
     tags = models.ManyToManyField(ListingTag, blank=True)
@@ -170,10 +170,10 @@ class Price(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"{self.listing.name} {self.price}"
+        return f"{self.listing.name} {self.price}"  
 
 #save customer order for future reference #TBD
-class Order(models.Model):
+class SwaptListing(models.Model):
     email = models.EmailField(max_length=254)
     paid = models.BooleanField(default="False")
     amount = models.IntegerField(default=0)
@@ -182,16 +182,18 @@ class Order(models.Model):
         return self.email
 
 class CampusPropertyNamePair(models.Model):
-    Listings = models.ManyToManyField('Listing')
+    listings = models.ManyToManyField('Listing')
 
     PROPERTYNAME_CHOICES = [
         ('Oaks', 'Oaks'),
-        ('Park Place', 'Park Place'),
-        ('Mill Point', 'Mill Point'),
+        ('ParkPlace', 'ParkPlace'),
+        ('MillPoint', 'MillPoint'),
     ]
        
     CAMPUS_CHOICES = [
-        ('Elon University', 'Elon University'),
+        ('ElonUniversity', 'ElonUniversity'),
+        ('UMD', 'UMD'),
+        ('UGA', 'UGA'),
     ]
 
     campus = models.CharField(
@@ -245,19 +247,50 @@ class Category(models.Model):
         return self.name
 
 
-class OrderModel(models.Model):
+class SwaptListingModel(models.Model):
+    CATEGORY_CHOICES = [
+        ('Bedroom Furniture', 'Bedroom Furniture'),
+        ( 'Dining Room Furniture', 'Dining Room Furniture'),
+        ( 'Living Room Furniture', 'Living Room Furniture'),
+        ('Office Furniture', 'Office Furniture'),
+        ('Outdoor Furniture', 'Outdoor Furniture'),
+        ('Other Furniture', 'Other Furniture'),
+
+    ]
     created_on = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
-    items = models.ManyToManyField(
+    discount = models.DecimalField(max_digits=7, decimal_places=2)
+    listings = models.ManyToManyField(
         'Listing', related_name='order', blank=True)
     name = models.CharField(max_length=50, blank=True)
-    email = models.CharField(max_length=50, blank=True)
+    swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
+    propertyname = models.CharField(max_length=50, blank=True)
+    campusname= models.CharField(max_length=50, blank=True)
     street = models.CharField(max_length=50, blank=True)
     city = models.CharField(max_length=50, blank=True)
     state = models.CharField(max_length=15, blank=True)
     zip_code = models.IntegerField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
     is_shipped = models.BooleanField(default=False)
+    tags = models.ManyToManyField(ListingTag, blank=True)
+    desc = models.TextField(_("Description"), blank=True)
+    thumbnail = models.ImageField(upload_to=get_image_filename, blank=True)
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        null=True
+    )
 
     def __str__(self):
-        return f'Order: {self.created_on.strftime("%b %d %I: %M %p")}'
+        return f'SwaptListing: {self.created_on.strftime("%b %d %I: %M %p")}'
+
+
+class Swapt_Bundle_Price(models.Model):
+    swapt_bundle_listing = models.ForeignKey(SwaptListingModel, on_delete=models.CASCADE)
+    price = models.DecimalField(decimal_places=2, max_digits=10)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.swapt_bundle_listing.name} {self.price}"      

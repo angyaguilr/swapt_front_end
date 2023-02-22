@@ -2,7 +2,7 @@ from django import forms
 from django.db.models.base import Model
 from django.forms import ModelForm
 
-from .models import Listing, CampusPropertyNamePair
+from .models import Listing, CampusPropertyNamePair, Price
 
 # For Swapt admin to create commMkt listings
 class ListingCreationForm(ModelForm):

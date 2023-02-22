@@ -31,7 +31,7 @@
                     {% for BedroomFurniture in BedroomFurnitureSets %}
                     <div class="row mt-4">
                         <div class="col-md-2 col-sm-12">
-                            <img class="rounded" src="{{ BedroomFurniture.image.url }}" width="150" height="100"/>
+                            <img class="rounded" src="{{ BedroomFurniture.thumbnail.url }}" width="150" height="100"/>
                         </div>
                         <div class="col-md-8 col-sm-12">
                             <div class="d-flex flex-row">
@@ -52,7 +52,7 @@
                     {% for OutdoorFurniture in OutdoorFurnitureSets %}
                     <div class="row mt-4">
                         <div class="col-md-2 col-sm-12">
-                            <img class="rounded" src="{{ OutdoorFurniture.image.url }}" width="150" height="100"/>
+                            <img class="rounded" src="{{ OutdoorFurniture.thumbnail.url }}" width="150" height="100"/>
                         </div>
                         <div class="col-md-8 col-sm-12">
                             <div class="d-flex flex-row">
@@ -73,7 +73,7 @@
                     {% for LivingRmFurniture in LivingRmFurnitureSets %}
                     <div class="row mt-4">
                         <div class="col-md-2 col-sm-12">
-                            <img class="rounded" src="{{ LivingRmFurniture.image.url }}" width="150" height="100"/>
+                            <img class="rounded" src="{{ LivingRmFurniture.thumbnail.url }}" width="150" height="100"/>
                         </div>
                         <div class="col-md-8 col-sm-12">
                             <div class="d-flex flex-row">
@@ -132,7 +132,7 @@
                 <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#submitModal">
                   Create Swapt Listing
                 </button>
-                <!-- <button class="btn btn-dark mt-5">Place Order!</button> -->
+                <!-- <button class="btn btn-dark mt-5">Place SwaptListing!</button> -->
 
                 <!-- Modal -->
                 <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-labelledby="submitModalLabel" aria-hidden="true">

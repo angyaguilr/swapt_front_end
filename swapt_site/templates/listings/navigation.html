@@ -20,12 +20,12 @@
                {% if user.is_authenticated %}
                <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Campus Listings
+                  Community Listings
                   </a>
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                      {% if user.is_swapt_user %}
-                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listing_list' %}">Shop</a></li>
-                     <li><a class="dropdown-item" href="{% url 'listings:upload_swapt' %}">Create a Swapt</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listing_list' %}">Old Shop Community Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listings' %}">Shop Community Listings</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Create a Community Swapt</a></li>
                      {% elif user.is_admin %}
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Upload</a></li>
@@ -35,14 +35,14 @@
                </li>
                <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Community Listings
+                  Campus Listings
                   </a>
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                      {% if user.is_swapt_user %}
-                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listings' %}">Community Swapts</a></li>
-                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listing_list' %}">Shop</a></li>
-                     <li><a class="dropdown-item" href="{% url 'listings:upload_swapt' %}">Create a Swapt</a></li>
-                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Create a Community Swapt</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_listings' %}">Shop Campus Swapts</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_create' %}">Create a Swapt Listing</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_listing_list' %}">Old Shop Campus Swapts</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:upload_swapt' %}">Old Create a Swapt</a></li>
                      {% elif user.is_admin %}
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Upload</a></li>
                      {% endif %}

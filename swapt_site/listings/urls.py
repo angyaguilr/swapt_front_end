@@ -11,35 +11,32 @@ from . import views
 
 # Setting up the reivew listings page API
 router = routers.DefaultRouter()
-router.register(r'review', views.ReviewListingsAPI) 
+router.register(r'review', views.ReviewFlashcardsAPI) 
 
 urlpatterns = [
     #all:
     path('index', views.Index.as_view(), name='index'),
     path('about/', views.About.as_view(), name='about'),
+    path("create-checkout-session/<int:pk>/", swapt_user_required()(views.CreateStripeCheckoutSessionView.as_view()),name="create-checkout-session",),
+    path('success/', swapt_user_required()(views.SuccessView.as_view()),name='success'),
+    path('cancel/', swapt_user_required()(views.CancelView.as_view()),name='cancel'),
+    path("webhooks/stripe/", views.StripeWebhookView.as_view(), name="stripe_webhook"), #updated line
     #community listings:
-    path("cmnty-create-checkout-session/<int:pk>/", swapt_user_required()(views.CreateStripeCheckoutSessionView.as_view()),name="create-checkout-session",),
-    path('cmnty-success/', swapt_user_required()(views.SuccessView.as_view()),name='cmnty_success'),
-    path('cmnty-cancel/', swapt_user_required()(views.CancelView.as_view()),name='cmnty_cancel'),
-    path("cmnty-webhooks/stripe/", views.StripeWebhookView.as_view(), name="cmnty_stripe_webhook"), #updated line
-    path("cmnty-listing", views.ListingListView.as_view(), name="cmnty_listing_list"),
-    path("cmnty-<int:pk>/", swapt_user_required()(views.ListingDetailView.as_view()), name="cmnty_listing_detail"),
-    path('cmnty-Listings/', views.Menu.as_view(), name='cmnty_listings'),
-    path('cmnty-Listings/search/', views.MenuSearch.as_view(), name='cmnty_listings_search'),
+    path("cmnty-listing", views.CmntyListingListView.as_view(), name="cmnty_listing_list"),
+    path("cmnty-<int:pk>/", swapt_user_required()(views.CmntyListingDetailView.as_view()), name="cmnty_listing_detail"),
+    path('cmnty-Listings/', views.CmntyListingsUploaded.as_view(), name='cmnty_listings'),
+    path('cmnty-Listings/search/', views.CmntyListingsUploadedSearch.as_view(), name='cmnty_listings_search'),
     path('cmnty-create-listing/', swapt_user_required()(views.CommMktListingCreationView.as_view()), name="cmnty_create"),
     #swapt listings:
-    path("swapt-create-checkout-session/<int:pk>/", swapt_user_required()(views.CreateStripeCheckoutSessionView.as_view()),name="swapt-create-checkout-session",),
-    path('swapt-success/', swapt_user_required()(views.SuccessView.as_view()),name='swapt_success'),
-    path('swapt-cancel/', swapt_user_required()(views.CancelView.as_view()),name='swapt_cancel'),
-     path("swapt-webhooks/stripe/", views.StripeWebhookView.as_view(), name="swapt_stripe_webhook"), #updated line
-    path("swapt-listing", views.ListingListView.as_view(), name="swapt_listing_list"),
-    path("swapt-<int:pk>/", swapt_user_required()(views.ListingDetailView.as_view()), name="swapt_listing_detail"),
-    path('swapt-Listings/', views.Menu.as_view(), name='swapt_listings'),
-    path('swapt-Listings/search/', views.MenuSearch.as_view(), name='swapt_listings_search'),
+    path("swapt-listing", views.SwaptListingListView.as_view(), name="swapt_listing_list"),
+    path("swapt-<int:pk>/", swapt_user_required()(views.SwaptListingDetailView.as_view()), name="swapt_listing_detail"),
+    path('swapt-Listings/', views.ListingsUploaded.as_view(), name='swapt_listings'),
+    path('swapt-Listings/search/', views.ListingsUploadedSearch.as_view(), name='swapt_listings_search'),
     path('swapt-upload-swapt/', swapt_user_required()(views.ListingsCreationView.as_view()), name="upload_swapt"),
-    path('swapt-create-listing/', views.Order.as_view(), name='swapt_create'),
-    path('swapt-confirmation/<int:pk>', views.OrderConfirmation.as_view(), name='swapt-confirmation'),
-    path('swapt-pay-confirmation/', views.OrderPayConfirmation.as_view(),name='payment-confirmation'),
+    
+    path('swapt-create-listing/', views.SwaptListing.as_view(), name='swapt_create'),
+    path('swapt-confirmation/<int:pk>', views.SwaptListingConfirmation.as_view(), name='swapt-confirmation'),
+    path('swapt-pay-confirmation/', views.SwaptListingPayConfirmation.as_view(),name='payment-confirmation'),
    
     #tbd
     path('confirm/', swapt_user_required()(views.ListingsConfirmationView.as_view()), name="confirm"),
@@ -48,6 +45,7 @@ urlpatterns = [
     path('reject/<int:pk>/', Swapt_admin_required()(views.ListingRejectView.as_view()), name="reject"),
     path('list/', views.ListListings.as_view(), name="list"),
     re_path('^api/', include(router.urls)),
+    #TBD: url('^api/', include(router.urls)),
     path('report/', views.ReportListing.as_view(), name="report"),
     path('update-percent-itemssold/', views.UpdatePercentItemsSoldListing.as_view(), name="update_percent_itemssold"),
     ]

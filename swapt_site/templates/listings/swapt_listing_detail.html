@@ -1,18 +1,18 @@
-{% extends 'listings/base.html' %}
+{% extends "listings/base.html" %} 
 {% block title %} Buy Product {% endblock title%} 
 {% block script %} <script src="https://js.stripe.com/v3/"></script> {% endblock script%} 
 {% block content %}
 <div class="card-deck">
-  {% for price in prices %}
+  {% for price in swapt_prices %}
   <div class="card">
     <img
       class="card-img-top"
-      src="{{listing.thumbnail.url}}"
+      src="{{swapt_bundle_listing.thumbnail.url}}"
       alt="Card image cap"
     />
     <div class="card-body">
-      <h5 class="card-title">{{listing.name}}</h5>
-      <p class="card-text">{{listing.desc}}</p>
+      <h5 class="card-title">{{swapt_bundle_listing.name}}</h5>
+      <p class="card-text">{{swapt_bundle_listing.desc}}</p>
       <div class="card-text">
         <h5 class="card-text">${{ price.price }}</h5>
         <form

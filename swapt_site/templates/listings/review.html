@@ -13,71 +13,80 @@
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="nav-rejected-tab" data-bs-toggle="tab" data-bs-target="#nav-rejected" type="button" role="tab" aria-controls="nav-rejected" aria-selected="false">Rejected</button>
     </li>
-    {% if user.is_swapt_user %}
+    {% if user.is_admin %}
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-commMkt-tab" data-bs-toggle="tab" data-bs-target="#nav-commMkt" type="button" role="tab" aria-controls="nav-commMkt" aria-selected="false">CommMkt</button>
+        <button class="nav-link" id="nav-action-tab" data-bs-toggle="tab" data-bs-target="#nav-action" type="button" role="tab" aria-controls="nav-action" aria-selected="false">Action</button>
     </li>
     {% endif %}
 
 </ul>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="ColumbiaMD">
-    <label class="form-check-label" for="ColumbiaMD">
-        ColumbiaMD
+    <input class="form-check-input subject filter" type="checkbox" id="Science">
+    <label class="form-check-label" for="Science">
+        Science
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="ElonNC">
-    <label class="form-check-label" for="ElonNC">
-        ElonNC
+    <input class="form-check-input subject filter" type="checkbox" id="Technology">
+    <label class="form-check-label" for="Technology">
+        Technology
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="BurlingtonNC">
-    <label class="form-check-label" for="BurlingtonNC">
-        BurlingtonNC
+    <input class="form-check-input subject filter" type="checkbox" id="Engineering">
+    <label class="form-check-label" for="Engineering">
+        Engineering
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="CollegeParkMD">
-    <label class="form-check-label" for="CollegeParkMD">
-        CollegeParkMD
+    <input class="form-check-input subject filter" type="checkbox" id="Math">
+    <label class="form-check-label" for="Math">
+        Math
     </label>
 </div>
 
 <br></br>
 
 <div class="form-check form-check-inline">
-    <input class="form-check-input propertyname filter" type="checkbox" id="Oaks">
-    <label class="form-check-label" for="Oaks">
-        Oaks
+    <input class="form-check-input difficulty filter" type="checkbox" id="Easy">
+    <label class="form-check-label" for="Easy">
+        Easy
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input propertyname filter" type="checkbox" id="ParkPlace">
-    <label class="form-check-label" for="ParkPlace">
-        ParkPlace
+    <input class="form-check-input difficulty filter" type="checkbox" id="Medium">
+    <label class="form-check-label" for="Medium">
+        Medium
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input propertyname filter" type="checkbox" id="MillPoint">
-    <label class="form-check-label" for="MillPoint">
-        MillPoint
+    <input class="form-check-input difficulty filter" type="checkbox" id="Hard">
+    <label class="form-check-label" for="Hard">
+        Hard
     </label>
 </div>
-
-
 
 <form class="form-inline">
-    <input type="number" class="itemsSold filter" id="low-itemsSold" value="0" min="0" max="100" step="0.1">
-    <label class="form-label" for="low-itemsSold">
-        Specify Minimum items Sold %
+    <input type="number" class="grade filter" id="low-grade" value="1" min="1" max="12">
+    <label class="form-label" for="low-grade">
+        Lower bound grade
     </label>
-    <input type="number" class="itemsSold filter" id="high-itemsSold" value="100" min="0" max="100" step="0.1">
-    <label class="form-label" for="high-itemsSold">
-        Specify Maximum items Sold %
+    <input type="number" class="grade filter" id="high-grade" value="12" min="1" max="12">
+    <label class="form-label" for="high-grade">
+        Upper bound grade
     </label>
-    <input class="form-check-input itemsSold-na filter" type="checkbox" id="na">
+</form>
+
+<form class="form-inline">
+    <input type="number" class="correct filter" id="low-correct" value="0" min="0" max="100" step="0.1">
+    <label class="form-label" for="low-correct">
+        Lower bound correct %
+    </label>
+    <input type="number" class="correct filter" id="high-correct" value="100" min="0" max="100" step="0.1">
+    <label class="form-label" for="high-correct">
+        Upper bound correct %
+    </label>
+    <input class="form-check-input correct-na filter" type="checkbox" id="na">
     <label class="form-check-label" for="na">
         Include N/A
     </label>
@@ -87,49 +96,49 @@
 <div class="tab-content" id="nav-tabContent">   
     <div class="tab-pane fade show active" id="nav-review" role="tabpanel" aria-labelledby="nav-review-tab">
         <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for listing in review %}
+        {% for flashcard in review %}
         <div class="col">
-            <form commMkt="" method="POST">
+            <form action="" method="POST">
                 {% csrf_token %}
             
-                <div class="listing" style="width: 18rem;">
-                    <div class="listing-body">
-                    <h5 class="listing-title">Awaiting Review</h5>
-                    <!-- <p class="listing-text">Some quick example text to build on the listing title and make up the bulk of the listing's content.</p> -->
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                    <h5 class="card-title">Awaiting Review</h5>
+                    <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                     </div>
                     <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Title: {{ listing.title }}</li>
-                    <li class="list-group-item">Description: {{ listing.description }}</li>
-                    <li class="list-group-item listing-location">Subject: {{listing.location}}</li>
-                    {% if listing.issue != None %}
-                    <li class="list-group-item">Reported/rejected issue: {{ listing.issue }}</li>
+                    <li class="list-group-item">Question: {{ flashcard.question }}</li>
+                    <li class="list-group-item">Answer: {{ flashcard.answer }}</li>
+                    <li class="list-group-item card-subject">Subject: {{flashcard.subject}}</li>
+                    {% if flashcard.issue != None %}
+                    <li class="list-group-item">Reported/rejected issue: {{ flashcard.issue }}</li>
                     {% endif %}
-                    {% if listing.itemsSold != 0 or listing.initemsSold != 0%}
-                    <li class="list-group-item listing-itemsSold">% ItemsSold: {{ listing.percent_itemsSold }}</li>
+                    {% if flashcard.correct != 0 or flashcard.incorrect != 0%}
+                    <li class="list-group-item card-correct">% Correct: {{ flashcard.percent_correct }}</li>
                     {% else %}
-                    <li class="list-group-item listing-itemsSold">% ItemsSold: N/A</li>
+                    <li class="list-group-item card-correct">% Correct: N/A</li>
                     {% endif %}
-                    {% for pair in listing.campuspropertyname_set.all %}
-                    <li class="list-group-item listing-propertyname">Campus/propertyname pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
+                    {% for pair in flashcard.gradedifficultypair_set.all %}
+                    <li class="list-group-item card-difficulty">Grade/difficulty pair {{ forloop.counter }}: {{ pair.grade }}/{{ pair.difficulty }}</li>
                     {% endfor %}
                     </ul>
-                    <div class="listing-body">
+                    <div class="card-body">
                         {% if user.is_admin %}
-                            {% if listing.stage != 2 %}
+                            {% if flashcard.stage != 2 %}
                             <button type="submit" value="2" class="btn btn-success" name="status">Approve</button>
                             {% endif %}
-                            {% if listing.stage == 1 %}
+                            {% if flashcard.stage == 1 %}
                             {% comment %} <button type="submit" value="3" class="btn btn-danger" name="status">Reject</button> {% endcomment %}
-                            <a class="btn btn-danger" href="{% url 'listings:reject' listing.id %}?next={% url 'listings:review'%}#nav-review-tab" role="button">Reject</a>
+                            <a class="btn btn-danger" href="{% url 'flashcards:reject' flashcard.id %}?next={% url 'flashcards:review'%}#nav-review-tab" role="button">Reject</a>
                             {% else %}
                             <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                             {% endif %}
-                        <a class="btn btn-primary" href="{% url 'listings:edit' listing.id %}?next={% url 'listings:review'%}#nav-review-tab" role="button">Edit</a>
-                        {% elif listing.stage != 2 and user.is_teacher %}
-                        <a class="btn btn-primary" href="{% url 'listings:edit' listing.id %}?next={% url 'listings:review'%}#nav-review-tab" role="button">Edit</a>
+                        <a class="btn btn-primary" href="{% url 'flashcards:edit' flashcard.id %}?next={% url 'flashcards:review'%}#nav-review-tab" role="button">Edit</a>
+                        {% elif flashcard.stage != 2 and user.is_teacher %}
+                        <a class="btn btn-primary" href="{% url 'flashcards:edit' flashcard.id %}?next={% url 'flashcards:review'%}#nav-review-tab" role="button">Edit</a>
                         <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                         {% endif %}
-                        <input type="hidden" name="id" value={{ listing.id }}>
+                        <input type="hidden" name="id" value={{ flashcard.id }}>
                     </div>
                 </div>
             </form>
@@ -141,16 +150,16 @@
         <table id="approved-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Title</th>
-                    <th scope="col">Description</th>
+                    <th scope="col">Question</th>
+                    <th scope="col">Answer</th>
                     <th scope="col">Subject</th>
-                    <th scope="col">% ItemsSold</th>
-                    <th scope="col">Campus Level 1</th>
-                    <th scope="col">PropertyName Level 1</th>
-                    <th scope="col">Campus Level 2</th>
-                    <th scope="col">PropertyName Level 2</th>
-                    <th scope="col">Campus Level 3</th>
-                    <th scope="col">PropertyName Level 3</th>
+                    <th scope="col">% Correct</th>
+                    <th scope="col">Grade Level 1</th>
+                    <th scope="col">Difficulty Level 1</th>
+                    <th scope="col">Grade Level 2</th>
+                    <th scope="col">Difficulty Level 2</th>
+                    <th scope="col">Grade Level 3</th>
+                    <th scope="col">Difficulty Level 3</th>
                     <th scope="col">Buttons</th>
                 </tr>
             </thead>
@@ -160,17 +169,17 @@
         <table id="reported-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Title</th>
-                    <th scope="col">Description</th>
+                    <th scope="col">Question</th>
+                    <th scope="col">Answer</th>
                     <th scope="col">Subject</th>
-                    <th scope="col">% ItemsSold</th>
+                    <th scope="col">% Correct</th>
                     <th scope="col">Issue</th>
-                    <th scope="col">Campus Level 1</th>
-                    <th scope="col">PropertyName Level 1</th>
-                    <th scope="col">Campus Level 2</th>
-                    <th scope="col">PropertyName Level 2</th>
-                    <th scope="col">Campus Level 3</th>
-                    <th scope="col">PropertyName Level 3</th>
+                    <th scope="col">Grade Level 1</th>
+                    <th scope="col">Difficulty Level 1</th>
+                    <th scope="col">Grade Level 2</th>
+                    <th scope="col">Difficulty Level 2</th>
+                    <th scope="col">Grade Level 3</th>
+                    <th scope="col">Difficulty Level 3</th>
                     <th scope="col">Buttons</th>
                 </tr>
             </thead>
@@ -180,28 +189,28 @@
         <table id="rejected-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Title</th>
-                    <th scope="col">Description</th>
+                    <th scope="col">Question</th>
+                    <th scope="col">Answer</th>
                     <th scope="col">Subject</th>
-                    <th scope="col">% ItemsSold</th>
+                    <th scope="col">% Correct</th>
                     <th scope="col">Issue</th>
-                    <th scope="col">Campus Level 1</th>
-                    <th scope="col">PropertyName Level 1</th>
-                    <th scope="col">Campus Level 2</th>
-                    <th scope="col">PropertyName Level 2</th>
-                    <th scope="col">Campus Level 3</th>
-                    <th scope="col">PropertyName Level 3</th>
+                    <th scope="col">Grade Level 1</th>
+                    <th scope="col">Difficulty Level 1</th>
+                    <th scope="col">Grade Level 2</th>
+                    <th scope="col">Difficulty Level 2</th>
+                    <th scope="col">Grade Level 3</th>
+                    <th scope="col">Difficulty Level 3</th>
                     <th scope="col">Buttons</th>
                 </tr>
             </thead>
         </table>
     </div>
-    {% if user.is_swapt_user %}
-    <div class="tab-pane fade" id="nav-commMkt" role="tabpanel" aria-labelledby="nav-commMkt-tab">
-        <table id="commMkt-table" class="table table-bordered">
+    {% if user.is_admin %}
+    <div class="tab-pane fade" id="nav-action" role="tabpanel" aria-labelledby="nav-action-tab">
+        <table id="action-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">CommMkt</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
         </table>
@@ -218,16 +227,16 @@ $(document).ready(function () {
         for(let i = 0; i < params.length; i ++) {
             param = params[i];
             
-            if(param.startsWith("location") || param.startsWith("propertyname")) {
+            if(param.startsWith("subject") || param.startsWith("difficulty")) {
                 $("#" + param.split("=")[1]).prop("checked", true);
-            } else if(param.startsWith("lowCampus")) {
-                $("#low-campus").val(parseInt(param.split("=")[1]))
-            } else if(param.startsWith("highCampus")) {
-                $("#high-campus").val(parseInt(param.split("=")[1]))
-            } else if(param.startsWith("lowItemsSold")) {
-                $("#low-itemsSold").val(parseFloat(param.split("=")[1]))
-            } else if(param.startsWith("highItemsSold")) {
-                $("#high-itemsSold").val(parseFloat(param.split("=")[1]))
+            } else if(param.startsWith("lowGrade")) {
+                $("#low-grade").val(parseInt(param.split("=")[1]))
+            } else if(param.startsWith("highGrade")) {
+                $("#high-grade").val(parseInt(param.split("=")[1]))
+            } else if(param.startsWith("lowCorrect")) {
+                $("#low-correct").val(parseFloat(param.split("=")[1]))
+            } else if(param.startsWith("highCorrect")) {
+                $("#high-correct").val(parseFloat(param.split("=")[1]))
             } else if(param.startsWith("showNA")) {
                 stringBool = param.split("=")[1] == "true"
                 $("#na").prop("checked", stringBool);
@@ -245,53 +254,53 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=2" + filter,
+            "url": "/flashcards/api/review/?format=datatables&stage=2" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "title"},
-            {"data": "description"},
+            {"data": "question"},
+            {"data": "answer"},
             {
                 "searchable": false,
-                "data": "location"
+                "data": "subject"
             },
             {
                 "searchable": false,
-                "data": "percent_itemsSold"
+                "data": "percent_correct"
             },
             {
                 "searchable": false,
-                "data": 'campuspropertyname_set.0.campus'
+                "data": 'gradedifficultypair_set.0.grade'
             },
             {
                 "searchable": false,
-                "data": 'campuspropertyname_set.0.propertyname'
-            },
-            {
-                "searchable": false,
-                "defaultContent": "",
-                "data": 'campuspropertyname_set.1.campus',
+                "data": 'gradedifficultypair_set.0.difficulty'
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.1.propertyname',
+                "data": 'gradedifficultypair_set.1.grade',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.2.campus',
+                "data": 'gradedifficultypair_set.1.difficulty',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.2.propertyname',
+                "data": 'gradedifficultypair_set.2.grade',
+            },
+            {
+                "searchable": false,
+                "defaultContent": "",
+                "data": 'gradedifficultypair_set.2.difficulty',
             },
             {
                 "searchable": false,
                 "data": null,
                 render:function(data, type, row) {
-                    return '<div class="d-inline"> <form commMkt="" method="POST"> {% csrf_token %} <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="listing-id" name="id" value="' + data["id"] + '"> </form> </div> <div class="d-inline"> <a class="btn btn-primary" role="button">Edit</a> </div>';
+                    return '<div class="d-inline"> <form action="" method="POST"> {% csrf_token %} <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="card-id" name="id" value="' + data["id"] + '"> </form> </div> <div class="d-inline"> <a class="btn btn-primary" role="button">Edit</a> </div>';
                 },
                 "targets": -1,
                
@@ -304,7 +313,7 @@ $(document).ready(function () {
 
     $('#approved-table tbody').on('click', 'a', function () {
         var data = approvedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-approved-tab";
+        window.location.href = window.location.origin + "/flashcards/edit/" + data["id"] + "?next=/flashcards/review/#nav-approved-tab";
     } );
 
     var reportedTable = $('#reported-table').DataTable({
@@ -313,53 +322,53 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=4" + filter,
+            "url": "/flashcards/api/review/?format=datatables&stage=4" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "title"},
-            {"data": "description"},
+            {"data": "question"},
+            {"data": "answer"},
             {
                 "searchable": false,
-                "data": "location"
+                "data": "subject"
             },
             {
                 "searchable": false,
-                "data": "percent_itemsSold"
+                "data": "percent_correct"
             },
             {"data": "issue"},
             {
                 "searchable": false,
-                "data": 'campuspropertyname_set.0.campus'
+                "data": 'gradedifficultypair_set.0.grade'
             },
             {
                 "searchable": false,
-                "data": 'campuspropertyname_set.0.propertyname'
-            },
-            {
-                "searchable": false,
-                "defaultContent": "",
-                "data": 'campuspropertyname_set.1.campus',
+                "data": 'gradedifficultypair_set.0.difficulty'
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.1.propertyname',
+                "data": 'gradedifficultypair_set.1.grade',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.2.campus',
+                "data": 'gradedifficultypair_set.1.difficulty',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.2.propertyname',
+                "data": 'gradedifficultypair_set.2.grade',
+            },
+            {
+                "searchable": false,
+                "defaultContent": "",
+                "data": 'gradedifficultypair_set.2.difficulty',
             },
             {
                 "data": null,
                 render:function(data, type, row) {
-                    return '<div class="d-inline"> <form commMkt="" method="POST"> {% csrf_token %} {% if user.is_admin %} <button type="submit" value="2" class="btn btn-success" name="status">Approve</button> {% endif %}<button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="listing-id" name="id" value="' + data["id"] + '"> </form> </div> <div class="d-inline"> <a class="btn btn-primary" role="button">Edit</a> </div>';
+                    return '<div class="d-inline"> <form action="" method="POST"> {% csrf_token %} {% if user.is_admin %} <button type="submit" value="2" class="btn btn-success" name="status">Approve</button> {% endif %}<button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="card-id" name="id" value="' + data["id"] + '"> </form> </div> <div class="d-inline"> <a class="btn btn-primary" role="button">Edit</a> </div>';
                 },
                 "targets": -1
             }
@@ -369,7 +378,7 @@ $(document).ready(function () {
     $('#reported-table tbody').on('click', 'a', function () {
         console.log("Test");
         var data = reportedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-reported-tab";
+        window.location.href = window.location.origin + "/flashcards/edit/" + data["id"] + "?next=/flashcards/review/#nav-reported-tab";
     } );
 
     var rejectedTable = $('#rejected-table').DataTable({
@@ -378,53 +387,53 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=3" + filter,
+            "url": "/flashcards/api/review/?format=datatables&stage=3" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "title"},
-            {"data": "description"},
+            {"data": "question"},
+            {"data": "answer"},
             {
                 "searchable": false,
-                "data": "location"
+                "data": "subject"
             },
             {
                 "searchable": false,
-                "data": "percent_itemsSold"
+                "data": "percent_correct"
             },
             {"data": "issue"},
             {
                 "searchable": false,
-                "data": 'campuspropertyname_set.0.campus'
+                "data": 'gradedifficultypair_set.0.grade'
             },
             {
                 "searchable": false,
-                "data": 'campuspropertyname_set.0.propertyname'
-            },
-            {
-                "searchable": false,
-                "defaultContent": "",
-                "data": 'campuspropertyname_set.1.campus',
+                "data": 'gradedifficultypair_set.0.difficulty'
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.1.propertyname',
+                "data": 'gradedifficultypair_set.1.grade',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.2.campus',
+                "data": 'gradedifficultypair_set.1.difficulty',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertyname_set.2.propertyname',
+                "data": 'gradedifficultypair_set.2.grade',
+            },
+            {
+                "searchable": false,
+                "defaultContent": "",
+                "data": 'gradedifficultypair_set.2.difficulty',
             },
             {
                 "data": null,
                 render:function(data, type, row) {
-                    return '<div class="d-inline"> <form commMkt="" method="POST"> {% csrf_token %} {% if user.is_admin %} <button type="submit" value="2" class="btn btn-success" name="status">Approve</button> {% endif %}<button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="listing-id" name="id" value="' + data["id"] + '"> </form> </div> <div class="d-inline"> <a class="btn btn-primary" role="button">Edit</a> </div>';
+                    return '<div class="d-inline"> <form action="" method="POST"> {% csrf_token %} {% if user.is_admin %} <button type="submit" value="2" class="btn btn-success" name="status">Approve</button> {% endif %}<button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="card-id" name="id" value="' + data["id"] + '"> </form> </div> <div class="d-inline"> <a class="btn btn-primary" role="button">Edit</a> </div>';
                 },
                 "targets": -1
             }
@@ -433,24 +442,24 @@ $(document).ready(function () {
 
     $('#rejected-table tbody').on('click', 'a', function () {
         var data = rejectedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-rejected-tab";
+        window.location.href = window.location.origin + "/flashcards/edit/" + data["id"] + "?next=/flashcards/review/#nav-rejected-tab";
     } );
 
-    var commMktTable = $('#commMkt-table').DataTable({
+    var actionTable = $('#action-table').DataTable({
         "serverSide": true,
         "processing": true,
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=5",
+            "url": "/flashcards/api/review/?format=datatables&stage=5",
             "credentials": 'include',
         },
         "columns": [
-            {"data": "title"},
+            {"data": "question"},
             {
                 "data": null,
                 render:function(data, type, row) {
-                    return '<div class="d-inline"> <form commMkt="" method="POST"> {% csrf_token %} {% if user.is_admin %} <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="listing-id" name="id" value="' + data["id"] + '"> </form> </div> {% endif %}';
+                    return '<div class="d-inline"> <form action="" method="POST"> {% csrf_token %} {% if user.is_admin %} <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="card-id" name="id" value="' + data["id"] + '"> </form> </div> {% endif %}';
                 },
                 "targets": -1
             }
@@ -463,38 +472,38 @@ $(document).ready(function () {
 $('.apply-filter').click(function (e){submit(e)});
 
 function submit(e){
-    var locations = [];
-    var propertynames = [];
+    var subjects = [];
+    var difficulties = [];
 
-    $(".location").each(function () {
-        if ($(this).is(":checked")) { locations.push($(this).attr('id').toString()); }
+    $(".subject").each(function () {
+        if ($(this).is(":checked")) { subjects.push($(this).attr('id').toString()); }
     });
 
-    $(".propertyname").each(function () {
-        if ($(this).is(":checked")) { propertynames.push($(this).attr('id').toString()); }
+    $(".difficulty").each(function () {
+        if ($(this).is(":checked")) { difficulties.push($(this).attr('id').toString()); }
     });
 
-    var lowCampus = $('#low-campus').val().toString();
-    var highCampus = $('#high-campus').val().toString();
+    var lowGrade = $('#low-grade').val().toString();
+    var highGrade = $('#high-grade').val().toString();
 
-    var lowItemsSold= $('#low-itemsSold').val().toString();
-    var highItemsSold = $('#high-itemsSold').val().toString();
+    var lowCorrect= $('#low-correct').val().toString();
+    var highCorrect = $('#high-correct').val().toString();
 
     var showNA = $('#na').is(":checked").toString();
 
-    var href = "?location=";
-    for(let i = 0; i < locations.length; i++) {
+    var href = "?subject=";
+    for(let i = 0; i < subjects.length; i++) {
         if(i != 0) {
-            href += "&location=" + locations[i];
+            href += "&subject=" + subjects[i];
         } else {
-            href += locations[i];
+            href += subjects[i];
         }
     }
-    for(let i = 0; i < propertynames.length; i++) {
-        href += "&propertyname=" + propertynames[i];
+    for(let i = 0; i < difficulties.length; i++) {
+        href += "&difficulty=" + difficulties[i];
     }
-    href += "&lowCampus=" + lowCampus + "&highCampus=" + highCampus + "&lowItemsSold=" + lowItemsSold
-        + "&highItemsSold=" + highItemsSold + "&showNA=" + showNA;
+    href += "&lowGrade=" + lowGrade + "&highGrade=" + highGrade + "&lowCorrect=" + lowCorrect
+        + "&highCorrect=" + highCorrect + "&showNA=" + showNA;
     window.location.href = href + location.hash;
 }
 

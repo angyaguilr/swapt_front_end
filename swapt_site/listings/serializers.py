@@ -1,90 +1,90 @@
-from rest_framework import serializers 
-from .models import Listing, CampusPropertyNamePair
+from  rest_framework import serializers 
+from .models import Flashcard, GradeDifficultyPair
 import random
  
 
-class CampusPropertyNamePairSerializer(serializers.ModelSerializer):
+class GradeDifficultyPairSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CampusPropertyNamePair
-        fields = ('campus',
-                  'propertyname',
+        model = GradeDifficultyPair
+        fields = ('grade',
+                  'difficulty',
                   )
  
-class ListingSerializer(serializers.ModelSerializer):
+class FlashcardSerializer(serializers.ModelSerializer):
     
     # Added fields up here to specify attributes (read_only or write_only)
-    title = serializers.CharField(read_only=True)
-    description = serializers.CharField(read_only=True)
-    location = serializers.CharField(read_only=True)
-    propertyname = serializers.SerializerMethodField(read_only=True)
+    question = serializers.CharField(read_only=True)
+    answer = serializers.CharField(read_only=True)
+    subject = serializers.CharField(read_only=True)
+    difficulty = serializers.SerializerMethodField(read_only=True)
     stage = serializers.IntegerField(write_only=True)
     issue = serializers.CharField(write_only=True)
     
     class Meta:
-        model = Listing
+        model = Flashcard
         fields = ('id',
-                  'title',
-                  'description',
-                  'location',
-                  'propertyname',
+                  'question',
+                  'answer',
+                  'subject',
+                  'difficulty',
                   'stage',
                   'issue'
                   )
         depth=1
       
-    # Randomly selects a propertyname level to return in the API request based on campus levels
-    # requested and campus levels that are in a campus/propertyname pair of the listing
-    def get_propertyname(self, obj):
+    # Randomly selects a difficulty level to return in the API request based on grade levels
+    # requested and grade levels that are in a grade/difficulty pair of the card
+    def get_difficulty(self, obj):
         if(obj.stage == 5): 
-            return "CommMkt"
+            return "Action"
             
-        campuss = self.context.get("campuss")
+        grades = self.context.get("grades")
 
-        if campuss == None:
+        if grades == None:
             return "N/A"
 
-        # Narrow down from campuss requested to campuss actually in the listing's campus/propertyname pairs
-        campuss = obj.campuspropertynamepair_set.filter(campus__in=campuss).values("campus")
+        # Narrow down from grades requested to grades actually in the card's grade/difficulty pairs
+        grades = obj.gradedifficultypair_set.filter(grade__in=grades).values("grade")
 
-        if campuss != None:
-            campus = random.choice(campuss)["campus"]
+        if grades != None:
+            grade = random.choice(grades)["grade"]
         else:
             return "N/A"
 
-        propertyname = obj.campuspropertynamepair_set.get(campus=campus).propertyname
+        difficulty = obj.gradedifficultypair_set.get(grade=grade).difficulty
         
-        # Returns in this format because this is how the propertyname is displayed in the game
-        if propertyname == "Oaks":
+        # Returns in this format because this is how the difficulty is displayed in the game
+        if difficulty == "Easy":
             return "+1" 
-        elif propertyname == "ParkPlace": 
+        elif difficulty == "Medium": 
             return "+2"
         else:
             return "+3"
 
 # Used only for the review page datatables
-class ListingReviewSerializer(serializers.ModelSerializer):
+class FlashcardReviewSerializer(serializers.ModelSerializer):
 
-    percent_itemsSold = serializers.SerializerMethodField(read_only=True)
+    percent_correct = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Listing
-        fields = ('title',
-                  'description',
-                  'location',
-                  'percent_itemsSold',
+        model = Flashcard
+        fields = ('question',
+                  'answer',
+                  'subject',
+                  'percent_correct',
                   'id',
-                  'campuspropertynamepair_set',
+                  'gradedifficultypair_set',
                   'issue'
                   )
-        depth=1 # Allows user to see campus and propertyname pairs from the set
+        depth=1 # Allows user to see grade and difficulty pairs from the set
 
         datatables_always_serialize = ('id')
 
-    def get_percent_itemsSold(self, obj):
-        percent_itemsSold = obj.percent_itemsSold
+    def get_percent_correct(self, obj):
+        percent_correct = obj.percent_correct
         # Returns N/A instead of blank for aesthetic purposes
-        if(percent_itemsSold == None):
+        if(percent_correct == None):
             return "N/A" 
         else:
-            return percent_itemsSold
+            return 

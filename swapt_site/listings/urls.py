@@ -11,7 +11,7 @@ from . import views
 
 # Setting up the reivew listings page API
 router = routers.DefaultRouter()
-router.register(r'review', views.ReviewFlashcardsAPI) 
+router.register(r'review', views.ReviewListingsAPI) 
 
 urlpatterns = [
     #all:
@@ -32,7 +32,7 @@ urlpatterns = [
     path("swapt-<int:pk>/", swapt_user_required()(views.SwaptListingDetailView.as_view()), name="swapt_listing_detail"),
     path('swapt-Listings/', views.ListingsUploaded.as_view(), name='swapt_listings'),
     path('swapt-Listings/search/', views.ListingsUploadedSearch.as_view(), name='swapt_listings_search'),
-    path('swapt-upload-swapt/', swapt_user_required()(views.ListingsCreationView.as_view()), name="upload_swapt"),
+    #path('swapt-upload-swapt/', swapt_user_required()(views.ListingsCreationView.as_view()), name="upload_swapt"),
     
     path('swapt-create-listing/', views.SwaptListing.as_view(), name='swapt_create'),
     path('swapt-confirmation/<int:pk>', views.SwaptListingConfirmation.as_view(), name='swapt-confirmation'),

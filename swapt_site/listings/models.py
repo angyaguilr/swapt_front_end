@@ -293,4 +293,21 @@ class Swapt_Bundle_Price(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"{self.swapt_bundle_listing.name} {self.price}"      
+        return f"{self.swapt_bundle_listing.name} {self.price}" 
+
+
+class GradeDifficultyPair(models.Model):
+    listings = models.ManyToManyField('Listing')
+
+    DIFFICULTY_CHOICES = [
+        ('Easy', 'Easy'),
+        ('Medium', 'Medium'),
+        ('Hard', 'Hard'),
+    ]
+
+    grade = models.IntegerField()
+    difficulty = models.CharField(
+        max_length=15,
+        choices=DIFFICULTY_CHOICES,
+    )
+    confirmed = models.BooleanField(default=False)     

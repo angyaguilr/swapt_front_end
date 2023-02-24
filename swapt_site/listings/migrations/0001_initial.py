@@ -127,7 +127,7 @@ class Migration(migrations.Migration):
             name='CampusPropertyNamePair',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('campus', models.CharField(choices=[('ElonUniversity', 'ElonUniversity'), ('UMD', 'UMD'), ('UGA', 'UGA')], max_length=35, null=True)),
+                ('grade', models.CharField(choices=[('ElonUniversity', 'ElonUniversity'), ('UMD', 'UMD'), ('UGA', 'UGA')], max_length=35, null=True)),
                 ('propertyname', models.CharField(choices=[('Oaks', 'Oaks'), ('ParkPlace', 'ParkPlace'), ('MillPoint', 'MillPoint')], max_length=35)),
                 ('confirmed', models.BooleanField(default=False)),
                 ('listings', models.ManyToManyField(to='listings.listing')),

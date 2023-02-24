@@ -35,36 +35,430 @@ YOUR_DOMAIN = 'http://127.0.0.1:8000'
 #   return_url="https://example.com/return",
 #   type="account_onboarding",
 # )
+import csv, io
+import random
+
+from django.shortcuts import redirect, render
+from django.contrib import messages
+from django.views.generic import View, UpdateView, CreateView
+from django.urls import reverse_lazy, reverse
+from rest_framework import generics, viewsets
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+from .models import Listing, GradeDifficultyPair
+from .forms import ListingEditForm, ListingRejectForm, ActionListingCreationForm
+from .serializers import ListingSerializer, ListingReviewSerializer
+
+class ListingsCreationView(View):
+    
+    # Shows the swapt_user the upload form for listings
+    def get(self, request):
+        # Deletes any unconfirmed listings
+        listings = Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
+        listings.delete()
+        template = "listings/upload_form.html"
+        return render(request, template)
+
+    def post(self, request):
+        template = "listings/upload_form.html"
+        csv_file = request.FILES['file']
+        # Checks if uploaded file is a CSV file
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, 'This is not a CSV file.')
+            return render(request, template)
+        data_set = csv_file.read().decode('UTF-8')
+        # setup a stream which is when we loop through each line we are able to handle a data in a stream
+        io_string = io.StringIO(data_set)
+        next(io_string)
+        # Keeps track of row number
+        counter = 1
+
+        # First loop through is for error checking
+        # Checks formatting guidelines that are laid out on the upload form page
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+            if column[0] == "" or len(column[0]) > 250: 
+                messages.error(request, 'Name field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[1] == "" or len(column[1]) > 250:
+                messages.error(request, 'Answer field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[2] == "" or (column[2] != "Math" and column[2] != "Engineering" and column[2] != "Science" and column[2] != "Technology"):
+                messages.error(request, 'Location field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
+                messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
+                messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[5] != "":
+                if int(column[5]) < 1 or int(column[5]) > 12:
+                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+                    messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+                messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
+                if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
+                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[7] != "":
+                if int(column[7]) < 1 or int(column[7]) > 12:
+                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+                    messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+                messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
+                if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
+                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+                    
+            counter += 1
+
+        # If there are any errors, render the upload page with those errors so user can fix them
+        if len(list(messages.get_messages(request))) != 0:
+            return render(request, template)
+
+        io_string = io.StringIO(data_set)
+        next(io_string)
+
+        # Second loop through is for adding cards to database
+        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+
+            listing = Listing.objects.create(
+                name=column[0],
+                description=column[1],
+                location=column[2],
+                stage=1,
+                swaptuser=request.user.swaptuser
+            )
+
+            firstPair = GradeDifficultyPair.objects.get_or_create(
+                grade=int(column[3]),
+                difficulty=column[4]
+            )
+            firstPair[0].listings.add(listing)
+
+            # Second and third pairs are optional
+            # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
+            # So, don't need to check both here
+            if column[5] != "":
+                secondPair = GradeDifficultyPair.objects.get_or_create(
+                    grade=int(column[5]),
+                    difficulty=column[6]
+                )
+                secondPair[0].listings.add(listing)
+
+            if column[7] != "":
+                thirdPair = GradeDifficultyPair.objects.get_or_create(
+                    grade=int(column[7]),
+                    difficulty=column[8]
+                )
+                thirdPair[0].listings.add(listing)
+
+        return redirect("listings:confirm")
+
+class ActionListingCreationView(CreateView):
+    model = Listing
+    form_class = ActionListingCreationForm
+    template_name ="listings/upload_action_form.html"
+
+    def form_valid(self, form):
+        listing = form.save()
+        if self.request.user.is_admin:
+            listing.save()
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("listings:review") + "#nav-action-tab"
+
+class ListingsConfirmationView(View):
+
+    # Returns view of swapt_user's unconfirmed listings (this page is redirected to right after the upload page if successful)
+    # swapt_user can delete or edit listings
+    def get(self, request):
+        
+        listings = Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
+
+        # Can't access page without unconfirmed listings
+        if not listings:
+            return redirect("listings:upload")
+
+        template = "listings/confirm.html"
+        context = {"listings": Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)}
+        return render(request, template, context)
+    
+    def post(self, request):
+
+        listings = Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
+
+        # Sets listings' and pairs' confirm fields to true if swapt_user selected the confirm button
+        if request.POST.get('status') == "confirm":
+            for listing in listings:
+                listing.confirmed = True
+                for pair in listing.gradedifficultypair_set.all():
+                    pair.confirmed = True
+                    pair.save()
+
+            Listing.objects.bulk_update(listings, ['confirmed'])
+            return redirect("listings:review")
+
+        # If selected the delete button for a specific card, deletes that cards
+        elif request.POST.get('status') == "delete":
+            id = request.POST['id']
+            listings.get(id=id).delete()
+            return redirect("listings:confirm")
+
+        # The only other button that results in a post request is the cancel button, which deletes all unconfirmed cards
+        else:
+            listings.delete()
+            return redirect("listings:upload")['Science', 'Technology', 'Engineering', 'Math']
+
+class ListingsReviewView(View):
+
+    def get(self, request):
+        template = "listings/review.html"
+    
+        # Gets different attributes from the query string, but by default will be the most expansive possible
+        locations = self.request.GET.getlist('location', ['Science', 'Technology', 'Engineering', 'Math'])
+        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
+        lowGrade = int(self.request.GET.get('lowGrade', 1))
+        highGrade = int(self.request.GET.get('highGrade', 12))
+        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
+        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
+        showNA = self.request.GET.get('showNA', 'true')
+
+        # Filters to relevant pairs, then when filtering listings filters by those pairs and other attributes
+        # Also stage 1 is the review stage
+        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        queryset = Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        # If the user wants to see cards that have 0 in/itemsSold, add those into the queryset too
+        if(showNA == "true"):
+            queryset = queryset | Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold=None, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+
+        if request.user.is_swapt_user:
+            context = {"user": request.user, "review": queryset.filter(swaptuser=request.user.swaptuser)}
+        elif request.user.is_admin:
+            context = {"user": request.user, "review": queryset[:3]} # Only show 3 at a time for admin
+        return render(request, template, context)
+
+    def post(self, request):
+        id = request.POST['id']
+        listing = Listing.objects.get(id=id)
+
+        # Deletes listings or changes stage (i.e. if approve or reject button is pressed)
+        if request.POST.get('status'):
+            if request.POST.get('status') == "delete" and (request.user.is_admin or (request.user.is_swapt_user and listing.stage != 2)):
+                listing.delete()
+            elif request.user.is_admin:
+                listing.stage = int(request.POST.get('status'))
+                if listing.stage == 2:
+                    listing.issue = None # If the card is approved again, don't keep previous issue in the database
+                listing.save()
+        
+        return redirect("listings:review")
+
+class ListingEditView(UpdateView):
+    form_class = ListingEditForm
+    model = Listing
+    template_name = 'listings/edit_form.html'
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        listing = Listing.objects.get(id=pk)
+
+        # Conditionals to make sure user has access to review page for the listing with the particular id requested
+        if request.user.is_admin:
+            return super().get(self, request, *args, **kwargs)
+        if listing.swaptuser != request.user.swaptuser or (request.user.is_swapt_user and listing.stage == 2):
+            return redirect('listings:review')
+        return super().get(self, request, *args, **kwargs)
+    
+    # This function is used to get the initial values of form fields
+    # Mostly used for pairs since those are part of a related model (through the manytomany field), so model fields
+    # are for the most part automatically filled in with proper intial values
+    def get_initial(self):
+        pk = self.kwargs['pk']
+        listing = Listing.objects.get(id=pk)
+        pairs = listing.gradedifficultypair_set.all()
+        
+        intial = {'stage': listing.stage, 'gradeOne': "", 'difficultyOne': "", 'gradeTwo': "", 'difficultyTwo': "", 'gradeThree': "", 'difficultyThree': ""}
+        
+        counter = 1
+        
+        for pair in pairs:
+            if counter == 1:
+                intial['gradeOne'] = pair.grade
+                intial['difficultyOne'] = pair.difficulty
+            if counter == 2:
+                intial['gradeTwo'] = pair.grade
+                intial['difficultyTwo'] = pair.difficulty
+            if counter == 3:
+                intial['gradeThree'] = pair.grade
+                intial['difficultyThree'] = pair.difficulty
+
+            counter += 1
+        
+        return intial
+
+    def get_success_url(self):
+        pk = self.kwargs['pk']
+        # self.request
+        listing = Listing.objects.get(id=pk)
+
+        # Go back to confirmation page if editing an unconfirmed card, otherwise return to the review page
+        if self.request.user.is_swapt_user and not listing.confirmed:
+            return reverse_lazy("listings:confirm")
+        if (self.request.user.is_swapt_user and listing.confirmed) or self.request.user.is_admin:
+            return reverse_lazy("listings:review")
+
+    def form_valid(self, form):
+        listing = form.save()
+
+        # Change stage, either based on admin changing it or automatic changes when swapt_user updates rejected/reported card
+        if self.request.user.is_admin:
+            listing.stage = int(form.cleaned_data["stage"])
+        elif self.request.user.is_swapt_user and (listing.stage == 3 or listing.stage == 4):
+            listing.stage = 1
+        listing.save()
+
+        return super().form_valid(form)
+
+class ListingRejectView(UpdateView):
+    form_class = ListingRejectForm
+    model = Listing
+    template_name = 'listings/reject.html'
+
+    def form_valid(self, form):
+        listing = form.save()
+        listing.save()
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse("listings:review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
+
+class ListListings(generics.ListAPIView):
+    queryset = Listing.objects.filter(confirmed=True)
+    serializer_class = ListingSerializer
+
+    def get_queryset(self):
+
+        # Get attibutes
+        locations = self.request.GET.getlist('location')
+        grades = self.request.GET.getlist('grade')
+        number = self.request.GET.get('number')
+
+        # Get pairs with grade levels specified, then narrow down listings based on those pairs and other attributes
+        pairs = GradeDifficultyPair.objects.filter(grade__in=grades)
+        queryset = Listing.objects.filter(gradedifficultypair__in=pairs).distinct()
+        queryset = queryset.filter(confirmed=True, stage=2, location__in=locations) # Make sure cards returned in request are approved and confirmed
+        queryset = sorted(queryset, key=lambda x: random.random()) # Randomize order as to not give same cards in same order every time to the app
+        queryset = queryset[:int(int(number) * .85)] # Only give up to 85% number of cards specified
+        queryset = sorted(queryset + sorted(Listing.objects.filter(stage=5), key=lambda x: random.random())[:int(int(number) * .15)], key=lambda x: random.random()) # Other 15% of cards are action cards
+       
+        return queryset
 
 
-# @csrf_exempt
-# def create_checkout_session(request):
-#     #Updated- creating SwaptListing object
-#     order=SwaptListing(email=" ",paid="False",amount=0,description=" ")
-#     order.save()
-#     session = stripe.checkout.Session.create(
-#         client_reference_id=request.user.id if request.user.is_authenticated else None,
-#         payment_method_types=['card'],
-#         line_items=[{
-#             'price_data': {
-#                 'currency': 'usd',
-#                 'product_data': {
-#                     'name': 'Swapt Listings',
-#                     },
-#                     'unit_amount': 10000,
-#                     },
-#                     'quantity': 1,
-#         }],
-#         #Update - passing order ID in checkout to update the order object in bhookhook
-#         metadata={
-#             "order_id":swapt_create.id
-#             },
-#             mode='payment',
-#             success_url='http://127.0.0.1:8000/listings/success.html/',
-#             cancel_url='http://127.0.0.1:8000/listings/cancel.html/',
-#     )
-#     return JsonResponse({'id': session.id})
+    def list(self, request, **kwargs):
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        queryset = self.get_queryset()
+        # Passes grade list in so that serializer can randomly pick the difficulty levels to return in the request for the cards
+        serializer = ListingSerializer(queryset, many=True, context={'grades': self.request.GET.getlist('grade')})  
+        data = serializer.data
 
+        # This is for the animations in the app to work
+        # i = int(self.request.GET.get('number'))
+        i = int(request.GET.get('number')) - 1
+        for entry in data:
+            entry["index"] = i
+            i -= 1
+        return Response(serializer.data)
+
+class ReportListing(generics.UpdateAPIView):
+    queryset = Listing.objects.filter(stage=2, confirmed=True)
+    serializer_class = ListingSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        return Listing.objects.filter(stage=2, confirmed=True)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = queryset.get(pk=self.request.GET.get('id'))
+        return obj
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+
+        instance = self.get_object()
+        # Updates listing to be reported with the issue field filled in (it will be whatever the user wrote)
+        serializer = self.get_serializer(instance, data={"stage": 4, "issue": request.data["issue"]}, partial=partial) 
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+class UpdatePercentItemsSoldListing(generics.UpdateAPIView):
+    queryset = Listing.objects.filter(stage=2, confirmed=True)
+    serializer_class = ListingSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        return Listing.objects.filter(stage=2, confirmed=True)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = queryset.get(pk=self.request.GET.get('id'))
+        return obj
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+
+        instance = self.get_object()
+        
+        # If itemsSold set to true, increment itemsSold count, otherwise (aka set to false), add incrment itemsUnSold count
+        is_itemsSold = self.request.data["itemsSold"]
+        if is_itemsSold:
+            instance.itemsSold += 1
+        else:
+            instance.itemsUnSold += 1
+
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+        
+class ReviewListingsAPI(viewsets.ModelViewSet):
+    queryset = Listing.objects.filter(confirmed=True)
+    serializer_class = ListingReviewSerializer
+
+    def get_queryset(self):
+
+        # Get attributes from query string
+        stage = int(self.request.GET.get('stage'))
+
+        if(stage == 5): 
+            return Listing.objects.filter(stage=5)
+        
+        locations = self.request.GET.getlist('location', ['Science', 'Technology', 'Engineering', 'Math'])
+        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
+        lowGrade = int(self.request.GET.get('lowGrade', 1))
+        highGrade = int(self.request.GET.get('highGrade', 12))
+        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
+        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
+        showNA = self.request.GET.get('showNA', 'true')
+
+        # Same filtering as in the regular review view
+        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        queryset = Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        if(showNA == "true"):
+            queryset = queryset | Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold=None, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        if self.request._request.user.is_swapt_user:
+            return queryset.filter(swaptuser=self.request._request.user.swaptuser)
+        else:
+            return queryset
 class CmntyListingListView(ListView):
     model = Listing
     context_object_name = "listings"
@@ -79,7 +473,6 @@ class CmntyListingDetailView(DetailView):
         context = super(CmntyListingDetailView, self).get_context_data()
         context["prices"] = Price.objects.filter(listing=self.get_object())
         return context           
-
 
 class SwaptListingListView(ListView):
     model = SwaptListingModel
@@ -177,123 +570,7 @@ class StripeWebhookView(View):
         # Can handle other events here.
 
         return HttpResponse(status=200)
-class ListingsCreationView(View):
-    
-    # Shows the teacher the upload form for listings
-    def get(self, request):
-        # Deletes any unconfirmed listings
-        listings = Listing.objects.filter(teacher=request.user.teacher, confirmed=False)
-        listings.delete()
-        template = "listings/upload_form.html"
-        return render(request, template)
 
-    def post(self, request):
-        template = "listings/upload_form.html"
-        csv_file = request.FILES['file']
-        # Checks if uploaded file is a CSV file
-        if not csv_file.name.endswith('.csv'):
-            messages.error(request, 'This is not a CSV file.')
-            return render(request, template)
-        data_set = csv_file.read().decode('UTF-8')
-        # setup a stream which is when we loop through each line we are able to handle a data in a stream
-        io_string = io.StringIO(data_set)
-        next(io_string)
-        # Keeps track of row number
-        counter = 1
-
-        # First loop through is for error checking
-        # Checks formatting guidelines that are laid out on the upload form page
-        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-            if column[0] == "" or len(column[0]) > 250: 
-                messages.error(request, 'Question field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[1] == "" or len(column[1]) > 250:
-                messages.error(request, 'Answer field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[2] == "" or (column[2] != "Math" and column[2] != "Engineering" and column[2] != "Science" and column[2] != "Technology"):
-                messages.error(request, 'Subject field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
-                messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
-                messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[5] != "":
-                if int(column[5]) < 1 or int(column[5]) > 12:
-                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-                    messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-                messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
-                if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
-                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[7] != "":
-                if int(column[7]) < 1 or int(column[7]) > 12:
-                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-                    messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-                messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
-                if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
-                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                    
-            counter += 1
-
-        # If there are any errors, render the upload page with those errors so user can fix them
-        if len(list(messages.get_messages(request))) != 0:
-            return render(request, template)
-
-        io_string = io.StringIO(data_set)
-        next(io_string)
-
-        # Second loop through is for adding cards to database
-        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-
-            listing = Listing.objects.create(
-                question=column[0],
-                answer=column[1],
-                subject=column[2],
-                stage=1,
-                teacher=request.user.teacher
-            )
-
-            firstPair = GradeDifficultyPair.objects.get_or_create(
-                grade=int(column[3]),
-                difficulty=column[4]
-            )
-            firstPair[0].listings.add(listing)
-
-            # Second and third pairs are optional
-            # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
-            # So, don't need to check both here
-            if column[5] != "":
-                secondPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=int(column[5]),
-                    difficulty=column[6]
-                )
-                secondPair[0].listings.add(listing)
-
-            if column[7] != "":
-                thirdPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=int(column[7]),
-                    difficulty=column[8]
-                )
-                thirdPair[0].listings.add(listing)
-
-        return redirect("listings:confirm")
-
-class ListingsCreationView(ListView):
-    model = Listing
-    form_class = ListingCreationForm
-    template_name ="listings/swapt_upload_form.html"
-
-    def form_valid(self, form):
-        listing = form.save()
-        if self.request.user.is_swapt_user:
-            listing.save()
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return redirect("listings:confirm")
 
 class CommMktListingCreationView(CreateView):
     model = Listing
@@ -310,297 +587,6 @@ class CommMktListingCreationView(CreateView):
     def get_success_url(self):
         return reverse("listings:review") + "#nav-commMkt-tab"
 
-class ListingsConfirmationView(View):
-
-    # Returns view of swaptuser's unconfirmed listings (this page is redirected to right after the upload page if successful)
-    # SwaptUser can delete or edit listings
-    def get(self, request):
-        
-        listings = Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
-
-        # Can't access page without unconfirmed listings
-        if not listings:
-            return redirect("listings:upload_swapt")
-
-        template = "listings/confirm.html"
-        context = {"listings": Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)}
-        return render(request, template, context)
-    
-    def post(self, request):
-
-        listings = Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
-
-        # Sets listings' and pairs' confirm fields to true if swaptuser selected the confirm button
-        if request.POST.get('status') == "confirm":
-            for listing in listings:
-                listing.confirmed = True
-                for pair in listing.campuspropertynamepair_set.all():
-                    pair.confirmed = True
-                    pair.save()
-
-            Listing.objects.bulk_update(listings, ['confirmed'])
-            return redirect("listings:review")
-
-        # If selected the delete button for a specific list, deletes that listings
-        elif request.POST.get('status') == "delete":
-            id = request.POST['id']
-            listings.get(id=id).delete()
-            return redirect("listings:confirm")
-
-        # The only other button that results in a post request is the cancel button, which deletes all unconfirmed listings
-        else:
-            listings.delete()
-            return redirect("listings:upload_swapt")['Columbia, MD', 'ElonNC', 'Burlington, NC', 'College Park MD']
-
-class ListingsReviewView(View):
-
-    def get(self, request):
-        template = "listings/review.html"
-    
-        # Gets different attributes from the query string, but by default will be the most expansive possible
-        locations = self.request.GET.getlist('location', ['ColumbiaMD', 'ElonNC', 'BurlingtonNC', 'CollegeParkMD'])
-        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'ParkPlace', 'MillPoint'])
-        lowCampus = int(self.request.GET.get('lowCampus', 1))
-        highCampus = int(self.request.GET.get('highCampus', 12))
-        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
-        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
-        showNA = self.request.GET.get('showNA', 'true')
-
-        # Filters to relevant pairs, then when filtering listings filters by those pairs and other attributes
-        # Also stage 1 is the review stage
-        pairs = CampusPropertyNamePair.objects.filter(campus__gte=lowCampus, campus__lte=highCampus, propertyname__in=propertynames)
-        queryset = Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
-            campuspropertynamepair__in=pairs, confirmed=True).distinct()
-        
-        # If the user wants to see listings that have 0 in/itemsSold, add those into the queryset too
-        if(showNA == "true"):
-            queryset = queryset | Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold=None, 
-            campuspropertynamepair__in=pairs, confirmed=True).distinct()
-
-        if request.user.is_swapt_user:
-            context = {"user": request.user, "review": queryset.filter(swaptuser=request.user.swaptuser)}
-        elif request.user.is_admin:
-            context = {"user": request.user, "review": queryset[:3]} # Only show 3 at a time for admin
-        return render(request, template, context)
-
-    def post(self, request):
-        id = request.POST['id']
-        listing = Listing.objects.get(id=id)
-
-        # Deletes listings or changes stage (i.e. if approve or reject button is pressed)
-        if request.POST.get('status'):
-            if request.POST.get('status') == "delete" and (request.user.is_admin or (request.user.is_swapt_user and listing.stage != 2)):
-                listing.delete()
-            elif request.user.is_admin:
-                listing.stage = int(request.POST.get('status'))
-                if listing.stage == 2:
-                    listing.issue = None # If the list is approved again, don't keep previous issue in the database
-                listing.save()
-        
-        return redirect("listings:review")
-
-class ListingEditView(UpdateView):
-    form_class = ListingEditForm
-    model = Listing
-    template_name = 'listings/edit_form.html'
-
-    def get(self, request, *args, **kwargs):
-        pk = self.kwargs['pk']
-        listing = Listing.objects.get(id=pk)
-
-        # Conditionals to make sure user has access to review page for the listing with the particular id requested
-        if request.user.is_admin:
-            return super().get(self, request, *args, **kwargs)
-        if listing.swaptuser != request.user.swaptuser or (request.user.is_swapt_user and listing.stage == 2):
-            return redirect('listings:review')
-        return super().get(self, request, *args, **kwargs)
-    
-    # This function is used to get the initial values of form fields
-    # Mostly used for pairs since those are part of a related model (through the manytomany field), so model fields
-    # are for the most part automatically filled in with proper intial values
-    def get_initial(self):
-        pk = self.kwargs['pk']
-        listing = Listing.objects.get(id=pk)
-        pairs = listing.campuspropertynamepair_set.all()
-        
-        intial = {'stage': listing.stage, 'campusOne': "", 'propertynameOne': "", 'campusTwo': "", 'propertynameTwo': "", 'campusThree': "", 'propertynameThree': ""}
-        
-        counter = 1
-        
-        for pair in pairs:
-            if counter == 1:
-                intial['campusOne'] = pair.campus
-                intial['propertynameOne'] = pair.propertyname
-            if counter == 2:
-                intial['campusTwo'] = pair.campus
-                intial['propertynameTwo'] = pair.propertyname
-            if counter == 3:
-                intial['campusThree'] = pair.campus
-                intial['propertynameThree'] = pair.propertyname
-
-            counter += 1
-        
-        return intial
-
-    def get_success_url(self):
-        pk = self.kwargs['pk']
-        # self.request
-        listing = Listing.objects.get(id=pk)
-
-        # Go back to confirmation page if editing an unconfirmed list, otherwise return to the review page
-        if self.request.user.is_swapt_user and not listing.confirmed:
-            return reverse_lazy("listings:confirm")
-        if (self.request.user.is_swapt_user and listing.confirmed) or self.request.user.is_admin:
-            return reverse_lazy("listings:review")
-
-    def form_valid(self, form):
-        listing = form.save()
-
-        # Change stage, either based on admin changing it or automatic changes when swaptuser updates rejected/reported listing
-        if self.request.user.is_admin:
-            listing.stage = int(form.cleaned_data["stage"])
-        elif self.request.user.is_swapt_user and (listing.stage == 3 or listing.stage == 4):
-            listing.stage = 1
-        listing.save()
-
-        return super().form_valid(form)
-
-class ListingRejectView(UpdateView):
-    form_class = ListingRejectForm
-    model = Listing
-    template_name = 'listings/reject.html'
-
-    def form_valid(self, form):
-        listing = form.save()
-        listing.save()
-        return super().form_valid(form)
-    
-    def get_success_url(self):
-        return reverse("listings:review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
-
-class ListListings(generics.ListAPIView):
-    queryset = Listing.objects.filter(confirmed=True)
-    serializer_class = ListingSerializer
-
-    def get_queryset(self):
-
-        # Get attibutes
-        locations = self.request.GET.getlist('location')
-        campuss = self.request.GET.getlist('campus')
-        number = self.request.GET.get('number')
-
-        # Get pairs with campus levels specified, then narrow down listings based on those pairs and other attributes
-        pairs = CampusPropertyNamePair.objects.filter(campus__in=campuss)
-        queryset = Listing.objects.filter(campuspropertynamepair__in=pairs).distinct()
-        queryset = queryset.filter(confirmed=True, stage=2, location__in=locations) # Make sure listings returned in request are approved and confirmed
-        queryset = sorted(queryset, key=lambda x: random.random()) # Randomize order as to not give same listings in same order every time to the app
-        queryset = queryset[:int(int(number) * .85)] # Only give up to 85% number of listings specified
-        queryset = sorted(queryset + sorted(Listing.objects.filter(stage=5), key=lambda x: random.random())[:int(int(number) * .15)], key=lambda x: random.random()) # Other 15% of listings are commMkt listings
-       
-        return queryset
-
-
-    def list(self, request, **kwargs):
-        # Note the use of `get_queryset()` instead of `self.queryset`
-        queryset = self.get_queryset()
-        # Passes campus list in so that serializer can randomly pick the propertyname levels to return in the request for the listings
-        serializer = ListingSerializer(queryset, many=True, context={'campuss': self.request.GET.getlist('campus')})  
-        data = serializer.data
-
-        # This is for the animations in the app to work
-        # i = int(self.request.GET.get('number'))
-        i = int(request.GET.get('number')) - 1
-        for entry in data:
-            entry["index"] = i
-            i -= 1
-        return Response(serializer.data)
-
-class ReportListing(generics.UpdateAPIView):
-    queryset = Listing.objects.filter(stage=2, confirmed=True)
-    serializer_class = ListingSerializer
-    permission_classes = (AllowAny,)
-
-    def get_queryset(self):
-        return Listing.objects.filter(stage=2, confirmed=True)
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = queryset.get(pk=self.request.GET.get('id'))
-        return obj
-    
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-
-        instance = self.get_object()
-        # Updates listing to be reported with the issue field filled in (it will be whatever the user wrote)
-        serializer = self.get_serializer(instance, data={"stage": 4, "issue": request.data["issue"]}, partial=partial) 
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(serializer.data)
-
-class UpdatePercentItemsSoldListing(generics.UpdateAPIView):
-    queryset = Listing.objects.filter(stage=2, confirmed=True)
-    serializer_class = ListingSerializer
-    permission_classes = (AllowAny,)
-
-    def get_queryset(self):
-        return Listing.objects.filter(stage=2, confirmed=True)
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = queryset.get(pk=self.request.GET.get('id'))
-        return obj
-    
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-
-        instance = self.get_object()
-        
-        # If itemsSold set to true, increment itemsSold count, otherwise (aka set to false), add incrment itemsUnSold count
-        is_itemsSold = self.request.data["itemsSold"]
-        if is_itemsSold:
-            instance.itemsSold += 1
-        else:
-            instance.itemsUnSold += 1
-
-        instance.save()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-        
-class ReviewListingsAPI(viewsets.ModelViewSet):
-    queryset = Listing.objects.filter(confirmed=True)
-    serializer_class = ListingReviewSerializer
-
-    def get_queryset(self):
-
-        # Get attributes from query string
-        stage = int(self.request.GET.get('stage'))
-
-        if(stage == 5): 
-            return Listing.objects.filter(stage=5)
-        
-        locations = self.request.GET.getlist('location', ['Columbia, MD', 'ElonNC', 'Burlington, NC', 'College Park MD'])
-        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'Park Place', 'Mill Point'])
-        lowCampus = int(self.request.GET.get('lowCampus', 1))
-        highCampus = int(self.request.GET.get('highCampus', 12))
-        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
-        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
-        showNA = self.request.GET.get('showNA', 'true')
-
-        # Same filtering as in the regular review view
-        pairs = CampusPropertyNamePair.objects.filter(campus__gte=lowCampus, campus__lte=highCampus, propertyname__in=propertynames)
-        queryset = Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
-            campuspropertynamepair__in=pairs, confirmed=True).distinct()
-        
-        if(showNA == "true"):
-            queryset = queryset | Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold=None, 
-            campuspropertynamepair__in=pairs, confirmed=True).distinct()
-        
-        if self.request._request.user.is_swapt_user:
-            return queryset.filter(swaptuser=self.request._request.user.swaptuser)
-        else:
-            return queryset
 
 class Index(View):
     def get(self, request, *args, **kwargs):
@@ -778,412 +764,3 @@ class ListingsUploadedSearch(View):
 
         return render(request, 'listings/swapt_listings.html', context)
         
-class FlashcardsCreationView(View):
-    
-    # Shows the teacher the upload form for flashcards
-    def get(self, request):
-        # Deletes any unconfirmed flashcards
-        flashcards = Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)
-        flashcards.delete()
-        template = "flashcards/upload_form.html"
-        return render(request, template)
-
-    def post(self, request):
-        template = "flashcards/upload_form.html"
-        csv_file = request.FILES['file']
-        # Checks if uploaded file is a CSV file
-        if not csv_file.name.endswith('.csv'):
-            messages.error(request, 'This is not a CSV file.')
-            return render(request, template)
-        data_set = csv_file.read().decode('UTF-8')
-        # setup a stream which is when we loop through each line we are able to handle a data in a stream
-        io_string = io.StringIO(data_set)
-        next(io_string)
-        # Keeps track of row number
-        counter = 1
-
-        # First loop through is for error checking
-        # Checks formatting guidelines that are laid out on the upload form page
-        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-            if column[0] == "" or len(column[0]) > 250: 
-                messages.error(request, 'Question field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[1] == "" or len(column[1]) > 250:
-                messages.error(request, 'Answer field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[2] == "" or (column[2] != "Math" and column[2] != "Engineering" and column[2] != "Science" and column[2] != "Technology"):
-                messages.error(request, 'Subject field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
-                messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
-                messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[5] != "":
-                if int(column[5]) < 1 or int(column[5]) > 12:
-                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-                    messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-                messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
-                if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
-                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[7] != "":
-                if int(column[7]) < 1 or int(column[7]) > 12:
-                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-                    messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-                messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
-                if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
-                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                    
-            counter += 1
-
-        # If there are any errors, render the upload page with those errors so user can fix them
-        if len(list(messages.get_messages(request))) != 0:
-            return render(request, template)
-
-        io_string = io.StringIO(data_set)
-        next(io_string)
-
-        # Second loop through is for adding cards to database
-        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-
-            flashcard = Flashcard.objects.create(
-                question=column[0],
-                answer=column[1],
-                subject=column[2],
-                stage=1,
-                teacher=request.user.teacher
-            )
-
-            firstPair = GradeDifficultyPair.objects.get_or_create(
-                grade=int(column[3]),
-                difficulty=column[4]
-            )
-            firstPair[0].flashcards.add(flashcard)
-
-            # Second and third pairs are optional
-            # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
-            # So, don't need to check both here
-            if column[5] != "":
-                secondPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=int(column[5]),
-                    difficulty=column[6]
-                )
-                secondPair[0].flashcards.add(flashcard)
-
-            if column[7] != "":
-                thirdPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=int(column[7]),
-                    difficulty=column[8]
-                )
-                thirdPair[0].flashcards.add(flashcard)
-
-        return redirect("flashcards:confirm")
-
-class ActionFlashcardCreationView(CreateView):
-    model = Flashcard
-    form_class = ActionFlashcardCreationForm
-    template_name ="flashcards/upload_action_form.html"
-
-    def form_valid(self, form):
-        flashcard = form.save()
-        if self.request.user.is_admin:
-            flashcard.save()
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse("flashcards:review") + "#nav-action-tab"
-
-class FlashcardsConfirmationView(View):
-
-    # Returns view of teacher's unconfirmed flashcards (this page is redirected to right after the upload page if successful)
-    # Teacher can delete or edit flashcards
-    def get(self, request):
-        
-        flashcards = Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)
-
-        # Can't access page without unconfirmed flashcards
-        if not flashcards:
-            return redirect("flashcards:upload")
-
-        template = "flashcards/confirm.html"
-        context = {"flashcards": Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)}
-        return render(request, template, context)
-    
-    def post(self, request):
-
-        flashcards = Flashcard.objects.filter(teacher=request.user.teacher, confirmed=False)
-
-        # Sets flashcards' and pairs' confirm fields to true if teacher selected the confirm button
-        if request.POST.get('status') == "confirm":
-            for flashcard in flashcards:
-                flashcard.confirmed = True
-                for pair in flashcard.gradedifficultypair_set.all():
-                    pair.confirmed = True
-                    pair.save()
-
-            Flashcard.objects.bulk_update(flashcards, ['confirmed'])
-            return redirect("flashcards:review")
-
-        # If selected the delete button for a specific card, deletes that cards
-        elif request.POST.get('status') == "delete":
-            id = request.POST['id']
-            flashcards.get(id=id).delete()
-            return redirect("flashcards:confirm")
-
-        # The only other button that results in a post request is the cancel button, which deletes all unconfirmed cards
-        else:
-            flashcards.delete()
-            return redirect("flashcards:upload")['Science', 'Technology', 'Engineering', 'Math']
-
-class FlashcardsReviewView(View):
-
-    def get(self, request):
-        template = "flashcards/review.html"
-    
-        # Gets different attributes from the query string, but by default will be the most expansive possible
-        subjects = self.request.GET.getlist('subject', ['Science', 'Technology', 'Engineering', 'Math'])
-        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
-        lowGrade = int(self.request.GET.get('lowGrade', 1))
-        highGrade = int(self.request.GET.get('highGrade', 12))
-        lowCorrect = float(self.request.GET.get('lowCorrect', 0.0))
-        highCorrect = float(self.request.GET.get('highCorrect', 100.0))
-        showNA = self.request.GET.get('showNA', 'true')
-
-        # Filters to relevant pairs, then when filtering flashcards filters by those pairs and other attributes
-        # Also stage 1 is the review stage
-        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
-        queryset = Flashcard.objects.filter(stage=1, subject__in=subjects, percent_correct__gte=lowCorrect, percent_correct__lte=highCorrect, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-        
-        # If the user wants to see cards that have 0 in/correct, add those into the queryset too
-        if(showNA == "true"):
-            queryset = queryset | Flashcard.objects.filter(stage=1, subject__in=subjects, percent_correct=None, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-
-        if request.user.is_teacher:
-            context = {"user": request.user, "review": queryset.filter(teacher=request.user.teacher)}
-        elif request.user.is_admin:
-            context = {"user": request.user, "review": queryset[:3]} # Only show 3 at a time for admin
-        return render(request, template, context)
-
-    def post(self, request):
-        id = request.POST['id']
-        flashcard = Flashcard.objects.get(id=id)
-
-        # Deletes flashcards or changes stage (i.e. if approve or reject button is pressed)
-        if request.POST.get('status'):
-            if request.POST.get('status') == "delete" and (request.user.is_admin or (request.user.is_teacher and flashcard.stage != 2)):
-                flashcard.delete()
-            elif request.user.is_admin:
-                flashcard.stage = int(request.POST.get('status'))
-                if flashcard.stage == 2:
-                    flashcard.issue = None # If the card is approved again, don't keep previous issue in the database
-                flashcard.save()
-        
-        return redirect("flashcards:review")
-
-class FlashcardEditView(UpdateView):
-    form_class = FlashcardEditForm
-    model = Flashcard
-    template_name = 'flashcards/edit_form.html'
-
-    def get(self, request, *args, **kwargs):
-        pk = self.kwargs['pk']
-        flashcard = Flashcard.objects.get(id=pk)
-
-        # Conditionals to make sure user has access to review page for the flashcard with the particular id requested
-        if request.user.is_admin:
-            return super().get(self, request, *args, **kwargs)
-        if flashcard.teacher != request.user.teacher or (request.user.is_teacher and flashcard.stage == 2):
-            return redirect('flashcards:review')
-        return super().get(self, request, *args, **kwargs)
-    
-    # This function is used to get the initial values of form fields
-    # Mostly used for pairs since those are part of a related model (through the manytomany field), so model fields
-    # are for the most part automatically filled in with proper intial values
-    def get_initial(self):
-        pk = self.kwargs['pk']
-        flashcard = Flashcard.objects.get(id=pk)
-        pairs = flashcard.gradedifficultypair_set.all()
-        
-        intial = {'stage': flashcard.stage, 'gradeOne': "", 'difficultyOne': "", 'gradeTwo': "", 'difficultyTwo': "", 'gradeThree': "", 'difficultyThree': ""}
-        
-        counter = 1
-        
-        for pair in pairs:
-            if counter == 1:
-                intial['gradeOne'] = pair.grade
-                intial['difficultyOne'] = pair.difficulty
-            if counter == 2:
-                intial['gradeTwo'] = pair.grade
-                intial['difficultyTwo'] = pair.difficulty
-            if counter == 3:
-                intial['gradeThree'] = pair.grade
-                intial['difficultyThree'] = pair.difficulty
-
-            counter += 1
-        
-        return intial
-
-    def get_success_url(self):
-        pk = self.kwargs['pk']
-        # self.request
-        flashcard = Flashcard.objects.get(id=pk)
-
-        # Go back to confirmation page if editing an unconfirmed card, otherwise return to the review page
-        if self.request.user.is_teacher and not flashcard.confirmed:
-            return reverse_lazy("flashcards:confirm")
-        if (self.request.user.is_teacher and flashcard.confirmed) or self.request.user.is_admin:
-            return reverse_lazy("flashcards:review")
-
-    def form_valid(self, form):
-        flashcard = form.save()
-
-        # Change stage, either based on admin changing it or automatic changes when teacher updates rejected/reported card
-        if self.request.user.is_admin:
-            flashcard.stage = int(form.cleaned_data["stage"])
-        elif self.request.user.is_teacher and (flashcard.stage == 3 or flashcard.stage == 4):
-            flashcard.stage = 1
-        flashcard.save()
-
-        return super().form_valid(form)
-
-class FlashcardRejectView(UpdateView):
-    form_class = FlashcardRejectForm
-    model = Flashcard
-    template_name = 'flashcards/reject.html'
-
-    def form_valid(self, form):
-        flashcard = form.save()
-        flashcard.save()
-        return super().form_valid(form)
-    
-    def get_success_url(self):
-        return reverse("flashcards:review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
-
-class ListFlashcards(generics.ListAPIView):
-    queryset = Flashcard.objects.filter(confirmed=True)
-    serializer_class = FlashcardSerializer
-
-    def get_queryset(self):
-
-        # Get attibutes
-        subjects = self.request.GET.getlist('subject')
-        grades = self.request.GET.getlist('grade')
-        number = self.request.GET.get('number')
-
-        # Get pairs with grade levels specified, then narrow down flashcards based on those pairs and other attributes
-        pairs = GradeDifficultyPair.objects.filter(grade__in=grades)
-        queryset = Flashcard.objects.filter(gradedifficultypair__in=pairs).distinct()
-        queryset = queryset.filter(confirmed=True, stage=2, subject__in=subjects) # Make sure cards returned in request are approved and confirmed
-        queryset = sorted(queryset, key=lambda x: random.random()) # Randomize order as to not give same cards in same order every time to the app
-        queryset = queryset[:int(int(number) * .85)] # Only give up to 85% number of cards specified
-        queryset = sorted(queryset + sorted(Flashcard.objects.filter(stage=5), key=lambda x: random.random())[:int(int(number) * .15)], key=lambda x: random.random()) # Other 15% of cards are action cards
-       
-        return queryset
-
-
-    def list(self, request, **kwargs):
-        # Note the use of `get_queryset()` instead of `self.queryset`
-        queryset = self.get_queryset()
-        # Passes grade list in so that serializer can randomly pick the difficulty levels to return in the request for the cards
-        serializer = FlashcardSerializer(queryset, many=True, context={'grades': self.request.GET.getlist('grade')})  
-        data = serializer.data
-
-        # This is for the animations in the app to work
-        # i = int(self.request.GET.get('number'))
-        i = int(request.GET.get('number')) - 1
-        for entry in data:
-            entry["index"] = i
-            i -= 1
-        return Response(serializer.data)
-
-class ReportFlashcard(generics.UpdateAPIView):
-    queryset = Flashcard.objects.filter(stage=2, confirmed=True)
-    serializer_class = FlashcardSerializer
-    permission_classes = (AllowAny,)
-
-    def get_queryset(self):
-        return Flashcard.objects.filter(stage=2, confirmed=True)
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = queryset.get(pk=self.request.GET.get('id'))
-        return obj
-    
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-
-        instance = self.get_object()
-        # Updates flashcard to be reported with the issue field filled in (it will be whatever the user wrote)
-        serializer = self.get_serializer(instance, data={"stage": 4, "issue": request.data["issue"]}, partial=partial) 
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(serializer.data)
-
-class UpdatePercentCorrectFlashcard(generics.UpdateAPIView):
-    queryset = Flashcard.objects.filter(stage=2, confirmed=True)
-    serializer_class = FlashcardSerializer
-    permission_classes = (AllowAny,)
-
-    def get_queryset(self):
-        return Flashcard.objects.filter(stage=2, confirmed=True)
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = queryset.get(pk=self.request.GET.get('id'))
-        return obj
-    
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-
-        instance = self.get_object()
-        
-        # If correct set to true, increment correct count, otherwise (aka set to false), add incrment incorrect count
-        is_correct = self.request.data["correct"]
-        if is_correct:
-            instance.correct += 1
-        else:
-            instance.incorrect += 1
-
-        instance.save()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-        
-class ReviewFlashcardsAPI(viewsets.ModelViewSet):
-    queryset = Flashcard.objects.filter(confirmed=True)
-    serializer_class = FlashcardReviewSerializer
-
-    def get_queryset(self):
-
-        # Get attributes from query string
-        stage = int(self.request.GET.get('stage'))
-
-        if(stage == 5): 
-            return Flashcard.objects.filter(stage=5)
-        
-        subjects = self.request.GET.getlist('subject', ['Science', 'Technology', 'Engineering', 'Math'])
-        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
-        lowGrade = int(self.request.GET.get('lowGrade', 1))
-        highGrade = int(self.request.GET.get('highGrade', 12))
-        lowCorrect = float(self.request.GET.get('lowCorrect', 0.0))
-        highCorrect = float(self.request.GET.get('highCorrect', 100.0))
-        showNA = self.request.GET.get('showNA', 'true')
-
-        # Same filtering as in the regular review view
-        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
-        queryset = Flashcard.objects.filter(stage=stage, subject__in=subjects, percent_correct__gte=lowCorrect, percent_correct__lte=highCorrect, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-        
-        if(showNA == "true"):
-            queryset = queryset | Flashcard.objects.filter(stage=stage, subject__in=subjects, percent_correct=None, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-        
-        if self.request._request.user.is_teacher:
-            return queryset.filter(teacher=self.request._request.user.teacher)
-        else:
-            return queryset  

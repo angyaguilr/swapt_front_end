@@ -21,25 +21,25 @@
 
 </ul>
 <div class="form-check form-check-inline">
-    <input class="form-check-input subject filter" type="checkbox" id="Science">
+    <input class="form-check-input location filter" type="checkbox" id="Science">
     <label class="form-check-label" for="Science">
         Science
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input subject filter" type="checkbox" id="Technology">
+    <input class="form-check-input location filter" type="checkbox" id="Technology">
     <label class="form-check-label" for="Technology">
         Technology
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input subject filter" type="checkbox" id="Engineering">
+    <input class="form-check-input location filter" type="checkbox" id="Engineering">
     <label class="form-check-label" for="Engineering">
         Engineering
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input subject filter" type="checkbox" id="Math">
+    <input class="form-check-input location filter" type="checkbox" id="Math">
     <label class="form-check-label" for="Math">
         Math
     </label>
@@ -78,15 +78,15 @@
 </form>
 
 <form class="form-inline">
-    <input type="number" class="correct filter" id="low-correct" value="0" min="0" max="100" step="0.1">
-    <label class="form-label" for="low-correct">
-        Lower bound correct %
+    <input type="number" class="itemsSold filter" id="low-itemsSold" value="0" min="0" max="100" step="0.1">
+    <label class="form-label" for="low-itemsSold">
+        Lower bound itemsSold %
     </label>
-    <input type="number" class="correct filter" id="high-correct" value="100" min="0" max="100" step="0.1">
-    <label class="form-label" for="high-correct">
-        Upper bound correct %
+    <input type="number" class="itemsSold filter" id="high-itemsSold" value="100" min="0" max="100" step="0.1">
+    <label class="form-label" for="high-itemsSold">
+        Upper bound itemsSold %
     </label>
-    <input class="form-check-input correct-na filter" type="checkbox" id="na">
+    <input class="form-check-input itemsSold-na filter" type="checkbox" id="na">
     <label class="form-check-label" for="na">
         Include N/A
     </label>
@@ -96,7 +96,7 @@
 <div class="tab-content" id="nav-tabContent">   
     <div class="tab-pane fade show active" id="nav-review" role="tabpanel" aria-labelledby="nav-review-tab">
         <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for flashcard in review %}
+        {% for listing in review %}
         <div class="col">
             <form action="" method="POST">
                 {% csrf_token %}
@@ -107,38 +107,38 @@
                     <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                     </div>
                     <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Question: {{ flashcard.question }}</li>
-                    <li class="list-group-item">Answer: {{ flashcard.answer }}</li>
-                    <li class="list-group-item card-subject">Subject: {{flashcard.subject}}</li>
-                    {% if flashcard.issue != None %}
-                    <li class="list-group-item">Reported/rejected issue: {{ flashcard.issue }}</li>
+                    <li class="list-group-item">Name: {{ listing.name }}</li>
+                    <li class="list-group-item">Answer: {{ listing.description }}</li>
+                    <li class="list-group-item card-location">Location: {{listing.location}}</li>
+                    {% if listing.issue != None %}
+                    <li class="list-group-item">Reported/rejected issue: {{ listing.issue }}</li>
                     {% endif %}
-                    {% if flashcard.correct != 0 or flashcard.incorrect != 0%}
-                    <li class="list-group-item card-correct">% Correct: {{ flashcard.percent_correct }}</li>
+                    {% if listing.itemsSold != 0 or listing.itemsUnSold != 0%}
+                    <li class="list-group-item card-itemsSold">% ItemsSold: {{ listing.percent_itemsSold }}</li>
                     {% else %}
-                    <li class="list-group-item card-correct">% Correct: N/A</li>
+                    <li class="list-group-item card-itemsSold">% ItemsSold: N/A</li>
                     {% endif %}
-                    {% for pair in flashcard.gradedifficultypair_set.all %}
+                    {% for pair in listing.gradedifficultypair_set.all %}
                     <li class="list-group-item card-difficulty">Grade/difficulty pair {{ forloop.counter }}: {{ pair.grade }}/{{ pair.difficulty }}</li>
                     {% endfor %}
                     </ul>
                     <div class="card-body">
                         {% if user.is_admin %}
-                            {% if flashcard.stage != 2 %}
+                            {% if listing.stage != 2 %}
                             <button type="submit" value="2" class="btn btn-success" name="status">Approve</button>
                             {% endif %}
-                            {% if flashcard.stage == 1 %}
+                            {% if listing.stage == 1 %}
                             {% comment %} <button type="submit" value="3" class="btn btn-danger" name="status">Reject</button> {% endcomment %}
-                            <a class="btn btn-danger" href="{% url 'flashcards:reject' flashcard.id %}?next={% url 'flashcards:review'%}#nav-review-tab" role="button">Reject</a>
+                            <a class="btn btn-danger" href="{% url 'listings:reject' listing.id %}?next={% url 'listings:review'%}#nav-review-tab" role="button">Reject</a>
                             {% else %}
                             <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                             {% endif %}
-                        <a class="btn btn-primary" href="{% url 'flashcards:edit' flashcard.id %}?next={% url 'flashcards:review'%}#nav-review-tab" role="button">Edit</a>
-                        {% elif flashcard.stage != 2 and user.is_teacher %}
-                        <a class="btn btn-primary" href="{% url 'flashcards:edit' flashcard.id %}?next={% url 'flashcards:review'%}#nav-review-tab" role="button">Edit</a>
+                        <a class="btn btn-primary" href="{% url 'listings:edit' listing.id %}?next={% url 'listings:review'%}#nav-review-tab" role="button">Edit</a>
+                        {% elif listing.stage != 2 and user.is_swapt_user %}
+                        <a class="btn btn-primary" href="{% url 'listings:edit' listing.id %}?next={% url 'listings:review'%}#nav-review-tab" role="button">Edit</a>
                         <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                         {% endif %}
-                        <input type="hidden" name="id" value={{ flashcard.id }}>
+                        <input type="hidden" name="id" value={{ listing.id }}>
                     </div>
                 </div>
             </form>
@@ -150,10 +150,10 @@
         <table id="approved-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Question</th>
+                    <th scope="col">Name</th>
                     <th scope="col">Answer</th>
-                    <th scope="col">Subject</th>
-                    <th scope="col">% Correct</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Grade Level 1</th>
                     <th scope="col">Difficulty Level 1</th>
                     <th scope="col">Grade Level 2</th>
@@ -169,10 +169,10 @@
         <table id="reported-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Question</th>
+                    <th scope="col">Name</th>
                     <th scope="col">Answer</th>
-                    <th scope="col">Subject</th>
-                    <th scope="col">% Correct</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Grade Level 1</th>
                     <th scope="col">Difficulty Level 1</th>
@@ -189,10 +189,10 @@
         <table id="rejected-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Question</th>
+                    <th scope="col">Name</th>
                     <th scope="col">Answer</th>
-                    <th scope="col">Subject</th>
-                    <th scope="col">% Correct</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Grade Level 1</th>
                     <th scope="col">Difficulty Level 1</th>
@@ -227,16 +227,16 @@ $(document).ready(function () {
         for(let i = 0; i < params.length; i ++) {
             param = params[i];
             
-            if(param.startsWith("subject") || param.startsWith("difficulty")) {
+            if(param.startsWith("location") || param.startsWith("difficulty")) {
                 $("#" + param.split("=")[1]).prop("checked", true);
             } else if(param.startsWith("lowGrade")) {
                 $("#low-grade").val(parseInt(param.split("=")[1]))
             } else if(param.startsWith("highGrade")) {
                 $("#high-grade").val(parseInt(param.split("=")[1]))
-            } else if(param.startsWith("lowCorrect")) {
-                $("#low-correct").val(parseFloat(param.split("=")[1]))
-            } else if(param.startsWith("highCorrect")) {
-                $("#high-correct").val(parseFloat(param.split("=")[1]))
+            } else if(param.startsWith("lowItemsSold")) {
+                $("#low-itemsSold").val(parseFloat(param.split("=")[1]))
+            } else if(param.startsWith("highItemsSold")) {
+                $("#high-itemsSold").val(parseFloat(param.split("=")[1]))
             } else if(param.startsWith("showNA")) {
                 stringBool = param.split("=")[1] == "true"
                 $("#na").prop("checked", stringBool);
@@ -254,19 +254,19 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/flashcards/api/review/?format=datatables&stage=2" + filter,
+            "url": "/listings/api/review/?format=datatables&stage=2" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "question"},
-            {"data": "answer"},
+            {"data": "name"},
+            {"data": "description"},
             {
                 "searchable": false,
-                "data": "subject"
+                "data": "location"
             },
             {
                 "searchable": false,
-                "data": "percent_correct"
+                "data": "percent_itemsSold"
             },
             {
                 "searchable": false,
@@ -313,7 +313,7 @@ $(document).ready(function () {
 
     $('#approved-table tbody').on('click', 'a', function () {
         var data = approvedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/flashcards/edit/" + data["id"] + "?next=/flashcards/review/#nav-approved-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-approved-tab";
     } );
 
     var reportedTable = $('#reported-table').DataTable({
@@ -322,19 +322,19 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/flashcards/api/review/?format=datatables&stage=4" + filter,
+            "url": "/listings/api/review/?format=datatables&stage=4" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "question"},
-            {"data": "answer"},
+            {"data": "name"},
+            {"data": "description"},
             {
                 "searchable": false,
-                "data": "subject"
+                "data": "location"
             },
             {
                 "searchable": false,
-                "data": "percent_correct"
+                "data": "percent_itemsSold"
             },
             {"data": "issue"},
             {
@@ -378,7 +378,7 @@ $(document).ready(function () {
     $('#reported-table tbody').on('click', 'a', function () {
         console.log("Test");
         var data = reportedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/flashcards/edit/" + data["id"] + "?next=/flashcards/review/#nav-reported-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-reported-tab";
     } );
 
     var rejectedTable = $('#rejected-table').DataTable({
@@ -387,19 +387,19 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/flashcards/api/review/?format=datatables&stage=3" + filter,
+            "url": "/listings/api/review/?format=datatables&stage=3" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "question"},
-            {"data": "answer"},
+            {"data": "name"},
+            {"data": "description"},
             {
                 "searchable": false,
-                "data": "subject"
+                "data": "location"
             },
             {
                 "searchable": false,
-                "data": "percent_correct"
+                "data": "percent_itemsSold"
             },
             {"data": "issue"},
             {
@@ -442,7 +442,7 @@ $(document).ready(function () {
 
     $('#rejected-table tbody').on('click', 'a', function () {
         var data = rejectedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/flashcards/edit/" + data["id"] + "?next=/flashcards/review/#nav-rejected-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-rejected-tab";
     } );
 
     var actionTable = $('#action-table').DataTable({
@@ -451,11 +451,11 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/flashcards/api/review/?format=datatables&stage=5",
+            "url": "/listings/api/review/?format=datatables&stage=5",
             "credentials": 'include',
         },
         "columns": [
-            {"data": "question"},
+            {"data": "name"},
             {
                 "data": null,
                 render:function(data, type, row) {
@@ -472,11 +472,11 @@ $(document).ready(function () {
 $('.apply-filter').click(function (e){submit(e)});
 
 function submit(e){
-    var subjects = [];
+    var locations = [];
     var difficulties = [];
 
-    $(".subject").each(function () {
-        if ($(this).is(":checked")) { subjects.push($(this).attr('id').toString()); }
+    $(".location").each(function () {
+        if ($(this).is(":checked")) { locations.push($(this).attr('id').toString()); }
     });
 
     $(".difficulty").each(function () {
@@ -486,24 +486,24 @@ function submit(e){
     var lowGrade = $('#low-grade').val().toString();
     var highGrade = $('#high-grade').val().toString();
 
-    var lowCorrect= $('#low-correct').val().toString();
-    var highCorrect = $('#high-correct').val().toString();
+    var lowItemsSold= $('#low-itemsSold').val().toString();
+    var highItemsSold = $('#high-itemsSold').val().toString();
 
     var showNA = $('#na').is(":checked").toString();
 
-    var href = "?subject=";
-    for(let i = 0; i < subjects.length; i++) {
+    var href = "?location=";
+    for(let i = 0; i < locations.length; i++) {
         if(i != 0) {
-            href += "&subject=" + subjects[i];
+            href += "&location=" + locations[i];
         } else {
-            href += subjects[i];
+            href += locations[i];
         }
     }
     for(let i = 0; i < difficulties.length; i++) {
         href += "&difficulty=" + difficulties[i];
     }
-    href += "&lowGrade=" + lowGrade + "&highGrade=" + highGrade + "&lowCorrect=" + lowCorrect
-        + "&highCorrect=" + highCorrect + "&showNA=" + showNA;
+    href += "&lowGrade=" + lowGrade + "&highGrade=" + highGrade + "&lowItemsSold=" + lowItemsSold
+        + "&highItemsSold=" + highItemsSold + "&showNA=" + showNA;
     window.location.href = href + location.hash;
 }
 

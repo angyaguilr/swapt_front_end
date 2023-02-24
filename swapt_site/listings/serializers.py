@@ -1,5 +1,5 @@
-from  rest_framework import serializers 
-from .models import Flashcard, GradeDifficultyPair
+from rest_framework import serializers 
+from .models import Listing, GradeDifficultyPair
 import random
  
 
@@ -11,22 +11,38 @@ class GradeDifficultyPairSerializer(serializers.ModelSerializer):
                   'difficulty',
                   )
  
-class FlashcardSerializer(serializers.ModelSerializer):
+class ListingSerializer(serializers.ModelSerializer):
     
     # Added fields up here to specify attributes (read_only or write_only)
-    question = serializers.CharField(read_only=True)
-    answer = serializers.CharField(read_only=True)
-    subject = serializers.CharField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    description = serializers.CharField(read_only=True)
+    location = serializers.CharField(read_only=True)
     difficulty = serializers.SerializerMethodField(read_only=True)
     stage = serializers.IntegerField(write_only=True)
     issue = serializers.CharField(write_only=True)
     
     class Meta:
-        model = Flashcard
+        model = Listing
         fields = ('id',
-                  'question',
-                  'answer',
-                  'subject',
+                  'name',
+                  'tags',
+                  'desc',
+                  'thumbnail',
+                  'url',
+                  'quantity',
+                  'title',
+                  'description',
+                  'color',
+                  'delivery',
+                  'category',
+                  'categoryV2',
+                  'condition',
+                  'cover',
+                  'itemPrice',
+                  'percent_itemsSold',
+                  'itemsUnSold',
+                  'itemsSold',
+                  'location',
                   'difficulty',
                   'stage',
                   'issue'
@@ -63,16 +79,16 @@ class FlashcardSerializer(serializers.ModelSerializer):
             return "+3"
 
 # Used only for the review page datatables
-class FlashcardReviewSerializer(serializers.ModelSerializer):
+class ListingReviewSerializer(serializers.ModelSerializer):
 
-    percent_correct = serializers.SerializerMethodField(read_only=True)
+    percent_itemsSold = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Flashcard
-        fields = ('question',
-                  'answer',
-                  'subject',
-                  'percent_correct',
+        model = Listing
+        fields = ('name',
+                  'description',
+                  'location',
+                  'percent_itemsSold',
                   'id',
                   'gradedifficultypair_set',
                   'issue'
@@ -81,10 +97,10 @@ class FlashcardReviewSerializer(serializers.ModelSerializer):
 
         datatables_always_serialize = ('id')
 
-    def get_percent_correct(self, obj):
-        percent_correct = obj.percent_correct
+    def get_percent_itemsSold(self, obj):
+        percent_itemsSold = obj.percent_itemsSold
         # Returns N/A instead of blank for aesthetic purposes
-        if(percent_correct == None):
+        if(percent_itemsSold == None):
             return "N/A" 
         else:
-            return 
+            return percent_itemsSold

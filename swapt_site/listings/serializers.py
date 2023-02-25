@@ -53,7 +53,7 @@ class ListingSerializer(serializers.ModelSerializer):
     # requested and grade levels that are in a grade/difficulty pair of the card
     def get_difficulty(self, obj):
         if(obj.stage == 5): 
-            return "Action"
+            return "CommMkt"
             
         grades = self.context.get("grades")
 

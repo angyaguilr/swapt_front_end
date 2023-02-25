@@ -207,6 +207,7 @@ class CampusPropertyNamePair(models.Model):
         choices=PROPERTYNAME_CHOICES,
     )
     confirmed = models.BooleanField(default=False) 
+
 class PaymentHistory(models.Model):
     PENDING = "P"
     COMPLETED = "C"
@@ -259,7 +260,7 @@ class SwaptListingModel(models.Model):
     ]
     created_on = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
-    discount = models.DecimalField(max_digits=7, decimal_places=2)
+    discount = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)
     listings = models.ManyToManyField(
         'Listing', related_name='order', blank=True)
     name = models.CharField(max_length=50, blank=True)

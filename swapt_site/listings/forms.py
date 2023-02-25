@@ -69,13 +69,13 @@ class ListingEditForm(ModelForm):
     stage = forms.ChoiceField(choices=APPROVAL_STAGES, label="Stage", required=False)
 
     # Added the grade and difficulty fields separately since they are part of a related object instead of the Listing object itself
-    campusOne = forms.IntegerField(min_value=1, max_value=12, label="Campus Level 1", required=True)
+    gradeOne = forms.IntegerField(min_value=1, max_value=12, label="Grade Level 1", required=True)
     difficultyOne = forms.ChoiceField(choices=DIFFICULTY_CHOICES, label="Difficulty Level 1", required=True)
 
-    campusTwo = forms.IntegerField(min_value=1, max_value=12, label="Campus Level 2", required=False)
+    gradeTwo = forms.IntegerField(min_value=1, max_value=12, label="Grade Level 2", required=False)
     difficultyTwo = forms.ChoiceField(choices=DIFFICULTY_CHOICES, label="Difficulty Level 2", required=False)
 
-    campusThree = forms.IntegerField(min_value=1, max_value=12, label="Campus Level 3", required=False)
+    gradeThree = forms.IntegerField(min_value=1, max_value=12, label="Grade Level 3", required=False)
     difficultyThree = forms.ChoiceField(choices=DIFFICULTY_CHOICES, label="Difficulty Level 3", required=False)
     
     class Meta:
@@ -88,25 +88,25 @@ class ListingEditForm(ModelForm):
 
         # Deals with one part of the pair (i.e. grade or difficulty) being left blank when the other is filled in
         # Can't have grade/difficulty pair without grade or without difficulty
-        if data['campusOne'] == None and data['difficultyOne'] != "":
-            errors.append(forms.ValidationError("Campus level one has no value even though difficulty level one does. Either both must have a value or neither."))
-        if data['campusOne'] != None and data['difficultyOne'] == "":
+        if data['gradeOne'] == None and data['difficultyOne'] != "":
+            errors.append(forms.ValidationError("Grade level one has no value even though difficulty level one does. Either both must have a value or neither."))
+        if data['gradeOne'] != None and data['difficultyOne'] == "":
             errors.append(forms.ValidationError("Difficulty level one has no value even though grade level one does. Either both must have a value or neither."))
-        if data['campusTwo'] == None and data['difficultyTwo'] != "":
-            errors.append(forms.ValidationError("Campus level two has no value even though difficulty level two does. Either both must have a value or neither."))
-        if data['campusTwo'] != None and data['difficultyTwo'] == "":
+        if data['gradeTwo'] == None and data['difficultyTwo'] != "":
+            errors.append(forms.ValidationError("Grade level two has no value even though difficulty level two does. Either both must have a value or neither."))
+        if data['gradeTwo'] != None and data['difficultyTwo'] == "":
             errors.append(forms.ValidationError("Difficulty level two has no value even though grade level two does. Either both must have a value or neither."))
-        if data['campusThree'] == None and data['difficultyThree'] != "":
-            errors.append(forms.ValidationError("Campus level three has no value even though difficulty level three does. Either both must have a value or neither."))
-        if data['campusThree'] != None and data['difficultyThree'] == "":
+        if data['gradeThree'] == None and data['difficultyThree'] != "":
+            errors.append(forms.ValidationError("Grade level three has no value even though difficulty level three does. Either both must have a value or neither."))
+        if data['gradeThree'] != None and data['difficultyThree'] == "":
             errors.append(forms.ValidationError("Difficulty level three has no value even though grade level one does. Either both must have a value or neither."))
         
         # Deals with more than one pair being the same
-        if data['campusOne'] == data['campusTwo'] and data['difficultyOne'] == data['difficultyTwo']:
+        if data['gradeOne'] == data['gradeTwo'] and data['difficultyOne'] == data['difficultyTwo']:
             errors.append(forms.ValidationError("The first and second grade/difficulty pairs are identical"))
-        if data['campusOne'] == data['campusThree'] and data['difficultyOne'] == data['difficultyThree']:
+        if data['gradeOne'] == data['gradeThree'] and data['difficultyOne'] == data['difficultyThree']:
             errors.append(forms.ValidationError("The first and third grade/difficulty pairs are identical"))   
-        if data['campusTwo'] == data['campusThree'] and data['difficultyTwo'] == data['difficultyThree'] and data['campusTwo'] != "" and data['difficultyTwo'] !="":
+        if data['gradeTwo'] == data['gradeThree'] and data['difficultyTwo'] == data['difficultyThree'] and data['gradeTwo'] != "" and data['difficultyTwo'] !="":
             errors.append(forms.ValidationError("The second and third grade/difficulty pairs are identical")) 
 
         # Raises all relevant errors
@@ -132,22 +132,22 @@ class ListingEditForm(ModelForm):
             # NOTE: if first pair and third pair are filled in, but second isn't, then when displayed on the site, the third pair filled in on 
             # the form will act like the second pair
             firstPair = GradeDifficultyPair.objects.get_or_create(
-                grade=fields['campusOne'],
+                grade=fields['gradeOne'],
                 difficulty=fields['difficultyOne']
             )
             firstPair[0].listings.add(listing)
             
             # Need to make sure these fields are filled in before adding a pair since they're optional (same goes for pair 3)
-            if fields['campusTwo'] != None and fields['difficultyTwo'] != "":
+            if fields['gradeTwo'] != None and fields['difficultyTwo'] != "":
                 secondPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=fields['campusTwo'],
+                    grade=fields['gradeTwo'],
                     difficulty=fields['difficultyTwo']
                 )
                 secondPair[0].listings.add(listing)
 
-            if fields['campusThree'] != None and fields['difficultyThree'] != "":
+            if fields['gradeThree'] != None and fields['difficultyThree'] != "":
                 thirdPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=fields['campusThree'],
+                    grade=fields['gradeThree'],
                     difficulty=fields['difficultyThree']
                 )
                 thirdPair[0].listings.add(listing)

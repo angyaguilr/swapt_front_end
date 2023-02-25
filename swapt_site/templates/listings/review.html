@@ -15,33 +15,33 @@
     </li>
     {% if user.is_admin %}
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-action-tab" data-bs-toggle="tab" data-bs-target="#nav-action" type="button" role="tab" aria-controls="nav-action" aria-selected="false">Action</button>
+        <button class="nav-link" id="nav-action-tab" data-bs-toggle="tab" data-bs-target="#nav-action" type="button" role="tab" aria-controls="nav-action" aria-selected="false">Community Listings</button>
     </li>
     {% endif %}
 
 </ul>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="Science">
-    <label class="form-check-label" for="Science">
-        Science
+    <input class="form-check-input location filter" type="checkbox" id="ElonNC">
+    <label class="form-check-label" for="ElonNC">
+        ElonNC
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="Technology">
-    <label class="form-check-label" for="Technology">
-        Technology
+    <input class="form-check-input location filter" type="checkbox" id="CollegeParkMD">
+    <label class="form-check-label" for="CollegeParkMD">
+        CollegeParkMD
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="Engineering">
-    <label class="form-check-label" for="Engineering">
-        Engineering
+    <input class="form-check-input location filter" type="checkbox" id="BurlingtonNC">
+    <label class="form-check-label" for="BurlingtonNC">
+        BurlingtonNC
     </label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input location filter" type="checkbox" id="Math">
-    <label class="form-check-label" for="Math">
-        Math
+    <input class="form-check-input location filter" type="checkbox" id="ColumbiaMD">
+    <label class="form-check-label" for="ColumbiaMD">
+        ColumbiaMD
     </label>
 </div>
 
@@ -108,7 +108,7 @@
                     </div>
                     <ul class="list-group list-group-flush">
                     <li class="list-group-item">Name: {{ listing.name }}</li>
-                    <li class="list-group-item">Answer: {{ listing.description }}</li>
+                    <li class="list-group-item">Description: {{ listing.description }}</li>
                     <li class="list-group-item card-location">Location: {{listing.location}}</li>
                     {% if listing.issue != None %}
                     <li class="list-group-item">Reported/rejected issue: {{ listing.issue }}</li>
@@ -151,7 +151,7 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">Answer</th>
+                    <th scope="col">Description</th>
                     <th scope="col">Location</th>
                     <th scope="col">% ItemsSold</th>
                     <th scope="col">Grade Level 1</th>
@@ -170,7 +170,7 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">Answer</th>
+                    <th scope="col">Description</th>
                     <th scope="col">Location</th>
                     <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
@@ -190,7 +190,7 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">Answer</th>
+                    <th scope="col">Description</th>
                     <th scope="col">Location</th>
                     <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
@@ -210,7 +210,7 @@
         <table id="action-table" class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Action</th>
+                    <th scope="col">CommMkt</th>
                 </tr>
             </thead>
         </table>

@@ -47,7 +47,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
 from .models import Listing, GradeDifficultyPair
-from .forms import ListingEditForm, ListingRejectForm, ActionListingCreationForm
+from .forms import ListingEditForm, ListingRejectForm, CommMktListingCreationForm
 from .serializers import ListingSerializer, ListingReviewSerializer
 
 class ListingsCreationView(View):
@@ -80,8 +80,8 @@ class ListingsCreationView(View):
             if column[0] == "" or len(column[0]) > 250: 
                 messages.error(request, 'Name field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
             if column[1] == "" or len(column[1]) > 250:
-                messages.error(request, 'Answer field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[2] == "" or (column[2] != "Math" and column[2] != "Engineering" and column[2] != "Science" and column[2] != "Technology"):
+                messages.error(request, 'Description field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+            if column[2] == "" or (column[2] != "ColumbiaMD" and column[2] != "BurlingtonNC" and column[2] != "ElonNC" and column[2] != "CollegeParkMD"):
                 messages.error(request, 'Location field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
             if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
                 messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
@@ -155,7 +155,7 @@ class ListingsCreationView(View):
 
 class ActionListingCreationView(CreateView):
     model = Listing
-    form_class = ActionListingCreationForm
+    form_class = CommMktListingCreationForm
     template_name ="listings/upload_action_form.html"
 
     def form_valid(self, form):
@@ -208,7 +208,7 @@ class ListingsConfirmationView(View):
         # The only other button that results in a post request is the cancel button, which deletes all unconfirmed cards
         else:
             listings.delete()
-            return redirect("listings:upload")['Science', 'Technology', 'Engineering', 'Math']
+            return redirect("listings:upload")['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD']
 
 class ListingsReviewView(View):
 
@@ -216,7 +216,7 @@ class ListingsReviewView(View):
         template = "listings/review.html"
     
         # Gets different attributes from the query string, but by default will be the most expansive possible
-        locations = self.request.GET.getlist('location', ['Science', 'Technology', 'Engineering', 'Math'])
+        locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
         difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
         lowGrade = int(self.request.GET.get('lowGrade', 1))
         highGrade = int(self.request.GET.get('highGrade', 12))
@@ -438,7 +438,7 @@ class ReviewListingsAPI(viewsets.ModelViewSet):
         if(stage == 5): 
             return Listing.objects.filter(stage=5)
         
-        locations = self.request.GET.getlist('location', ['Science', 'Technology', 'Engineering', 'Math'])
+        locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
         difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
         lowGrade = int(self.request.GET.get('lowGrade', 1))
         highGrade = int(self.request.GET.get('highGrade', 12))

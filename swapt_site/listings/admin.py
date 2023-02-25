@@ -1,9 +1,10 @@
 from django.contrib import admin
-from .models import Listing, GradeDifficultyPair, SwaptListing, Price, ListingTag, Category, SwaptListingModel, Swapt_Bundle_Price
+from .models import Listing, GradeDifficultyPair, SwaptListing, Price, ListingTag, Category, SwaptListingModel, Swapt_Bundle_Price, CampusPropertyNamePair
 
 # Registering the models in this app so the admin can view and edit these types of objects
 admin.site.register(Listing)
 admin.site.register(GradeDifficultyPair)
+admin.site.register(CampusPropertyNamePair)
 admin.site.register(SwaptListing)
 
 

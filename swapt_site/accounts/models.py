@@ -6,6 +6,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=254, unique=True)
     is_swapt_user = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_PM_admin = models.BooleanField(default=False)
    
     CAMPUS_CHOICES = [
         ('Elon University', 'Elon University'),

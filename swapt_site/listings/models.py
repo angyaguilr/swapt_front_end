@@ -63,6 +63,11 @@ class Listing(models.Model):
         (5, 'Community'),
 
     ]
+    SELLING_STAGES = [
+        (1, 'Available'),
+        (2, 'Pending'),
+        (3, 'Sold'),
+    ]
     CATEGORY_CHOICES = [
         ('Bedroom Furniture', 'Bedroom Furniture'),
         ( 'Dining Room Furniture', 'Dining Room Furniture'),
@@ -132,6 +137,7 @@ class Listing(models.Model):
     )
     delivery = models.PositiveSmallIntegerField(choices=DELIVERYMETHOD_CHOICES, null=True)
     stage = models.PositiveSmallIntegerField(choices=APPROVAL_STAGES, null=True)
+    selling_stage = models.PositiveSmallIntegerField(choices=SELLING_STAGES, null=True)
     category = models.CharField(
         max_length=50,
         choices=CATEGORY_CHOICES,

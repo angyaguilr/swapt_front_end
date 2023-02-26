@@ -242,12 +242,12 @@ class ListingsReviewView(View):
         # Filters to relevant pairs, then when filtering listings filters by those pairs and other attributes
         # Also stage 1 is the review stage
         pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
-        queryset = Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
+        queryset = SwaptListingModel.objects.filter(stage=1, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
             gradedifficultypair__in=pairs, confirmed=True).distinct()
         
         # If the user wants to see cards that have 0 in/itemsSold, add those into the queryset too
         if(showNA == "true"):
-            queryset = queryset | Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold=None, 
+            queryset = queryset | SwaptListingModel.objects.filter(stage=1, location__in=locations, percent_itemsSold=None, 
             gradedifficultypair__in=pairs, confirmed=True).distinct()
 
         if request.user.is_swapt_user:
@@ -258,7 +258,7 @@ class ListingsReviewView(View):
 
     def post(self, request):
         id = request.POST['id']
-        listing = Listing.objects.get(id=id)
+        listing = SwaptListingModel.objects.get(id=id)
 
         # Deletes listings or changes stage (i.e. if approve or reject button is pressed)
         if request.POST.get('status'):
@@ -618,7 +618,7 @@ class SwaptListing(View):
 
     def post(self, request, *args, **kwargs):
         name = request.POST.get('name')
-        email = request.POST.get('email')
+        propertyname = request.POST.get('propertyname')
         street = request.POST.get('street')
         city = request.POST.get('city')
         state = request.POST.get('state')
@@ -650,7 +650,7 @@ class SwaptListing(View):
         order = SwaptListingModel.objects.create(
             price=price,
             name=name,
-            email=email,
+            propertyname=propertyname,
             street=street,
             city=city,
             state=state,
@@ -663,13 +663,13 @@ class SwaptListing(View):
                 f'Your total: {price}\n'
                 'Thank you again for your order!')
 
-        send_mail(
-            'Thank You For Your SwaptListing!',
-            body,
-            'example@example.com',
-            [email],
-            fail_silently=False
-        )
+        # send_mail(
+        #     'Thank You For Your SwaptListing!',
+        #     body,
+        #     'example@example.com',
+        #     [email],
+        #     fail_silently=False
+        # )
 
         context = {
             'items': order_items['items'],

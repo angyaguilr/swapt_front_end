@@ -26,7 +26,7 @@ class ListingCreationForm(ModelForm):
         
         return listing
 
-class CommMktListingCreationForm(ModelForm):
+class CmntyListingCreationForm(ModelForm):
     
     # Instead of creating a new model, just using listing model with arbitrary data for required fields
     # Specifically, using title field for commMkt and stage=5 is for commMkt listings
@@ -34,7 +34,7 @@ class CommMktListingCreationForm(ModelForm):
 
     class Meta:
         model = Listing
-        fields = ( "thumbnail", "name", "itemPrice", "category", "condition", "desc", "tags", "location",)
+        fields = ( "thumbnail", "name", "tags", "desc", "url", "quantity", "itemPrice", "category", "categoryV2", "condition", "desc", "color", "location",)
         # "grade", "difficulty"
     
     def save(self, commit=True):
@@ -44,8 +44,35 @@ class CommMktListingCreationForm(ModelForm):
         if commit:
             fields = self.cleaned_data
             listing.name = fields['name']
+            listing.thumbnail = fields['thumbnail']
+            listing.tags = fields['tags']
+            listing.desc = fields['desc']
+            listing.quantity = fields['quantity']
+            listing.itemPrice = fields['itemPrice']
+            listing.categoryV2 = fields['categoryV2']
         
         return listing
+
+class CmntyListingPriceCreationForm(ModelForm):
+    
+    # Instead of creating a new model, just using listing model with arbitrary data for required fields
+    # Specifically, using title field for commMkt and stage=5 is for commMkt listings
+    #title = forms.CharField(max_length=250, label="Listing Title")
+
+    class Meta:
+        model = Price
+        fields = ( "listing", "price",)
+    
+    def save(self, commit=True):
+        self.full_clean() # calls clean function
+        price = Price
+        
+        if commit:
+            fields = self.cleaned_data
+            price.listing = fields['listing']
+            price.price = fields['price']
+        
+        return price   
 
 class ListingEditForm(ModelForm):
 

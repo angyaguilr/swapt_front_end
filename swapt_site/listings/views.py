@@ -21,7 +21,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Listing, CampusPropertyNamePair, SwaptListing,  Price, Swapt_Bundle_Price, PaymentHistory, SwaptListingModel, Category
-from .forms import ListingEditForm, ListingRejectForm, CommMktListingCreationForm, ListingCreationForm
+from .forms import ListingEditForm, ListingRejectForm, CmntyListingCreationForm, ListingCreationForm, CmntyListingPriceCreationForm
 from .serializers import ListingSerializer, ListingReviewSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -47,7 +47,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
 from .models import Listing, GradeDifficultyPair
-from .forms import ListingEditForm, ListingRejectForm, CommMktListingCreationForm
+from .forms import ListingEditForm, ListingRejectForm, CmntyListingCreationForm
 from .serializers import ListingSerializer, ListingReviewSerializer
 
 class ListingsCreationView(View):
@@ -152,21 +152,36 @@ class ListingsCreationView(View):
                 thirdPair[0].listings.add(listing)
 
         return redirect("listings:confirm")
-
-class ActionListingCreationView(CreateView):
+class CmntyListingCreationView(CreateView):
     model = Listing
-    form_class = CommMktListingCreationForm
-    template_name ="listings/upload_action_form.html"
+    form_class = CmntyListingCreationForm
+    template_name ="listings/cmnty_create_form.html"
 
     def form_valid(self, form):
         listing = form.save()
-        if self.request.user.is_admin:
+        if self.request.user.is_swapt_user:
             listing.save()
 
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("listings:review") + "#nav-action-tab"
+        return reverse("listings:review") + "#nav-cmnty-tab"
+    
+class CmntyListingPriceCreationView(CreateView):
+    model = Price
+    form_class = CmntyListingPriceCreationForm
+    template_name ="listings/cmnty_create_price.html"
+
+    def form_valid(self, form):
+        price = form.save()
+        if self.request.user.is_swapt_user:
+            price.save()
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("listings:review") + "#nav-cmnty-tab"
+    
 
 class ListingsConfirmationView(View):
 
@@ -353,7 +368,7 @@ class ListListings(generics.ListAPIView):
         queryset = queryset.filter(confirmed=True, stage=2, location__in=locations) # Make sure cards returned in request are approved and confirmed
         queryset = sorted(queryset, key=lambda x: random.random()) # Randomize order as to not give same cards in same order every time to the app
         queryset = queryset[:int(int(number) * .85)] # Only give up to 85% number of cards specified
-        queryset = sorted(queryset + sorted(Listing.objects.filter(stage=5), key=lambda x: random.random())[:int(int(number) * .15)], key=lambda x: random.random()) # Other 15% of cards are action cards
+        queryset = sorted(queryset + sorted(Listing.objects.filter(stage=5), key=lambda x: random.random())[:int(int(number) * .15)], key=lambda x: random.random()) # Other 15% of cards are cmnty cards
        
         return queryset
 
@@ -570,24 +585,7 @@ class StripeWebhookView(View):
         # Can handle other events here.
 
         return HttpResponse(status=200)
-
-
-class CommMktListingCreationView(CreateView):
-    model = Listing
-    form_class = CommMktListingCreationForm
-    template_name ="listings/cmnty_create_form.html"
-
-    def form_valid(self, form):
-        listing = form.save()
-        if self.request.user.is_swapt_user:
-            listing.save()
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse("listings:review") + "#nav-commMkt-tab"
-
-
+    
 class Index(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'listings/index.html')

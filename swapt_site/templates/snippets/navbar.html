@@ -28,10 +28,9 @@
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     {% if user.is_swapt_user %}
                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listing_list' %}">Shop</a></li>
-                    <li><a class="dropdown-item" href="{% url 'listings:upload_swapt' %}">Create a Swapt</a></li>
                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Create a Community Swapt</a></li>
                     {% elif user.is_admin %}
-                    <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Upload</a></li>
+                    <li><a class="dropdown-item" href="{% url 'listings:review' %}">Upload</a></li>
                     {% endif %}
                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">My Listings</a></li>
 

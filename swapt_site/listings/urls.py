@@ -22,7 +22,8 @@ urlpatterns = [
     path("cmnty-<int:pk>/", swapt_user_required()(views.CmntyListingDetailView.as_view()), name="cmnty_listing_detail"),
     path('cmnty-Listings/', views.CmntyListingsUploaded.as_view(), name='cmnty_listings'),
     path('cmnty-Listings/search/', views.CmntyListingsUploadedSearch.as_view(), name='cmnty_listings_search'),
-    path('cmnty-create-listing/', swapt_user_required()(views.CommMktListingCreationView.as_view()), name="cmnty_create"),
+    path('cmnty-create-listing/', views.CmntyListingCreationView.as_view(), name="cmnty_create"),
+    path('cmnty-create-listing-price/', views.CmntyListingPriceCreationView.as_view(), name="cmnty_create_price"),
     #swapt listings:
     path("swapt-listing", views.SwaptListingListView.as_view(), name="swapt_listing_list"),
     path("swapt-<int:pk>/", swapt_user_required()(views.SwaptListingDetailView.as_view()), name="swapt_listing_detail"),

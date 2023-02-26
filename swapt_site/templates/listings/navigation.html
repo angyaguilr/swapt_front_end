@@ -27,8 +27,9 @@
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_listing_list' %}">Old Shop Community Listings</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_listings' %}">Shop Community Listings</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Create a Community Swapt</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create_price' %}">Create a Community Swapt</a></li>
                      {% elif user.is_admin %}
-                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Upload</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">Upload</a></li>
                      {% endif %}
                      <li><a class="dropdown-item" href="{% url 'listings:review' %}">My Listings</a></li>
                   </ul>
@@ -42,9 +43,8 @@
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_listings' %}">Shop Campus Swapts</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_create' %}">Create a Swapt Listing</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_listing_list' %}">Old Shop Campus Swapts</a></li>
-                     <li><a class="dropdown-item" href="{% url 'listings:upload_swapt' %}">Old Create a Swapt</a></li>
                      {% elif user.is_admin %}
-                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Upload</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">Upload</a></li>
                      {% endif %}
                      <li><a class="dropdown-item" href="{% url 'listings:review' %}">My Listings</a></li>
                   </ul>

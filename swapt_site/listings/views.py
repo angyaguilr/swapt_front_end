@@ -703,7 +703,7 @@ class CmntyReviewListingsAPI(viewsets.ModelViewSet):
         
         locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
         propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'MillPoint', 'OakHill'])
-        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD'])
+        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD', 'UNCG'])
         lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
         highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
         showNA = self.request.GET.get('showNA', 'true')
@@ -802,7 +802,7 @@ class CmntyListingsReviewView(View):
         # Gets different attributes from the query string, but by default will be the most expansive possible
         locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
         propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'MillPoint', 'OakHill'])
-        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD'])
+        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD', 'UNCG'])
         lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
         highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
         showNA = self.request.GET.get('showNA', 'true')
@@ -870,13 +870,13 @@ class CmntyListingEditView(UpdateView):
         
         for pair in pairs:
             if counter == 1:
-                intial['campusOne'] = pair.
+                intial['campusOne'] = pair.campus
                 intial['propertynameOne'] = pair.propertyname
             if counter == 2:
-                intial['campusTwo'] = pair.
+                intial['campusTwo'] = pair.campus
                 intial['propertynameTwo'] = pair.propertyname
             if counter == 3:
-                intial['campusThree'] = pair.
+                intial['campusThree'] = pair.campus
                 intial['propertynameThree'] = pair.propertyname
 
             counter += 1
@@ -917,7 +917,7 @@ class CmntyListingRejectView(UpdateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse("listings:cmnty_review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
+        return reverse("listings:cmnty_review") + "#nav-cmntyreview-tab" # Go back to the review tab after rejecting since can only reject from that tab
 
 class CmntyListingListAPIView(generics.ListAPIView):
     queryset = Listing.objects.filter(confirmed=True)

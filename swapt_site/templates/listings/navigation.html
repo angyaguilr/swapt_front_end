@@ -31,7 +31,7 @@
                      {% elif user.is_admin %}
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_review' %}">Upload</a></li>
                      {% endif %}
-                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_review' %}">My Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_review' %}">My Community Listings</a></li>
                   </ul>
                </li>
                <li class="nav-item dropdown">
@@ -46,7 +46,7 @@
                      {% elif user.is_admin %}
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">Upload</a></li>
                      {% endif %}
-                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">My Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">My Swapt Listings</a></li>
                   </ul>
                </li>
                {% if user.is_admin %}

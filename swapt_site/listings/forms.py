@@ -197,6 +197,7 @@ class CmntyListingEditForm(ModelForm):
         ('', ''), # This is for the blank option
         ('Elon', 'Elon'),
         ('UMD', 'UMD'),
+        ('UNCG', 'UNCG'),
     ]
     PROPERTYNAME_CHOICES = [
         ('', ''), # This is for the blank option

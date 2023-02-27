@@ -202,6 +202,7 @@ class CampusPropertyNamePair(models.Model):
     campus = models.CharField(
         max_length=30,
         choices=CAMPUS_CHOICES,
+        default='Elon'
     )
     propertyname = models.CharField(
         max_length=30,

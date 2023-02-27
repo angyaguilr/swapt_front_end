@@ -28,7 +28,7 @@ urlpatterns = [
     path('cmnty-list/', views.CmntyListingListAPIView.as_view(), name="cmnty_list"),
     re_path('^api/', include(router.urls)),
     path('cmnty-report/', views.CmntyReportListingView.as_view(), name="cmnty_report"),
-    path('cmnty-update-percent-itemssold/', views.CmntyUpdatePercentItemsSoldListingView(), name="cmnty_update_percent_itemssold"),
+    path('cmnty-update-percent-itemssold/', views.CmntyUpdatePercentItemsSoldListingView.as_view(), name="cmnty_update_percent_itemssold"),
     path('cmnty-Listings/', views.CmntyListingsUploaded.as_view(), name='cmnty_listings'),
     path('cmnty-Listings/search/', views.CmntyListingsUploadedSearch.as_view(), name='cmnty_listings_search'),
     path("cmnty-listing", views.CmntyListingListView.as_view(), name="cmnty_listing_list"),

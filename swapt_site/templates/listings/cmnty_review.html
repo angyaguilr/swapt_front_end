@@ -2,21 +2,17 @@
 {% block header %}
 <ul class="nav nav-tabs" id="nav-tab" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="nav-review-tab" data-bs-toggle="tab" data-bs-target="#nav-review" type="button" role="tab" aria-controls="nav-review" aria-selected="true">Awaiting Review</button>
+        <button class="nav-link active" id="nav-cmntyreview-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyreview" type="button" role="tab" aria-controls="nav-cmntyreview" aria-selected="true">Awaiting Review</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-approved-tab" data-bs-toggle="tab" data-bs-target="#nav-approved" type="button" role="tab" aria-controls="nav-approved" aria-selected="false">Approved</button>
+        <button class="nav-link" id="nav-cmntycmnty-approved-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyapproved" type="button" role="tab" aria-controls="nav-cmntyapproved" aria-selected="false">Approved</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-reported-tab" data-bs-toggle="tab" data-bs-target="#nav-reported" type="button" role="tab" aria-controls="nav-reported" aria-selected="false">Reported</button>
+        <button class="nav-link" id="nav-cmntycmnty-reported-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyreported" type="button" role="tab" aria-controls="nav-cmntyreported" aria-selected="false">Reported</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-rejected-tab" data-bs-toggle="tab" data-bs-target="#nav-rejected" type="button" role="tab" aria-controls="nav-rejected" aria-selected="false">Rejected</button>
+        <button class="nav-link" id="nav-cmntycmnty-rejected-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyrejected" type="button" role="tab" aria-controls="nav-cmntyrejected" aria-selected="false">Rejected</button>
     </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-cmnty-tab" data-bs-toggle="tab" data-bs-target="#nav-cmnty" type="button" role="tab" aria-controls="nav-cmnty" aria-selected="false">Community Listings</button>
-    </li>
-
 </ul>
 <div class="form-check form-check-inline">
     <input class="form-check-input location filter" type="checkbox" id="ElonNC">
@@ -44,36 +40,43 @@
 </div>
 
 <br></br>
+<div class="form-check form-check-inline">
+    <input class="form-check-input campus filter" type="checkbox" id="Elon">
+    <label class="form-check-label" for="Elon">
+        Elon
+    </label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input campus filter" type="checkbox" id="UMD">
+    <label class="form-check-label" for="UMD">
+        UMD
+    </label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input campus filter" type="checkbox" id="UNCG">
+    <label class="form-check-label" for="UNCG">
+        UNCG
+    </label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input propertyname filter" type="checkbox" id="Oaks">
+    <label class="form-check-label" for="Oaks">
+        Oaks
+    </label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input propertyname filter" type="checkbox" id="MillPoint">
+    <label class="form-check-label" for="MillPoint">
+        MillPoint
+    </label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input propertyname filter" type="checkbox" id="OakHill">
+    <label class="form-check-label" for="OakHill">
+        OakHill
+    </label>
+</div>
 
-<div class="form-check form-check-inline">
-    <input class="form-check-input propertyname filter" type="checkbox" id="Easy">
-    <label class="form-check-label" for="Easy">
-        Easy
-    </label>
-</div>
-<div class="form-check form-check-inline">
-    <input class="form-check-input propertyname filter" type="checkbox" id="Medium">
-    <label class="form-check-label" for="Medium">
-        Medium
-    </label>
-</div>
-<div class="form-check form-check-inline">
-    <input class="form-check-input propertyname filter" type="checkbox" id="Hard">
-    <label class="form-check-label" for="Hard">
-        Hard
-    </label>
-</div>
-
-<form class="form-inline">
-    <input type="number" class="grade filter" id="low-grade" value="1" min="1" max="12">
-    <label class="form-label" for="low-grade">
-        Lower bound grade
-    </label>
-    <input type="number" class="grade filter" id="high-grade" value="12" min="1" max="12">
-    <label class="form-label" for="high-grade">
-        Upper bound grade
-    </label>
-</form>
 
 <form class="form-inline">
     <input type="number" class="itemsSold filter" id="low-itemsSold" value="0" min="0" max="100" step="0.1">
@@ -92,7 +95,7 @@
 </form>
 <button class="btn btn-success apply-filter">Filter</button>
 <div class="tab-content" id="nav-tabContent">   
-    <div class="tab-pane fade show active" id="nav-review" role="tabpanel" aria-labelledby="nav-review-tab">
+    <div class="tab-pane fade show active" id="nav-cmntyreview" role="tabpanel" aria-labelledby="nav-cmntyreview-tab">
         <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for listing in review %}
         <div class="col">
@@ -117,7 +120,7 @@
                     <li class="list-group-item card-itemsSold">% ItemsSold: N/A</li>
                     {% endif %}
                     {% for pair in listing.campuspropertynamepair_set.all %}
-                    <li class="list-group-item card-propertyname">Campus/propertyname pair {{ forloop.counter }}: {{ pair.grade }}/{{ pair.propertyname }}</li>
+                    <li class="list-group-item card-propertyname">Campus/propertyname pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
                     {% endfor %}
                     </ul>
                     <div class="card-body">
@@ -127,13 +130,13 @@
                             {% endif %}
                             {% if listing.stage == 1 %}
                             {% comment %} <button type="submit" value="3" class="btn btn-danger" name="status">Reject</button> {% endcomment %}
-                            <a class="btn btn-danger" href="{% url 'listings:cmnty_reject' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-review-tab" role="button">Reject</a>
+                            <a class="btn btn-danger" href="{% url 'listings:cmnty_reject' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-cmntyreview-tab" role="button">Reject</a>
                             {% else %}
                             <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                             {% endif %}
-                        <a class="btn btn-primary" href="{% url 'listings:cmnty_edit' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-review-tab" role="button">Edit</a>
+                        <a class="btn btn-primary" href="{% url 'listings:cmnty_edit' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-cmntyreview-tab" role="button">Edit</a>
                         {% elif listing.stage != 2 and user.is_swapt_user %}
-                        <a class="btn btn-primary" href="{% url 'listings:cmnty_edit' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-review-tab" role="button">Edit</a>
+                        <a class="btn btn-primary" href="{% url 'listings:cmnty_edit' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-cmntyreview-tab" role="button">Edit</a>
                         <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                         {% endif %}
                         <input type="hidden" name="id" value={{ listing.id }}>
@@ -144,8 +147,8 @@
         {% endfor %}
         </div>
     </div>
-    <div class="tab-pane fade" id="nav-approved" role="tabpanel" aria-labelledby="nav-approved-tab">
-        <table id="approved-table" class="table table-bordered">
+    <div class="tab-pane fade" id="nav-cmntyapproved" role="tabpanel" aria-labelledby="nav-cmntycmnty-approved-tab">
+        <table id="cmnty-approved-table" class="table table-bordered">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -153,18 +156,18 @@
                     <th scope="col">Location</th>
                     <th scope="col">% ItemsSold</th>
                     <th scope="col">Campus Level 1</th>
-                    <th scope="col">Difficulty Level 1</th>
+                    <th scope="col">Propertyname Level 1</th>
                     <th scope="col">Campus Level 2</th>
-                    <th scope="col">Difficulty Level 2</th>
+                    <th scope="col">Propertyname Level 2</th>
                     <th scope="col">Campus Level 3</th>
-                    <th scope="col">Difficulty Level 3</th>
+                    <th scope="col">Propertyname Level 3</th>
                     <th scope="col">Buttons</th>
                 </tr>
             </thead>
         </table>
     </div>
-    <div class="tab-pane fade" id="nav-reported" role="tabpanel" aria-labelledby="nav-reported-tab">
-        <table id="reported-table" class="table table-bordered">
+    <div class="tab-pane fade" id="nav-cmntyreported" role="tabpanel" aria-labelledby="nav-cmntycmnty-reported-tab">
+        <table id="cmnty-reported-table" class="table table-bordered">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -173,18 +176,18 @@
                     <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Campus Level 1</th>
-                    <th scope="col">Difficulty Level 1</th>
+                    <th scope="col">Propertyname Level 1</th>
                     <th scope="col">Campus Level 2</th>
-                    <th scope="col">Difficulty Level 2</th>
+                    <th scope="col">Propertyname Level 2</th>
                     <th scope="col">Campus Level 3</th>
-                    <th scope="col">Difficulty Level 3</th>
+                    <th scope="col">Propertyname Level 3</th>
                     <th scope="col">Buttons</th>
                 </tr>
             </thead>
         </table>
     </div> 
-    <div class="tab-pane fade" id="nav-rejected" role="tabpanel" aria-labelledby="nav-rejected-tab">
-        <table id="rejected-table" class="table table-bordered">
+    <div class="tab-pane fade" id="nav-cmntyrejected" role="tabpanel" aria-labelledby="nav-cmntycmnty-rejected-tab">
+        <table id="cmnty-rejected-table" class="table table-bordered">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -193,11 +196,11 @@
                     <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Campus Level 1</th>
-                    <th scope="col">Difficulty Level 1</th>
+                    <th scope="col">Propertyname Level 1</th>
                     <th scope="col">Campus Level 2</th>
-                    <th scope="col">Difficulty Level 2</th>
+                    <th scope="col">Propertyname Level 2</th>
                     <th scope="col">Campus Level 3</th>
-                    <th scope="col">Difficulty Level 3</th>
+                    <th scope="col">Propertyname Level 3</th>
                     <th scope="col">Buttons</th>
                 </tr>
             </thead>
@@ -227,10 +230,6 @@ $(document).ready(function () {
             
             if(param.startsWith("location") || param.startsWith("propertyname")) {
                 $("#" + param.split("=")[1]).prop("checked", true);
-            } else if(param.startsWith("lowGrade")) {
-                $("#low-grade").val(parseInt(param.split("=")[1]))
-            } else if(param.startsWith("highGrade")) {
-                $("#high-grade").val(parseInt(param.split("=")[1]))
             } else if(param.startsWith("lowItemsSold")) {
                 $("#low-itemsSold").val(parseFloat(param.split("=")[1]))
             } else if(param.startsWith("highItemsSold")) {
@@ -246,7 +245,7 @@ $(document).ready(function () {
         });
     }
 
-    var approvedTable = $('#approved-table').DataTable({
+    var approvedTable = $('#cmnty-approved-table').DataTable({
         "serverSide": true,
         "processing": true,
         "autoWidth": false,
@@ -268,7 +267,7 @@ $(document).ready(function () {
             },
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.grade'
+                "data": 'campuspropertynamepair_set.0.campus'
             },
             {
                 "searchable": false,
@@ -277,7 +276,7 @@ $(document).ready(function () {
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.grade',
+                "data": 'campuspropertynamepair_set.1.campus',
             },
             {
                 "searchable": false,
@@ -287,7 +286,7 @@ $(document).ready(function () {
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.grade',
+                "data": 'campuspropertynamepair_set.2.campus',
             },
             {
                 "searchable": false,
@@ -309,12 +308,12 @@ $(document).ready(function () {
     var column = approvedTable.column(10);
     column.visible({% if user.is_admin %} true {% else %} false {% endif %});
 
-    $('#approved-table tbody').on('click', 'a', function () {
+    $('#cmnty-approved-table tbody').on('click', 'a', function () {
         var data = approvedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-approved-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmntycmnty-approved-tab";
     } );
 
-    var reportedTable = $('#reported-table').DataTable({
+    var reportedTable = $('#cmnty-reported-table').DataTable({
         "serverSide": true,
         "processing": true,
         "autoWidth": false,
@@ -337,7 +336,7 @@ $(document).ready(function () {
             {"data": "issue"},
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.grade'
+                "data": 'campuspropertynamepair_set.0.campus'
             },
             {
                 "searchable": false,
@@ -346,7 +345,7 @@ $(document).ready(function () {
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.grade',
+                "data": 'campuspropertynamepair_set.1.campus',
             },
             {
                 "searchable": false,
@@ -356,7 +355,7 @@ $(document).ready(function () {
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.grade',
+                "data": 'campuspropertynamepair_set.2.campus',
             },
             {
                 "searchable": false,
@@ -373,13 +372,13 @@ $(document).ready(function () {
         ],
     });
 
-    $('#reported-table tbody').on('click', 'a', function () {
+    $('#cmnty-reported-table tbody').on('click', 'a', function () {
         console.log("Test");
         var data = reportedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-reported-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmntycmnty-reported-tab";
     } );
 
-    var rejectedTable = $('#rejected-table').DataTable({
+    var rejectedTable = $('#cmnty-rejected-table').DataTable({
         "serverSide": true,
         "processing": true,
         "autoWidth": false,
@@ -402,7 +401,7 @@ $(document).ready(function () {
             {"data": "issue"},
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.grade'
+                "data": 'campuspropertynamepair_set.0.campus'
             },
             {
                 "searchable": false,
@@ -411,7 +410,7 @@ $(document).ready(function () {
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.grade',
+                "data": 'campuspropertynamepair_set.1.campus',
             },
             {
                 "searchable": false,
@@ -421,7 +420,7 @@ $(document).ready(function () {
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.grade',
+                "data": 'campuspropertynamepair_set.2.campus',
             },
             {
                 "searchable": false,
@@ -438,9 +437,9 @@ $(document).ready(function () {
         ],
     });
 
-    $('#rejected-table tbody').on('click', 'a', function () {
+    $('#cmnty-rejected-table tbody').on('click', 'a', function () {
         var data = rejectedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-rejected-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmntycmnty-rejected-tab";
     } );
 
     var cmntyTable = $('#cmnty-table').DataTable({
@@ -471,18 +470,21 @@ $('.apply-filter').click(function (e){submit(e)});
 
 function submit(e){
     var locations = [];
-    var difficulties = [];
+    var propertynames = [];
+    var campuses = [];
 
     $(".location").each(function () {
         if ($(this).is(":checked")) { locations.push($(this).attr('id').toString()); }
     });
 
     $(".propertyname").each(function () {
-        if ($(this).is(":checked")) { difficulties.push($(this).attr('id').toString()); }
+        if ($(this).is(":checked")) { propertynames.push($(this).attr('id').toString()); }
+    });
+    $(".campus").each(function () {
+        if ($(this).is(":checked")) { campuses.push($(this).attr('id').toString()); }
     });
 
-    var lowGrade = $('#low-grade').val().toString();
-    var highGrade = $('#high-grade').val().toString();
+
 
     var lowItemsSold= $('#low-itemsSold').val().toString();
     var highItemsSold = $('#high-itemsSold').val().toString();
@@ -497,10 +499,10 @@ function submit(e){
             href += locations[i];
         }
     }
-    for(let i = 0; i < difficulties.length; i++) {
-        href += "&propertyname=" + difficulties[i];
+    for(let i = 0; i < propertynames.length; i++) {
+        href += "&propertyname=" + propertynames[i];
     }
-    href += "&lowGrade=" + lowGrade + "&highGrade=" + highGrade + "&lowItemsSold=" + lowItemsSold
+    href += "&lowItemsSold=" + lowItemsSold
         + "&highItemsSold=" + highItemsSold + "&showNA=" + showNA;
     window.location.href = href + location.hash;
 }

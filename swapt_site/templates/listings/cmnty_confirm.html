@@ -25,7 +25,7 @@
                     <li class="list-group-item">Description: {{ listing.desc }}</li>
                     <li class="list-group-item">Tags: {{ listing.tags }}</li>
                     {% for pair in listing.campuspropertynamepair_set.all %}
-                    <li class="list-group-item">Campus/Property Name pair {{ forloop.counter }}: {{ pair.grade }}/{{ pair.propertyname }}</li>
+                    <li class="list-group-item">Campus/Property Name pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
                     {% endfor %}
                     </ul>
                     <div class="card-body">

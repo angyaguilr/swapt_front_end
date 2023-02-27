@@ -7,7 +7,8 @@ from . import views
 
 # Setting up the reivew flashcards page API
 router = routers.DefaultRouter()
-router.register(r'review', views.ReviewListingsAPI) 
+router.register(r'review', views.ReviewListingsAPI)
+router.register(r'cmnty_listings_review') 
 
 urlpatterns = [
     #all:
@@ -24,6 +25,7 @@ urlpatterns = [
     path('cmnty-Listings/search/', views.CmntyListingsUploadedSearch.as_view(), name='cmnty_listings_search'),
     path('cmnty-create-listing/', views.CmntyListingCreationView.as_view(), name="cmnty_create"),
     path('cmnty-create-listing-price/', views.CmntyListingPriceCreationView.as_view(), name="cmnty_create_price"),
+    path('review-my-cmnty-listings/', login_required()(views.ListingsReviewView.as_view()), name="cmnty_listings_review"),
     #swapt listings:
     path("swapt-listing", views.SwaptListingListView.as_view(), name="swapt_listing_list"),
     path("swapt-<int:pk>/", swapt_user_required()(views.SwaptListingDetailView.as_view()), name="swapt_listing_detail"),

@@ -2,7 +2,7 @@ from django import forms
 from django.db.models.base import Model
 from django.forms import ModelForm
 
-from .models import Listing, GradeDifficultyPair, Price
+from .models import Listing, GradeDifficultyPair, Price, SwaptListingModel
 
 # For Swapt admin to create commMkt listings
 class ListingCreationForm(ModelForm):
@@ -12,13 +12,13 @@ class ListingCreationForm(ModelForm):
     title = forms.CharField(max_length=250, label="Listing Title")
 
     class Meta:
-        model = Listing
+        model = SwaptListingModel
         fields = ("title", "description", "location", "category", "condition", "itemPrice")
         # "grade", "difficulty"
     
     def save(self, commit=True):
         self.full_clean() # calls clean function
-        listing = Listing(stage=5)
+        listing = SwaptListingModel(stage=5)
         
         if commit:
             fields = self.cleaned_data
@@ -106,7 +106,7 @@ class ListingEditForm(ModelForm):
     difficultyThree = forms.ChoiceField(choices=DIFFICULTY_CHOICES, label="Difficulty Level 3", required=False)
     
     class Meta:
-        model = Listing
+        model = SwaptListingModel
         fields = ("title", "description", "location")
 
     def clean(self):
@@ -184,7 +184,7 @@ class ListingEditForm(ModelForm):
 # Only field is issue (to show Swapt User what's wrong)
 class ListingRejectForm(ModelForm):
     class Meta:
-        model = Listing
+        model = SwaptListingModel
         fields = ("issue", )
 
     def save(self, commit=True):

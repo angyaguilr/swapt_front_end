@@ -29,9 +29,9 @@
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Create a Community Swapt</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:cmnty_create_price' %}">Create a Community Swapt</a></li>
                      {% elif user.is_admin %}
-                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">Upload</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_review' %}">Upload</a></li>
                      {% endif %}
-                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">My Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_review' %}">My Listings</a></li>
                   </ul>
                </li>
                <li class="nav-item dropdown">
@@ -44,9 +44,9 @@
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_create' %}">Create a Swapt Listing</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_listing_list' %}">Old Shop Campus Swapts</a></li>
                      {% elif user.is_admin %}
-                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">Upload</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">Upload</a></li>
                      {% endif %}
-                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">My Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">My Listings</a></li>
                   </ul>
                </li>
                {% if user.is_admin %}
@@ -73,7 +73,7 @@
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                      <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
                      <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Log out</a></li>
-                     <li><a class="dropdown-item" href="{% url 'listings:review' %}">My Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">My Listings</a></li>
                   </ul>
                </li>
             </ul>

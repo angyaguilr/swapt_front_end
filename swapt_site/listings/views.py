@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Listing, CampusPropertyNamePair, SwaptListing,  Price, Swapt_Bundle_Price, PaymentHistory, SwaptListingModel, Category
 from .forms import ListingEditForm, ListingRejectForm, CmntyListingCreationForm, ListingCreationForm, CmntyListingPriceCreationForm
-from .serializers import ListingSerializer, ListingReviewSerializer, CmntyListingReviewSerializer
+from .serializers import CmntyListingSerializer, ListingSerializer, ListingReviewSerializer, CampusPropertyNamePairSerializer, CmntyListingReviewSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 YOUR_DOMAIN = 'http://127.0.0.1:8000' 
@@ -144,6 +144,40 @@ class StripeWebhookView(View):
 
 
 #Swapt Listings
+class SwaptReviewListingsAPI(viewsets.ModelViewSet):
+    queryset = SwaptListingModel.objects.filter(confirmed=True)
+    serializer_class = ListingReviewSerializer
+
+    def get_queryset(self):
+
+        # Get attributes from query string
+        stage = int(self.request.GET.get('stage'))
+
+        if(stage == 5): 
+            return SwaptListingModel.objects.filter(stage=5)
+        
+        locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
+        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
+        lowGrade = int(self.request.GET.get('lowGrade', 1))
+        highGrade = int(self.request.GET.get('highGrade', 12))
+        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
+        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
+        showNA = self.request.GET.get('showNA', 'true')
+
+        # Same filtering as in the regular review view
+        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        queryset = SwaptListingModel.objects.filter(stage=stage, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        if(showNA == "true"):
+            queryset = queryset | SwaptListingModel.objects.filter(stage=stage, location__in=locations, percent_itemsSold=None, 
+            gradedifficultypair__in=pairs, confirmed=True).distinct()
+        
+        if self.request._request.user.is_swapt_user:
+            return queryset.filter(swaptuser=self.request._request.user.swaptuser)
+        else:
+            return queryset
+        
 class SwaptListingsCreationView(View):
     
     # Shows the swapt_user the upload form for listings
@@ -151,11 +185,11 @@ class SwaptListingsCreationView(View):
         # Deletes any unconfirmed listings
         listings = SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
         listings.delete()
-        template = "listings/upload_form.html"
+        template = "listings/swapt_upload_form.html"
         return render(request, template)
 
     def post(self, request):
-        template = "listings/upload_form.html"
+        template = "listings/swapt_upload_form.html"
         csv_file = request.FILES['file']
         # Checks if uploaded file is a CSV file
         if not csv_file.name.endswith('.csv'):
@@ -245,7 +279,7 @@ class SwaptListingsCreationView(View):
                 )
                 thirdPair[0].listings.add(listing)
 
-        return redirect("listings:confirm")
+        return redirect("listings:swapt_confirm")
         
 class SwaptListingsConfirmationView(View):
 
@@ -257,9 +291,9 @@ class SwaptListingsConfirmationView(View):
 
         # Can't access page without unconfirmed listings
         if not listings:
-            return redirect("listings:upload")
+            return redirect("listings:swapt_create")
 
-        template = "listings/confirm.html"
+        template = "listings/swapt_confirm.html"
         context = {"listings": SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)}
         return render(request, template, context)
     
@@ -276,23 +310,23 @@ class SwaptListingsConfirmationView(View):
                     pair.save()
 
             SwaptListingModel.objects.bulk_update(listings, ['confirmed'])
-            return redirect("listings:review")
+            return redirect("listings:swapt_review")
 
         # If selected the delete button for a specific card, deletes that cards
         elif request.POST.get('status') == "delete":
             id = request.POST['id']
             listings.get(id=id).delete()
-            return redirect("listings:confirm")
+            return redirect("listings:swapt_confirm")
 
         # The only other button that results in a post request is the cancel button, which deletes all unconfirmed cards
         else:
             listings.delete()
-            return redirect("listings:upload")['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD']
+            return redirect("listings:swapt_create")['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD']
 
 class SwaptListingsReviewView(View):
 
     def get(self, request):
-        template = "listings/review.html"
+        template = "listings/swapt_review.html"
     
         # Gets different attributes from the query string, but by default will be the most expansive possible
         locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
@@ -334,46 +368,12 @@ class SwaptListingsReviewView(View):
                     listing.issue = None # If the card is approved again, don't keep previous issue in the database
                 listing.save()
         
-        return redirect("listings:review")
+        return redirect("listings:swapt_review")
 
-class SwaptReviewListingsAPI(viewsets.ModelViewSet):
-    queryset = SwaptListingModel.objects.filter(confirmed=True)
-    serializer_class = ListingReviewSerializer
-
-    def get_queryset(self):
-
-        # Get attributes from query string
-        stage = int(self.request.GET.get('stage'))
-
-        if(stage == 5): 
-            return SwaptListingModel.objects.filter(stage=5)
-        
-        locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
-        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
-        lowGrade = int(self.request.GET.get('lowGrade', 1))
-        highGrade = int(self.request.GET.get('highGrade', 12))
-        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
-        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
-        showNA = self.request.GET.get('showNA', 'true')
-
-        # Same filtering as in the regular review view
-        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
-        queryset = SwaptListingModel.objects.filter(stage=stage, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-        
-        if(showNA == "true"):
-            queryset = queryset | SwaptListingModel.objects.filter(stage=stage, location__in=locations, percent_itemsSold=None, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-        
-        if self.request._request.user.is_swapt_user:
-            return queryset.filter(swaptuser=self.request._request.user.swaptuser)
-        else:
-            return queryset
-        
 class SwaptListingEditView(UpdateView):
     form_class = ListingEditForm
     model = SwaptListingModel
-    template_name = 'listings/edit_form.html'
+    template_name = 'listings/swapt_edit_form.html'
 
     def get(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
@@ -383,7 +383,7 @@ class SwaptListingEditView(UpdateView):
         if request.user.is_admin:
             return super().get(self, request, *args, **kwargs)
         if listing.swaptuser != request.user.swaptuser or (request.user.is_swapt_user and listing.stage == 2):
-            return redirect('listings:review')
+            return redirect('listings:swapt_review')
         return super().get(self, request, *args, **kwargs)
     
     # This function is used to get the initial values of form fields
@@ -420,9 +420,9 @@ class SwaptListingEditView(UpdateView):
 
         # Go back to confirmation page if editing an unconfirmed card, otherwise return to the review page
         if self.request.user.is_swapt_user and not listing.confirmed:
-            return reverse_lazy("listings:confirm")
+            return reverse_lazy("listings:swapt_confirm")
         if (self.request.user.is_swapt_user and listing.confirmed) or self.request.user.is_admin:
-            return reverse_lazy("listings:review")
+            return reverse_lazy("listings:swapt_review")
 
     def form_valid(self, form):
         listing = form.save()
@@ -439,7 +439,7 @@ class SwaptListingEditView(UpdateView):
 class SwaptListingRejectView(UpdateView):
     form_class = ListingRejectForm
     model = SwaptListingModel
-    template_name = 'listings/reject.html'
+    template_name = 'listings/swapt_reject.html'
 
     def form_valid(self, form):
         listing = form.save()
@@ -447,7 +447,7 @@ class SwaptListingRejectView(UpdateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse("listings:review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
+        return reverse("listings:swapt_review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
 
 class SwaptListingListAPIView(generics.ListAPIView):
     queryset = SwaptListingModel.objects.filter(confirmed=True)
@@ -645,7 +645,7 @@ class SwaptListingCreation(View):
             'price': price
         }
 
-        return redirect('listings:swapt-confirmation', pk=order.pk)  
+        return redirect('listings:swapt_confirmation', pk=order.pk)  
       
 class SwaptListingListView(ListView):
     model = SwaptListingModel
@@ -689,6 +689,39 @@ class SwaptListingPayConfirmation(View):
         return render(request, 'listings/swapt_pay_confirmation.html')
 
 #Community Listings
+class CmntyReviewListingsAPI(viewsets.ModelViewSet):
+    queryset = Listing.objects.filter(confirmed=True)
+    serializer_class = CmntyListingReviewSerializer
+
+    def get_queryset(self):
+
+        # Get attributes from query string
+        stage = int(self.request.GET.get('stage'))
+
+        if(stage == 5): 
+            return Listing.objects.filter(stage=5)
+        
+        locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
+        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'MillPoint', 'OakHill'])
+        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD'])
+        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
+        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
+        showNA = self.request.GET.get('showNA', 'true')
+
+        # Same filtering as in the regular review view
+        pairs = CampusPropertyNamePair.objects.filter(propertyname__in=propertynames,campus__in=campuses)
+        queryset = Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
+            campuspropertynamepair__in=pairs, confirmed=True).distinct()
+        
+        if(showNA == "true"):
+            queryset = queryset | Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold=None, 
+            campuspropertynamepair__in=pairs, confirmed=True).distinct()
+        
+        if self.request._request.user.is_swapt_user:
+            return queryset.filter(swaptuser=self.request._request.user.swaptuser)
+        else:
+            return queryset
+        
 class CmntyListingCreationView(CreateView):
     model = Listing
     form_class = CmntyListingCreationForm
@@ -702,7 +735,7 @@ class CmntyListingCreationView(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("listings:review") + "#nav-cmnty-tab"
+        return reverse("listings:cmnty_review") + "#nav-cmnty-tab"
     
 class CmntyListingPriceCreationView(CreateView):
     model = Price
@@ -717,7 +750,7 @@ class CmntyListingPriceCreationView(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("listings:review") + "#nav-cmnty-tab"             
+        return reverse("listings:cmnty_review") + "#nav-cmnty-tab"             
 
 class CmntyListingsConfirmationView(View):
 
@@ -729,9 +762,9 @@ class CmntyListingsConfirmationView(View):
 
         # Can't access page without unconfirmed listings
         if not listings:
-            return redirect("listings:upload")
+            return redirect("listings:cmnty_create")
 
-        template = "listings/confirm.html"
+        template = "listings/cmnty_confirm.html"
         context = {"listings": Listing.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)}
         return render(request, template, context)
     
@@ -743,48 +776,47 @@ class CmntyListingsConfirmationView(View):
         if request.POST.get('status') == "confirm":
             for listing in listings:
                 listing.confirmed = True
-                for pair in listing.gradedifficultypair_set.all():
+                for pair in listing.campuspropertynamepair_set.all():
                     pair.confirmed = True
                     pair.save()
 
             Listing.objects.bulk_update(listings, ['confirmed'])
-            return redirect("listings:review")
+            return redirect("listings:cmnty_review")
 
         # If selected the delete button for a specific card, deletes that cards
         elif request.POST.get('status') == "delete":
             id = request.POST['id']
             listings.get(id=id).delete()
-            return redirect("listings:confirm")
+            return redirect("listings:cmnty_confirm")
 
         # The only other button that results in a post request is the cancel button, which deletes all unconfirmed cards
         else:
             listings.delete()
-            return redirect("listings:upload")['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD']
+            return redirect("listings:cmnty_create")['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD']
 
 class CmntyListingsReviewView(View):
 
     def get(self, request):
-        template = "listings/review.html"
+        template = "listings/cmnty_review.html"
     
         # Gets different attributes from the query string, but by default will be the most expansive possible
         locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
-        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
-        lowGrade = int(self.request.GET.get('lowGrade', 1))
-        highGrade = int(self.request.GET.get('highGrade', 12))
+        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'MillPoint', 'OakHill'])
+        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD'])
         lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
         highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
         showNA = self.request.GET.get('showNA', 'true')
 
         # Filters to relevant pairs, then when filtering listings filters by those pairs and other attributes
         # Also stage 1 is the review stage
-        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        pairs = CampusPropertyNamePair.objects.filter(campus__in=campuses, propertyname__in=propertynames)
         queryset = Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
+            campuspropertynamepair__in=pairs, confirmed=True).distinct()
         
         # If the user wants to see cards that have 0 in/itemsSold, add those into the queryset too
         if(showNA == "true"):
             queryset = queryset | Listing.objects.filter(stage=1, location__in=locations, percent_itemsSold=None, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
+            campuspropertynamepair__in=pairs, confirmed=True).distinct()
 
         if request.user.is_swapt_user:
             context = {"user": request.user, "review": queryset.filter(swaptuser=request.user.swaptuser)}
@@ -806,46 +838,12 @@ class CmntyListingsReviewView(View):
                     listing.issue = None # If the card is approved again, don't keep previous issue in the database
                 listing.save()
         
-        return redirect("listings:review")
+        return redirect("listings:cmnty_review")
 
-class CmntyReviewListingsAPI(viewsets.ModelViewSet):
-    queryset = Listing.objects.filter(confirmed=True)
-    serializer_class = ListingReviewSerializer
-
-    def get_queryset(self):
-
-        # Get attributes from query string
-        stage = int(self.request.GET.get('stage'))
-
-        if(stage == 5): 
-            return Listing.objects.filter(stage=5)
-        
-        locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
-        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
-        lowGrade = int(self.request.GET.get('lowGrade', 1))
-        highGrade = int(self.request.GET.get('highGrade', 12))
-        lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
-        highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
-        showNA = self.request.GET.get('showNA', 'true')
-
-        # Same filtering as in the regular review view
-        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
-        queryset = Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-        
-        if(showNA == "true"):
-            queryset = queryset | Listing.objects.filter(stage=stage, location__in=locations, percent_itemsSold=None, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
-        
-        if self.request._request.user.is_swapt_user:
-            return queryset.filter(swaptuser=self.request._request.user.swaptuser)
-        else:
-            return queryset
-        
 class CmntyListingEditView(UpdateView):
     form_class = ListingEditForm
     model = Listing
-    template_name = 'listings/edit_form.html'
+    template_name = 'listings/cmnty_edit_form.html'
 
     def get(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
@@ -855,7 +853,7 @@ class CmntyListingEditView(UpdateView):
         if request.user.is_admin:
             return super().get(self, request, *args, **kwargs)
         if listing.swaptuser != request.user.swaptuser or (request.user.is_swapt_user and listing.stage == 2):
-            return redirect('listings:review')
+            return redirect('listings:cmnty_review')
         return super().get(self, request, *args, **kwargs)
     
     # This function is used to get the initial values of form fields
@@ -864,22 +862,22 @@ class CmntyListingEditView(UpdateView):
     def get_initial(self):
         pk = self.kwargs['pk']
         listing = Listing.objects.get(id=pk)
-        pairs = listing.gradedifficultypair_set.all()
+        pairs = listing.campuspropertynamepair_set.all()
         
-        intial = {'stage': listing.stage, 'gradeOne': "", 'difficultyOne': "", 'gradeTwo': "", 'difficultyTwo': "", 'gradeThree': "", 'difficultyThree': ""}
+        intial = {'stage': listing.stage, 'campusOne': "", 'propertynameOne': "", 'campusTwo': "", 'propertynameTwo': "", 'campusThree': "", 'propertynameThree': ""}
         
         counter = 1
         
         for pair in pairs:
             if counter == 1:
-                intial['gradeOne'] = pair.grade
-                intial['difficultyOne'] = pair.difficulty
+                intial['campusOne'] = pair.
+                intial['propertynameOne'] = pair.propertyname
             if counter == 2:
-                intial['gradeTwo'] = pair.grade
-                intial['difficultyTwo'] = pair.difficulty
+                intial['campusTwo'] = pair.
+                intial['propertynameTwo'] = pair.propertyname
             if counter == 3:
-                intial['gradeThree'] = pair.grade
-                intial['difficultyThree'] = pair.difficulty
+                intial['campusThree'] = pair.
+                intial['propertynameThree'] = pair.propertyname
 
             counter += 1
         
@@ -892,9 +890,9 @@ class CmntyListingEditView(UpdateView):
 
         # Go back to confirmation page if editing an unconfirmed card, otherwise return to the review page
         if self.request.user.is_swapt_user and not listing.confirmed:
-            return reverse_lazy("listings:confirm")
+            return reverse_lazy("listings:cmnty_confirm")
         if (self.request.user.is_swapt_user and listing.confirmed) or self.request.user.is_admin:
-            return reverse_lazy("listings:review")
+            return reverse_lazy("listings:cmnty_review")
 
     def form_valid(self, form):
         listing = form.save()
@@ -911,7 +909,7 @@ class CmntyListingEditView(UpdateView):
 class CmntyListingRejectView(UpdateView):
     form_class = ListingRejectForm
     model = Listing
-    template_name = 'listings/reject.html'
+    template_name = 'listings/cmnty_reject.html'
 
     def form_valid(self, form):
         listing = form.save()
@@ -919,22 +917,22 @@ class CmntyListingRejectView(UpdateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse("listings:review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
+        return reverse("listings:cmnty_review") + "#nav-review-tab" # Go back to the review tab after rejecting since can only reject from that tab
 
 class CmntyListingListAPIView(generics.ListAPIView):
     queryset = Listing.objects.filter(confirmed=True)
-    serializer_class = ListingSerializer
+    serializer_class = CmntyListingSerializer
 
     def get_queryset(self):
 
         # Get attibutes
         locations = self.request.GET.getlist('location')
-        grades = self.request.GET.getlist('grade')
+        campuss = self.request.GET.getlist('')
         number = self.request.GET.get('number')
 
-        # Get pairs with grade levels specified, then narrow down listings based on those pairs and other attributes
-        pairs = GradeDifficultyPair.objects.filter(grade__in=grades)
-        queryset = Listing.objects.filter(gradedifficultypair__in=pairs).distinct()
+        # Get pairs with  levels specified, then narrow down listings based on those pairs and other attributes
+        pairs = CampusPropertyNamePair.objects.filter(campus__in=campuss)
+        queryset = Listing.objects.filter(campuspropertynamepair__in=pairs).distinct()
         queryset = queryset.filter(confirmed=True, stage=2, location__in=locations) # Make sure cards returned in request are approved and confirmed
         queryset = sorted(queryset, key=lambda x: random.random()) # Randomize order as to not give same cards in same order every time to the app
         queryset = queryset[:int(int(number) * .85)] # Only give up to 85% number of cards specified
@@ -946,8 +944,8 @@ class CmntyListingListAPIView(generics.ListAPIView):
     def list(self, request, **kwargs):
         # Note the use of `get_queryset()` instead of `self.queryset`
         queryset = self.get_queryset()
-        # Passes grade list in so that serializer can randomly pick the difficulty levels to return in the request for the cards
-        serializer = ListingSerializer(queryset, many=True, context={'grades': self.request.GET.getlist('grade')})  
+        # Passes  list in so that serializer can randomly pick the propertyname levels to return in the request for the cards
+        serializer = CmntyListingSerializer(queryset, many=True, context={'campuss': self.request.GET.getlist('')})  
         data = serializer.data
 
         # This is for the animations in the app to work
@@ -960,7 +958,7 @@ class CmntyListingListAPIView(generics.ListAPIView):
 
 class CmntyReportListingView(generics.UpdateAPIView):
     queryset = Listing.objects.filter(stage=2, confirmed=True)
-    serializer_class = ListingSerializer
+    serializer_class = CmntyListingSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
@@ -984,7 +982,7 @@ class CmntyReportListingView(generics.UpdateAPIView):
 
 class CmntyUpdatePercentItemsSoldListingView(generics.UpdateAPIView):
     queryset = Listing.objects.filter(stage=2, confirmed=True)
-    serializer_class = ListingSerializer
+    serializer_class = CmntyListingSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):

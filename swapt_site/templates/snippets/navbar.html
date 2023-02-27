@@ -30,9 +30,9 @@
                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listing_list' %}">Shop</a></li>
                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Create a Community Swapt</a></li>
                     {% elif user.is_admin %}
-                    <li><a class="dropdown-item" href="{% url 'listings:review' %}">Upload</a></li>
+                    <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">Upload</a></li>
                     {% endif %}
-                    <li><a class="dropdown-item" href="{% url 'listings:review' %}">My Listings</a></li>
+                    <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">My Listings</a></li>
 
                   </ul>
                 </li>

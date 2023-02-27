@@ -70,9 +70,9 @@ class CmntyListingSerializer(serializers.ModelSerializer):
         propertyname = obj.campuspropertynamepair_set.get(campus=campus).propertyname
         
         # Returns in this format because this is how the propertyname is displayed in the game
-        if propertyname == "Easy":
+        if propertyname == "Oaks":
             return "+1" 
-        elif propertyname == "Medium": 
+        elif propertyname == "Millpoint": 
             return "+2"
         else:
             return "+3"

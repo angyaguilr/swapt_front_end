@@ -189,30 +189,25 @@ class SwaptListing(models.Model):
 
 class CampusPropertyNamePair(models.Model):
     listings = models.ManyToManyField('Listing')
-
+    CAMPUS_CHOICES = [
+        ('Elon', 'Elon'),
+        ('UMD', 'UMD'),
+        ('UNCG', 'UNCG')
+    ]
     PROPERTYNAME_CHOICES = [
         ('Oaks', 'Oaks'),
-        ('ParkPlace', 'ParkPlace'),
         ('MillPoint', 'MillPoint'),
+        ('OakHill', 'OakHill'),
     ]
-       
-    CAMPUS_CHOICES = [
-        ('ElonUniversity', 'ElonUniversity'),
-        ('UMD', 'UMD'),
-        ('UGA', 'UGA'),
-    ]
-
     campus = models.CharField(
-        max_length=35,
+        max_length=30,
         choices=CAMPUS_CHOICES,
-        null=True
     )
-
     propertyname = models.CharField(
-        max_length=35,
+        max_length=30,
         choices=PROPERTYNAME_CHOICES,
     )
-    confirmed = models.BooleanField(default=False) 
+    confirmed = models.BooleanField(default=False)   
 
 class PaymentHistory(models.Model):
     PENDING = "P"

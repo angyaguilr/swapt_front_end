@@ -13,86 +13,6 @@
                 <div class="md-form mt-0 active-cyan-2">
                     <input class="form-control" name="q" type="text" placeholder="Search Our Community Swapts" aria-label="Search" value="{{ request.GET.q }}">
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input location filter" type="checkbox" id="ElonNC">
-                    <label class="form-check-label" for="ElonNC">
-                        ElonNC
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input location filter" type="checkbox" id="CollegeParkMD">
-                    <label class="form-check-label" for="CollegeParkMD">
-                        CollegeParkMD
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input location filter" type="checkbox" id="BurlingtonNC">
-                    <label class="form-check-label" for="BurlingtonNC">
-                        BurlingtonNC
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input location filter" type="checkbox" id="ColumbiaMD">
-                    <label class="form-check-label" for="ColumbiaMD">
-                        ColumbiaMD
-                    </label>
-                </div>
-                
-                <br></br>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input campus filter" type="checkbox" id="Elon">
-                    <label class="form-check-label" for="Elon">
-                        Elon
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input campus filter" type="checkbox" id="UMD">
-                    <label class="form-check-label" for="UMD">
-                        UMD
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input campus filter" type="checkbox" id="UNCG">
-                    <label class="form-check-label" for="UNCG">
-                        UNCG
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input propertyname filter" type="checkbox" id="Oaks">
-                    <label class="form-check-label" for="Oaks">
-                        Oaks
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input propertyname filter" type="checkbox" id="MillPoint">
-                    <label class="form-check-label" for="MillPoint">
-                        MillPoint
-                    </label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input propertyname filter" type="checkbox" id="OakHill">
-                    <label class="form-check-label" for="OakHill">
-                        OakHill
-                    </label>
-                </div>
-                
-                
-                <form class="form-inline">
-                    <input type="number" class="itemsSold filter" id="low-itemsSold" value="0" min="0" max="100" step="0.1">
-                    <label class="form-label" for="low-itemsSold">
-                        Lower bound itemsSold %
-                    </label>
-                    <input type="number" class="itemsSold filter" id="high-itemsSold" value="100" min="0" max="100" step="0.1">
-                    <label class="form-label" for="high-itemsSold">
-                        Upper bound itemsSold %
-                    </label>
-                    <input class="form-check-input itemsSold-na filter" type="checkbox" id="na">
-                    <label class="form-check-label" for="na">
-                        Include N/A
-                    </label>
-                    
-                </form>
-                <button class="btn btn-success apply-filter">Filter</button>
             </form>
         </div>
     </div>
@@ -121,6 +41,7 @@
               >
             </div>
           </div>
-        {% endfor %}
+          {% endfor %}
     </div>
 </div>
+{% endblock content %}

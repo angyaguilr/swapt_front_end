@@ -29,15 +29,17 @@ class Swapt_admin(models.Model):
 class propManager(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)    
 
+class PropNameSignUp(models.Model):
+    propertyName = models.CharField(
+        max_length=100, help_text= ("Designates the name of the property.")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.name
+    
 # Code model for sign up codes
 class Code(models.Model):
     code = models.CharField(max_length=50, primary_key=True, unique=True)
-    PROPNAME_CHOICES = [
-        ('PropertyName1', 'PropertyName1'),
-        ('PropertyName2', 'PropertyName2'),
-    ]
-    campusSignUp = models.CharField(
-        max_length=50,
-        choices= PROPNAME_CHOICES,
-        null=True
-        )
+    propertyNameSignUp = models.ManyToManyField(PropNameSignUp, blank=True)

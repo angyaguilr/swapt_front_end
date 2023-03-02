@@ -4,7 +4,7 @@ from django.db import transaction
 from django.forms import ModelForm
 
 from .validators import validate_email, validate_code
-from .models import Swapt_admin, SwaptUser, User, Code, propManager
+from .models import Swapt_admin, SwaptUser, User, Code, propManager, PropNameSignUp
 
 
 class SwaptUserSignUpForm(UserCreationForm):
@@ -70,7 +70,7 @@ class UserEditForm(UserChangeForm):
 class CodeCreationForm(ModelForm):
 
     code = forms.CharField(min_length=6, max_length=50)
-    
+   
     class Meta(UserChangeForm.Meta):
         model = Code
-        fields = ("code", )
+        fields = ("code", "propertyNameSignUp")

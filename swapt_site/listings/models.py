@@ -378,19 +378,26 @@ class Swapt_Bundle_Price(models.Model):
         return f"{self.swapt_bundle_listing.name} {self.price}" 
 
 
-class GradeDifficultyPair(models.Model):
+class SwaptCampusPropertyNamePair(models.Model):
     listings = models.ManyToManyField('SwaptListingModel')
-
-
-    DIFFICULTY_CHOICES = [
-        ('Easy', 'Easy'),
-        ('Medium', 'Medium'),
-        ('Hard', 'Hard'),
+    CAMPUS_CHOICES = [
+        ('Elon', 'Elon'),
+        ('UMD', 'UMD'),
+        ('UNCG', 'UNCG')
     ]
-
-    grade = models.IntegerField()
-    difficulty = models.CharField(
-        max_length=15,
-        choices=DIFFICULTY_CHOICES,
+    PROPERTYNAME_CHOICES = [
+        ('Oaks', 'Oaks'),
+        ('MillPoint', 'MillPoint'),
+        ('OakHill', 'OakHill'),
+    ]
+    campus = models.CharField(
+        max_length=30,
+        choices=CAMPUS_CHOICES,
+        default='Elon'
     )
-    confirmed = models.BooleanField(default=False)     
+    propertyname = models.CharField(
+        max_length=30,
+        choices=PROPERTYNAME_CHOICES,
+    )
+    confirmed = models.BooleanField(default=False)  
+            

@@ -20,9 +20,9 @@ from django.http import JsonResponse,HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Listing, CampusPropertyNamePair, SwaptListing,  Price, Swapt_Bundle_Price, PaymentHistory, SwaptListingModel, Category
+from .models import Listing, SwaptCampusPropertyNamePair, CampusPropertyNamePair, SwaptListing,  Price, Swapt_Bundle_Price, PaymentHistory, SwaptListingModel, Category
 from .forms import ListingEditForm, ListingRejectForm, CmntyListingCreationForm, ListingCreationForm, CmntyListingPriceCreationForm
-from .serializers import CmntyListingSerializer, ListingSerializer, ListingReviewSerializer, CampusPropertyNamePairSerializer, CmntyListingReviewSerializer
+from .serializers import CmntyListingSerializer, SwaptListingSerializer, SwaptCampusPropertyNamePairSerializer, CampusPropertyNamePairSerializer, CampusPropertyNamePairSerializer, CmntyListingReviewSerializer, SwaptListingReviewSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 YOUR_DOMAIN = 'http://127.0.0.1:8000' 
@@ -46,9 +46,9 @@ from rest_framework import generics, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
-from .models import Listing, GradeDifficultyPair, SwaptListingModel
+from .models import Listing, SwaptListingModel, SwaptCampusPropertyNamePair, CampusPropertyNamePair
 from .forms import ListingEditForm, ListingRejectForm, CmntyListingCreationForm
-from .serializers import ListingSerializer, ListingReviewSerializer
+from .serializers import SwaptListingSerializer, SwaptListingReviewSerializer, CmntyListingSerializer
 
 #index /about
 class Index(View):
@@ -146,7 +146,7 @@ class StripeWebhookView(View):
 #Swapt Listings
 class SwaptReviewListingsAPI(viewsets.ModelViewSet):
     queryset = SwaptListingModel.objects.filter(confirmed=True)
-    serializer_class = ListingReviewSerializer
+    serializer_class = SwaptListingReviewSerializer
 
     def get_queryset(self):
 
@@ -157,135 +157,134 @@ class SwaptReviewListingsAPI(viewsets.ModelViewSet):
             return SwaptListingModel.objects.filter(stage=5)
         
         locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
-        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
-        lowGrade = int(self.request.GET.get('lowGrade', 1))
-        highGrade = int(self.request.GET.get('highGrade', 12))
+        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'MillPoint', 'OakHill'])
+        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD', 'UNCG'])
         lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
         highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
         showNA = self.request.GET.get('showNA', 'true')
 
         # Same filtering as in the regular review view
-        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        pairs = SwaptCampusPropertyNamePair.objects.filter(propertyname__in=propertynames,campus__in=campuses)
         queryset = SwaptListingModel.objects.filter(stage=stage, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
+            swaptcampuspropertynamepair__in=pairs, confirmed=True).distinct()
         
         if(showNA == "true"):
             queryset = queryset | SwaptListingModel.objects.filter(stage=stage, location__in=locations, percent_itemsSold=None, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
+            swaptcampuspropertynamepair__in=pairs, confirmed=True).distinct()
         
         if self.request._request.user.is_swapt_user:
             return queryset.filter(swaptuser=self.request._request.user.swaptuser)
         else:
             return queryset
         
-class SwaptListingsCreationView(View):
+# class SwaptListingsCreationView(View):
     
-    # Shows the swapt_user the upload form for listings
-    def get(self, request):
-        # Deletes any unconfirmed listings
-        listings = SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
-        listings.delete()
-        template = "listings/swapt_upload_form.html"
-        return render(request, template)
+#     # Shows the swapt_user the upload form for listings
+#     def get(self, request):
+#         # Deletes any unconfirmed listings
+#         listings = SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
+#         listings.delete()
+#         template = "listings/swapt_upload_form.html"
+#         return render(request, template)
 
-    def post(self, request):
-        template = "listings/swapt_upload_form.html"
-        csv_file = request.FILES['file']
-        # Checks if uploaded file is a CSV file
-        if not csv_file.name.endswith('.csv'):
-            messages.error(request, 'This is not a CSV file.')
-            return render(request, template)
-        data_set = csv_file.read().decode('UTF-8')
-        # setup a stream which is when we loop through each line we are able to handle a data in a stream
-        io_string = io.StringIO(data_set)
-        next(io_string)
-        # Keeps track of row number
-        counter = 1
+#     def post(self, request):
+#         template = "listings/swapt_upload_form.html"
+#         csv_file = request.FILES['file']
+#         # Checks if uploaded file is a CSV file
+#         if not csv_file.name.endswith('.csv'):
+#             messages.error(request, 'This is not a CSV file.')
+#             return render(request, template)
+#         data_set = csv_file.read().decode('UTF-8')
+#         # setup a stream which is when we loop through each line we are able to handle a data in a stream
+#         io_string = io.StringIO(data_set)
+#         next(io_string)
+#         # Keeps track of row number
+#         counter = 1
 
-        # First loop through is for error checking
-        # Checks formatting guidelines that are laid out on the upload form page
-        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-            if column[0] == "" or len(column[0]) > 250: 
-                messages.error(request, 'Name field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[1] == "" or len(column[1]) > 250:
-                messages.error(request, 'Description field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[2] == "" or (column[2] != "ColumbiaMD" and column[2] != "BurlingtonNC" and column[2] != "ElonNC" and column[2] != "CollegeParkMD"):
-                messages.error(request, 'Location field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
-                messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
-                messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[5] != "":
-                if int(column[5]) < 1 or int(column[5]) > 12:
-                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-                    messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-                messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
-                if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
-                    messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[7] != "":
-                if int(column[7]) < 1 or int(column[7]) > 12:
-                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-                    messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-                messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-            elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
-                if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
-                    messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#         # First loop through is for error checking
+#         # Checks formatting guidelines that are laid out on the upload form page
+#         for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+#             if column[0] == "" or len(column[0]) > 250: 
+#                 messages.error(request, 'Name field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[1] == "" or len(column[1]) > 250:
+#                 messages.error(request, 'Description field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[2] == "" or (column[2] != "ColumbiaMD" and column[2] != "BurlingtonNC" and column[2] != "ElonNC" and column[2] != "CollegeParkMD"):
+#                 messages.error(request, 'Location field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
+#                 messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
+#                 messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[5] != "":
+#                 if int(column[5]) < 1 or int(column[5]) > 12:
+#                     messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#                 if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+#                     messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
+#                 messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
+#                 if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
+#                     messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[7] != "":
+#                 if int(column[7]) < 1 or int(column[7]) > 12:
+#                     messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#                 if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+#                     messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
+#                 messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
+#             elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
+#                 if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
+#                     messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
                     
-            counter += 1
+#             counter += 1
 
-        # If there are any errors, render the upload page with those errors so user can fix them
-        if len(list(messages.get_messages(request))) != 0:
-            return render(request, template)
+#         # If there are any errors, render the upload page with those errors so user can fix them
+#         if len(list(messages.get_messages(request))) != 0:
+#             return render(request, template)
 
-        io_string = io.StringIO(data_set)
-        next(io_string)
+#         io_string = io.StringIO(data_set)
+#         next(io_string)
 
-        # Second loop through is for adding cards to database
-        for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+#         # Second loop through is for adding cards to database
+#         for column in csv.reader(io_string, delimiter=',', quotechar="|"):
 
-            listing = SwaptListingModel.objects.create(
-                name=column[0],
-                description=column[1],
-                location=column[2],
-                stage=1,
-                swaptuser=request.user.swaptuser
-            )
+#             listing = SwaptListingModel.objects.create(
+#                 name=column[0],
+#                 description=column[1],
+#                 location=column[2],
+#                 stage=1,
+#                 swaptuser=request.user.swaptuser
+#             )
 
-            firstPair = GradeDifficultyPair.objects.get_or_create(
-                grade=int(column[3]),
-                difficulty=column[4]
-            )
-            firstPair[0].listings.add(listing)
+#             firstPair = GradeDifficultyPair.objects.get_or_create(
+#                 grade=int(column[3]),
+#                 difficulty=column[4]
+#             )
+#             firstPair[0].listings.add(listing)
 
-            # Second and third pairs are optional
-            # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
-            # So, don't need to check both here
-            if column[5] != "":
-                secondPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=int(column[5]),
-                    difficulty=column[6]
-                )
-                secondPair[0].listings.add(listing)
+#             # Second and third pairs are optional
+#             # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
+#             # So, don't need to check both here
+#             if column[5] != "":
+#                 secondPair = GradeDifficultyPair.objects.get_or_create(
+#                     grade=int(column[5]),
+#                     difficulty=column[6]
+#                 )
+#                 secondPair[0].listings.add(listing)
 
-            if column[7] != "":
-                thirdPair = GradeDifficultyPair.objects.get_or_create(
-                    grade=int(column[7]),
-                    difficulty=column[8]
-                )
-                thirdPair[0].listings.add(listing)
+#             if column[7] != "":
+#                 thirdPair = GradeDifficultyPair.objects.get_or_create(
+#                     grade=int(column[7]),
+#                     difficulty=column[8]
+#                 )
+#                 thirdPair[0].listings.add(listing)
 
-        return redirect("listings:swapt_confirm")
+#         return redirect("listings:swapt_confirm")
         
 class SwaptListingsConfirmationView(View):
 
     # Returns view of swapt_user's unconfirmed listings (this page is redirected to right after the upload page if successful)
     # swapt_user can delete or edit listings
-    def get(self, request):
+     def get(self, request):
         
         listings = SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
 
@@ -296,8 +295,7 @@ class SwaptListingsConfirmationView(View):
         template = "listings/swapt_confirm.html"
         context = {"listings": SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)}
         return render(request, template, context)
-    
-    def post(self, request):
+     def post(self, request):
 
         listings = SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
 
@@ -305,7 +303,7 @@ class SwaptListingsConfirmationView(View):
         if request.POST.get('status') == "confirm":
             for listing in listings:
                 listing.confirmed = True
-                for pair in listing.gradedifficultypair_set.all():
+                for pair in listing.swaptcampuspropertynamepair_set.all():
                     pair.confirmed = True
                     pair.save()
 
@@ -321,8 +319,8 @@ class SwaptListingsConfirmationView(View):
         # The only other button that results in a post request is the cancel button, which deletes all unconfirmed cards
         else:
             listings.delete()
-            return redirect("listings:swapt_create")['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD']
-
+            return redirect("listings:swapt__create")['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD']
+        
 class SwaptListingsReviewView(View):
 
     def get(self, request):
@@ -330,28 +328,27 @@ class SwaptListingsReviewView(View):
     
         # Gets different attributes from the query string, but by default will be the most expansive possible
         locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
-        difficulties = self.request.GET.getlist('difficulty', ['Easy', 'Medium', 'Hard'])
-        lowGrade = int(self.request.GET.get('lowGrade', 1))
-        highGrade = int(self.request.GET.get('highGrade', 12))
+        propertynames = self.request.GET.getlist('propertyname', ['Oaks', 'MillPoint', 'OakHill'])
+        campuses = self.request.GET.getlist('campus', ['Elon', 'UMD', 'UNCG'])
         lowItemsSold = float(self.request.GET.get('lowItemsSold', 0.0))
         highItemsSold = float(self.request.GET.get('highItemsSold', 100.0))
         showNA = self.request.GET.get('showNA', 'true')
 
         # Filters to relevant pairs, then when filtering listings filters by those pairs and other attributes
         # Also stage 1 is the review stage
-        pairs = GradeDifficultyPair.objects.filter(grade__gte=lowGrade, grade__lte=highGrade, difficulty__in=difficulties)
+        pairs = SwaptCampusPropertyNamePair.objects.filter(campus__in=campuses, propertyname__in=propertynames)
         queryset = SwaptListingModel.objects.filter(stage=1, location__in=locations, percent_itemsSold__gte=lowItemsSold, percent_itemsSold__lte=highItemsSold, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
+            swaptcampuspropertynamepair__in=pairs, confirmed=True).distinct()
         
         # If the user wants to see cards that have 0 in/itemsSold, add those into the queryset too
         if(showNA == "true"):
             queryset = queryset | SwaptListingModel.objects.filter(stage=1, location__in=locations, percent_itemsSold=None, 
-            gradedifficultypair__in=pairs, confirmed=True).distinct()
+            swaptcampuspropertynamepair__in=pairs, confirmed=True).distinct()
 
         if request.user.is_swapt_user:
-            context = {"user": request.user, "review": queryset.filter(swaptuser=request.user.swaptuser)}
+            context = {"user": request.user, "swaptreview": queryset.filter(swaptuser=request.user.swaptuser)}
         elif request.user.is_admin:
-            context = {"user": request.user, "review": queryset[:3]} # Only show 3 at a time for admin
+            context = {"user": request.user, "swaptreview": queryset[:3]} # Only show 3 at a time for admin
         return render(request, template, context)
 
     def post(self, request):
@@ -367,6 +364,7 @@ class SwaptListingsReviewView(View):
                 if listing.stage == 2:
                     listing.issue = None # If the card is approved again, don't keep previous issue in the database
                 listing.save()
+        
         
         return redirect("listings:swapt_review")
 
@@ -392,22 +390,22 @@ class SwaptListingEditView(UpdateView):
     def get_initial(self):
         pk = self.kwargs['pk']
         listing = SwaptListingModel.objects.get(id=pk)
-        pairs = listing.gradedifficultypair_set.all()
+        pairs = listing.swaptcampuspropertynamepair_set.all()
         
-        intial = {'stage': listing.stage, 'gradeOne': "", 'difficultyOne': "", 'gradeTwo': "", 'difficultyTwo': "", 'gradeThree': "", 'difficultyThree': ""}
+        intial = {'stage': listing.stage, 'campusOne': "", 'propertynameOne': "", 'campusTwo': "", 'propertynameTwo': "", 'campusThree': "", 'propertynameThree': ""}
         
         counter = 1
         
         for pair in pairs:
             if counter == 1:
-                intial['gradeOne'] = pair.grade
-                intial['difficultyOne'] = pair.difficulty
+                intial['campusOne'] = pair.campus
+                intial['propertynameOne'] = pair.propertyname
             if counter == 2:
-                intial['gradeTwo'] = pair.grade
-                intial['difficultyTwo'] = pair.difficulty
+                intial['campusTwo'] = pair.campus
+                intial['propertynameTwo'] = pair.propertyname
             if counter == 3:
-                intial['gradeThree'] = pair.grade
-                intial['difficultyThree'] = pair.difficulty
+                intial['campusThree'] = pair.campus
+                intial['propertynameThree'] = pair.propertyname
 
             counter += 1
         
@@ -451,18 +449,18 @@ class SwaptListingRejectView(UpdateView):
 
 class SwaptListingListAPIView(generics.ListAPIView):
     queryset = SwaptListingModel.objects.filter(confirmed=True)
-    serializer_class = ListingSerializer
+    serializer_class = SwaptListingSerializer
 
     def get_queryset(self):
 
         # Get attibutes
         locations = self.request.GET.getlist('location')
-        grades = self.request.GET.getlist('grade')
+        campuss = self.request.GET.getlist('')
         number = self.request.GET.get('number')
 
-        # Get pairs with grade levels specified, then narrow down listings based on those pairs and other attributes
-        pairs = GradeDifficultyPair.objects.filter(grade__in=grades)
-        queryset = SwaptListingModel.objects.filter(gradedifficultypair__in=pairs).distinct()
+        # Get pairs with  levels specified, then narrow down listings based on those pairs and other attributes
+        pairs = SwaptCampusPropertyNamePair.objects.filter(campus__in=campuss)
+        queryset = SwaptListingModel.objects.filter(campuspropertynamepair__in=pairs).distinct()
         queryset = queryset.filter(confirmed=True, stage=2, location__in=locations) # Make sure cards returned in request are approved and confirmed
         queryset = sorted(queryset, key=lambda x: random.random()) # Randomize order as to not give same cards in same order every time to the app
         queryset = queryset[:int(int(number) * .85)] # Only give up to 85% number of cards specified
@@ -474,8 +472,8 @@ class SwaptListingListAPIView(generics.ListAPIView):
     def list(self, request, **kwargs):
         # Note the use of `get_queryset()` instead of `self.queryset`
         queryset = self.get_queryset()
-        # Passes grade list in so that serializer can randomly pick the difficulty levels to return in the request for the cards
-        serializer = ListingSerializer(queryset, many=True, context={'grades': self.request.GET.getlist('grade')})  
+        # Passes  list in so that serializer can randomly pick the propertyname levels to return in the request for the cards
+        serializer = SwaptListingSerializer(queryset, many=True, context={'campuss': self.request.GET.getlist('')})  
         data = serializer.data
 
         # This is for the animations in the app to work
@@ -488,7 +486,7 @@ class SwaptListingListAPIView(generics.ListAPIView):
 
 class SwaptReportListingView(generics.UpdateAPIView):
     queryset = SwaptListingModel.objects.filter(stage=2, confirmed=True)
-    serializer_class = ListingSerializer
+    serializer_class = SwaptListingSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
@@ -512,7 +510,7 @@ class SwaptReportListingView(generics.UpdateAPIView):
 
 class SwaptUpdatePercentItemsSoldListingView(generics.UpdateAPIView):
     queryset = SwaptListingModel.objects.filter(stage=2, confirmed=True)
-    serializer_class = ListingSerializer
+    serializer_class = SwaptListingSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):

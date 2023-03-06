@@ -34,7 +34,6 @@ class CmntyListingSerializer(serializers.ModelSerializer):
                   'color',
                   'delivery',
                   'category',
-                  'categoryV2',
                   'condition',
                   'cover',
                   'itemPrice',

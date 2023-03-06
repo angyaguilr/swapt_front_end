@@ -1055,17 +1055,17 @@ class CmntyListingDetailView(DetailView):
 def home(request):
 	banners=Banner.objects.all().order_by('-id')
 	data=Listing.objects.filter(is_featured=True).order_by('-id')
-	return render(request,'index.html',{'data':data,'banners':banners})
+	return render(request,'listings/index.html',{'data':data,'banners':banners})
 
 # Category
 def category_list(request):
     data=Category.objects.all().order_by('-id')
-    return render(request,'category_list.html',{'data':data})
+    return render(request,'listings/cmnty_category_list.html',{'data':data})
 
 # Brand
 def brand_list(request):
     data=Brand.objects.all().order_by('-id')
-    return render(request,'brand_list.html',{'data':data})
+    return render(request,'listings/cmnty_brand_list.html',{'data':data})
 
 # Listing List
 def listing_list(request):
@@ -1073,7 +1073,7 @@ def listing_list(request):
 	data=Listing.objects.all().order_by('-id')[:3]
 	min_price=ListingAttribute.objects.aggregate(Min('price'))
 	max_price=ListingAttribute.objects.aggregate(Max('price'))
-	return render(request,'listing_list.html',
+	return render(request,'listings/cmnty_listing_list_2.html',
 		{
 			'data':data,
 			'total_data':total_data,
@@ -1086,7 +1086,7 @@ def listing_list(request):
 def category_listing_list(request,cat_id):
 	category=CmntyListingsCategory.objects.get(id=cat_id)
 	data=Listing.objects.filter(category=category).order_by('-id')
-	return render(request,'category_listing_list.html',{
+	return render(request,'listings/category_listing_list.html',{
 			'data':data,
 			})
 
@@ -1094,7 +1094,7 @@ def category_listing_list(request,cat_id):
 def brand_listing_list(request,brand_id):
 	brand=Brand.objects.get(id=brand_id)
 	data=Listing.objects.filter(brand=brand).order_by('-id')
-	return render(request,'category_listing_list.html',{
+	return render(request,'listings/category_listing_list.html',{
 			'data':data,
 			})
 
@@ -1105,13 +1105,13 @@ def listing_detail(request,slug,id):
 	colors=ListingAttribute.objects.filter(listing=listing).values('color__id','color__title','color__color_code').distinct()
 	sizes=ListingAttribute.objects.filter(listing=listing).values('size__id','size__title','price','color__id').distinct()
 
-	return render(request, 'listing_detail.html',{'data':listing,'related':related_listings,'colors':colors,'sizes':sizes,})
+	return render(request, 'listings/cmnty_listing_detail_2.html',{'data':listing,'related':related_listings,'colors':colors,'sizes':sizes,})
 
 # Search
 def search(request):
 	q=request.GET['q']
 	data=Listing.objects.filter(title__icontains=q).order_by('-id')
-	return render(request,'search.html',{'data':data})
+	return render(request,'listings/search.html',{'data':data})
 
 # Filter Data
 def filter_data(request):

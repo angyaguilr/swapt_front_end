@@ -34,7 +34,7 @@ class CmntyListingCreationForm(ModelForm):
     class Meta:
         model = Listing
         fields = ("name", "tags", "desc", "thumbnail", "itemPrice", "url", "quantity", "title", "description", "color",
-                   "location", "category", "categoryV2", "condition", "itemsSold", "itemsUnSold")
+                   "location", "category", "condition", "itemsSold", "itemsUnSold")
     
     def save(self, commit=True):
         self.full_clean() # calls clean function
@@ -50,7 +50,6 @@ class CmntyListingCreationForm(ModelForm):
             listing.title = fields['title']
             listing.quantity = fields['quantity']
             listing.itemPrice = fields['itemPrice']
-            listing.categoryV2 = fields['categoryV2']
             listing.color = fields['color']
             listing.itemsSold = fields['itemsSold']
             listing.itemsUnSold =fields['itemsUnSold']

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Listing, SwaptListing, Banner, Price, ListingTag, Category, SwaptListingModel, Swapt_Bundle_Price, CampusPropertyNamePair,  SwaptCampusPropertyNamePair, ListingAttribute, CmntyListingsCategory
+from .models import Color, Size, Brand, Listing, SwaptListing, Banner, Price, ListingTag, Category, SwaptListingModel, Swapt_Bundle_Price, CampusPropertyNamePair,  SwaptCampusPropertyNamePair, ListingAttribute, CmntyListingsCategory
 
 # Registering the models in this app so the admin can view and edit these types of objects
 admin.site.register(Listing)
@@ -8,6 +8,9 @@ admin.site.register(SwaptCampusPropertyNamePair)
 admin.site.register(CampusPropertyNamePair)
 admin.site.register(SwaptListing)
 admin.site.register(Banner)
+admin.site.register(Brand)
+admin.site.register(Color)
+admin.site.register(Size)
 
 
 admin.site.register(Category)

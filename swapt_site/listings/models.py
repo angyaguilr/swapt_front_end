@@ -124,7 +124,7 @@ class Listing(models.Model):
         (2, 'Approved'),
         (3, 'Rejected'),
         (4, 'Reported'),
-        (5, 'Community'),
+        (5, 'Closed'),
 
     ]
     SELLING_STAGES = [
@@ -337,7 +337,7 @@ class SwaptListingModel(models.Model):
         (2, 'Approved'),
         (3, 'Rejected'),
         (4, 'Reported'),
-        (5, 'Community'),
+        (5, 'Closed'),
 
     ]
     SELLING_STAGES = [

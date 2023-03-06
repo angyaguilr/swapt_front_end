@@ -1109,7 +1109,7 @@ def listing_detail(request,slug,id):
 
 # Search
 def search(request):
-	q=request.GET['q']
+	q=request.GET.get("q")
 	data=Listing.objects.filter(title__icontains=q).order_by('-id')
 	return render(request,'listings/search.html',{'data':data})
 
@@ -1119,8 +1119,8 @@ def filter_data(request):
 	categories=request.GET.getlist('categoryV3[]')
 	brands=request.GET.getlist('brand[]')
 	sizes=request.GET.getlist('size[]')
-	minPrice=request.GET['minPrice']
-	maxPrice=request.GET['maxPrice']
+	minPrice=request.GET.get('minPrice', 0)
+	maxPrice=request.GET.get('maxPrice', 10000)
 	allListings=Listing.objects.all().order_by('-id').distinct()
 	allListings=allListings.filter(listingattribute__price__gte=minPrice)
 	allListings=allListings.filter(listingattribute__price__lte=maxPrice)
@@ -1132,7 +1132,7 @@ def filter_data(request):
 		allListings=allListings.filter(brand__id__in=brands).distinct()
 	if len(sizes)>0:
 		allListings=allListings.filter(listingattribute__size__id__in=sizes).distinct()
-	t=render_to_string('ajax/listing-list.html',{'data':allListings})
+	t=render_to_string('listings/listing-list.html',{'data':allListings})
 	return JsonResponse({'data':t})
 
 # Load More
@@ -1140,6 +1140,6 @@ def load_more_data(request):
 	offset=int(request.GET['offset'])
 	limit=int(request.GET['limit'])
 	data=Listing.objects.all().order_by('-id')[offset:offset+limit]
-	t=render_to_string('ajax/listing-list.html',{'data':data})
+	t=render_to_string('listings/listing-list.html',{'data':data})
 	return JsonResponse({'data':t}
 )

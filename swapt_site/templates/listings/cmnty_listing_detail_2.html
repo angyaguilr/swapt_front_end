@@ -7,7 +7,7 @@
 	<div class="row">
 		<!-- Images -->
 		<div class="col-md-4">
-			<img id="zoom_01" data-zoom-image="/media/{{data.productattribute_set.first.image}}" src="/media/{{data.productattribute_set.first.image}}" class="card-img-top" alt="{{data.title}}">
+			<img id="zoom_01" data-zoom-image="/media/{{data.listingattribute_set.first.image}}" src="/media/{{data.listingattribute_set.first.image}}" class="card-img-top" alt="{{data.title}}">
 		</div>
 		<div class="col-md-8">
 			<p>{{data.detail}}</p>
@@ -31,14 +31,14 @@
 				</tr>
 				<tr>
 					<th>Price</th>
-					<th>$ <span class="listing-price-{{data.id}}">{{data.productattribute_set.first.price}}</span></th>
+					<th>$ <span class="listing-price-{{data.id}}">{{data.listingattribute_set.first.price}}</span></th>
 				</tr>
 			</table>
 			<hr/>
 			<div class="input-group my-3" style="width:30%;">
-			  <input type="number" value="1" class="form-control listing-qty-{{data.id}}" id="productQty" />
+			  <input type="number" value="1" class="form-control listing-qty-{{data.id}}" id="listingQty" />
 			  <div class="input-group-append">
-			  	<input type="hidden" class="listing-image-{{data.id}}" value="{{data.productattribute_set.first.image}}" />
+			  	<input type="hidden" class="listing-image-{{data.id}}" value="{{data.listingattribute_set.first.image}}" />
 		          <input type="hidden" class="listing-id-{{data.id}}" value="{{data.id}}" />
 		          <input type="hidden" class="listing-title-{{data.id}}" value="{{data.title}}" />
 			    <button class="btn btn-primary btn-sm add-to-cart" data-index="{{data.id}}" type="button" id="addToCartBtn"><i class="fa fa-shopping-cart"></i> Add to Cart</button>
@@ -71,13 +71,13 @@
 			<h3 class="my-3">Reviews - <span class="avg-rating">{{avg_reviews.avg_rating}}</span>/5 <i class="fa fa-star text-warning"></i>
 				{% if user.is_authenticated %}
 				{% if canAdd %}
-				<button data-toggle="modal" data-target="#productReview" type="button" class="btn btn-warning btn-sm float-right reviewBtn">Add Review</button>
+				<button data-toggle="modal" data-target="#listingReview" type="button" class="btn btn-warning btn-sm float-right reviewBtn">Add Review</button>
 				{% endif %}
 				{% endif %}
 			</h3>
 	{% if user.is_authenticated %}
 	<!-- Product Review -->
-	<div class="modal fade" id="productReview" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="listingReview" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
 	      <div class="modal-header">
@@ -137,7 +137,7 @@
 		{% for listing in related %}
 		<div class="col-lg-3 col-sm-4 mb-4">
 			<div class="card shadow">
-			  <a href="/listing/{{listing.slug}}/{{listing.id}}"><img src="/media/{{listing.productattribute_set.first.image}}" class="card-img-top" alt="{{listing.title}}"></a>
+			  <a href="/listing/{{listing.slug}}/{{listing.id}}"><img src="/media/{{listing.listingattribute_set.first.image}}" class="card-img-top" alt="{{listing.title}}"></a>
 			  <div class="card-body">
 			    <h6 class="card-text"><a href="/listing/{{listing.slug}}/{{listing.id}}">{{listing.title}}</a></h6>
 			  </div>

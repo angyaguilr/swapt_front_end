@@ -9,16 +9,16 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for product_id,item in cart_data.items %}
+			{% for listing_id,item in cart_data.items %}
 			<tr>
 				<td>
 					<img src="/media/{{item.image}}" width="50" />
-					<p><a href="/listing/{{item.title|slugify}}/{{product_id}}">{{item.title}}</a></p>
+					<p><a href="/listing/{{item.title|slugify}}/{{listing_id}}">{{item.title}}</a></p>
 				</td>
 				<td>
-					<input type="number" value="{{item.qty}}" style="vertical-align: bottom;" class="listing-qty-{{product_id}}" />
-					<button data-item="{{product_id}}" class="btn btn-sm btn-primary update-item"><i class="fa fa-sync"></i></button>
-					<button class="btn btn-sm btn-danger delete-item" data-item="{{product_id}}"><i class="fa fa-trash"></i></button>
+					<input type="number" value="{{item.qty}}" style="vertical-align: bottom;" class="listing-qty-{{listing_id}}" />
+					<button data-item="{{listing_id}}" class="btn btn-sm btn-primary update-item"><i class="fa fa-sync"></i></button>
+					<button class="btn btn-sm btn-danger delete-item" data-item="{{listing_id}}"><i class="fa fa-trash"></i></button>
 				</td>
 				<td>$ {{item.price}}</td>
 				<td>$ {% widthratio item.price 1 item.qty %}</td>

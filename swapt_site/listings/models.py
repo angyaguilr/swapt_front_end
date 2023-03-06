@@ -4,6 +4,7 @@ from accounts.models import SwaptUser
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
+from django.utils.html import mark_safe
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -53,6 +54,69 @@ class ListingManager(models.Manager):
         ) | super().get_queryset().filter(
             stage__in=[1,2,4,5]
         )
+# Banner
+class Banner(models.Model):
+    img=models.ImageField(upload_to="banner_imgs/")
+    alt_text=models.CharField(max_length=300)
+
+    class Meta:
+        verbose_name_plural='1. Banners'
+
+    def image_tag(self):
+        return mark_safe('<img src="%s" width="100" />' % (self.img.url))
+
+
+    def __str__(self):
+        return self.alt_text
+# Category
+class CmntyListingsCategory(models.Model):
+    title=models.CharField(max_length=100)
+    image=models.ImageField(upload_to="cat_imgs/")
+
+    class Meta:
+        verbose_name_plural='2. Categories'
+
+    def image_tag(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
+
+    def __str__(self):
+        return self.title
+
+# Brand
+class Brand(models.Model):
+    title=models.CharField(max_length=100)
+    image=models.ImageField(upload_to="brand_imgs/")
+
+    class Meta:
+        verbose_name_plural='3. Brands'
+
+    def __str__(self):
+        return self.title
+
+# Color
+class Color(models.Model):
+    title=models.CharField(max_length=100)
+    color_code=models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural='4. Colors'
+
+    def color_bg(self):
+        return mark_safe('<div style="width:30px; height:30px; background-color:%s"></div>' % (self.color_code))
+
+    def __str__(self):
+        return self.title
+
+# Size
+class Size(models.Model):
+    title=models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural='5. Sizes'
+
+    def __str__(self):
+        return self.title
+
 
 class Listing(models.Model):
     APPROVAL_STAGES = [
@@ -143,7 +207,7 @@ class Listing(models.Model):
         choices=CATEGORY_CHOICES,
         null=True
     )
-    categoryV2 = models.ManyToManyField('Category', related_name='item')
+    categoryV3 = models.ForeignKey(CmntyListingsCategory,on_delete=models.CASCADE)
     condition = models.PositiveSmallIntegerField(choices=CONDITION_CHOICES , null=True)
     confirmed = models.BooleanField(default=False)
     swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
@@ -153,7 +217,9 @@ class Listing(models.Model):
     percent_itemsSold = models.DecimalField(default=None, blank=True, null=True, max_digits=5, decimal_places=2) # Max digits 5 instead of 4 because
     itemPrice = models.DecimalField(decimal_places=2, max_digits=10, default=0.00) # Max digits 5 instead of 4 because
     cover = models.ImageField(upload_to='images/')
-    
+    brand=models.ForeignKey(Brand,on_delete=models.CASCADE)
+    specs=models.TextField()
+    is_featured=models.BooleanField(default=False)
     publishing_date = models.DateTimeField(
         default=timezone.now,
         blank=True,
@@ -167,7 +233,22 @@ class Listing(models.Model):
         if(not (self.itemsSold == 0 and self.itemsUnSold == 0)):
             self.percent_itemsSold = round(100 * self.itemsSold/(self.itemsSold + self.itemsUnSold), 2)
         super(Listing, self).save(*args, **kwargs) # Call the "real" save() method.
+# Listing Attribute
+class ListingAttribute(models.Model):
+    listing=models.ForeignKey(Listing,on_delete=models.CASCADE)
+    color=models.ForeignKey(Color,on_delete=models.CASCADE)
+    size=models.ForeignKey(Size,on_delete=models.CASCADE)
+    price=models.PositiveIntegerField(default=0)
+    image=models.ImageField(upload_to="listing_imgs/",null=True)
 
+    class Meta:
+        verbose_name_plural='7. ListingAttributes'
+
+    def __str__(self):
+        return self.listing.title
+
+    def image_tag(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
 class Price(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     price = models.DecimalField(decimal_places=2, max_digits=10)

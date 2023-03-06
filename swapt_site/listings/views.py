@@ -1,15 +1,18 @@
 import csv, io
 import random
 import stripe
+import json
 
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.views.generic import View, UpdateView, CreateView, DetailView, ListView, TemplateView
 from django.urls import reverse_lazy, reverse
+from django.db.models import Max,Min,Count,Avg
 from rest_framework import generics, viewsets
+from django.template.loader import render_to_string
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.db.models import Q
 from django.core.mail import send_mail
@@ -20,7 +23,7 @@ from django.http import JsonResponse,HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Listing, SwaptCampusPropertyNamePair, CampusPropertyNamePair, SwaptListing,  Price, Swapt_Bundle_Price, PaymentHistory, SwaptListingModel, Category
+from .models import Listing, Banner, SwaptCampusPropertyNamePair, CampusPropertyNamePair, SwaptListing,  Price, Swapt_Bundle_Price, PaymentHistory, SwaptListingModel, Category, ListingAttribute, CmntyListingsCategory, Brand
 from .forms import ListingEditForm, ListingRejectForm, CmntyListingCreationForm, ListingCreationForm, CmntyListingPriceCreationForm
 from .serializers import CmntyListingSerializer, SwaptListingSerializer, SwaptCampusPropertyNamePairSerializer, CampusPropertyNamePairSerializer, CampusPropertyNamePairSerializer, CmntyListingReviewSerializer, SwaptListingReviewSerializer
 
@@ -1047,3 +1050,96 @@ class CmntyListingDetailView(DetailView):
         context = super(CmntyListingDetailView, self).get_context_data()
         context["prices"] = Price.objects.filter(listing=self.get_object())
         return context 
+
+# Home Page
+def home(request):
+	banners=Banner.objects.all().order_by('-id')
+	data=Listing.objects.filter(is_featured=True).order_by('-id')
+	return render(request,'index.html',{'data':data,'banners':banners})
+
+# Category
+def category_list(request):
+    data=Category.objects.all().order_by('-id')
+    return render(request,'category_list.html',{'data':data})
+
+# Brand
+def brand_list(request):
+    data=Brand.objects.all().order_by('-id')
+    return render(request,'brand_list.html',{'data':data})
+
+# Listing List
+def listing_list(request):
+	total_data=Listing.objects.count()
+	data=Listing.objects.all().order_by('-id')[:3]
+	min_price=ListingAttribute.objects.aggregate(Min('price'))
+	max_price=ListingAttribute.objects.aggregate(Max('price'))
+	return render(request,'listing_list.html',
+		{
+			'data':data,
+			'total_data':total_data,
+			'min_price':min_price,
+			'max_price':max_price,
+		}
+		)
+
+# Listing List According to Category
+def category_listing_list(request,cat_id):
+	category=CmntyListingsCategory.objects.get(id=cat_id)
+	data=Listing.objects.filter(category=category).order_by('-id')
+	return render(request,'category_listing_list.html',{
+			'data':data,
+			})
+
+# Listing List According to Brand
+def brand_listing_list(request,brand_id):
+	brand=Brand.objects.get(id=brand_id)
+	data=Listing.objects.filter(brand=brand).order_by('-id')
+	return render(request,'category_listing_list.html',{
+			'data':data,
+			})
+
+# Listing Detail
+def listing_detail(request,slug,id):
+	listing=Listing.objects.get(id=id)
+	related_listings=Listing.objects.filter(category=listing.categoryV3).exclude(id=id)[:4]
+	colors=ListingAttribute.objects.filter(listing=listing).values('color__id','color__title','color__color_code').distinct()
+	sizes=ListingAttribute.objects.filter(listing=listing).values('size__id','size__title','price','color__id').distinct()
+
+	return render(request, 'listing_detail.html',{'data':listing,'related':related_listings,'colors':colors,'sizes':sizes,})
+
+# Search
+def search(request):
+	q=request.GET['q']
+	data=Listing.objects.filter(title__icontains=q).order_by('-id')
+	return render(request,'search.html',{'data':data})
+
+# Filter Data
+def filter_data(request):
+	colors=request.GET.getlist('color[]')
+	categories=request.GET.getlist('categoryV3[]')
+	brands=request.GET.getlist('brand[]')
+	sizes=request.GET.getlist('size[]')
+	minPrice=request.GET['minPrice']
+	maxPrice=request.GET['maxPrice']
+	allListings=Listing.objects.all().order_by('-id').distinct()
+	allListings=allListings.filter(listingattribute__price__gte=minPrice)
+	allListings=allListings.filter(listingattribute__price__lte=maxPrice)
+	if len(colors)>0:
+		allListings=allListings.filter(listingattribute__color__id__in=colors).distinct()
+	if len(categories)>0:
+		allListings=allListings.filter(category__id__in=categories).distinct()
+	if len(brands)>0:
+		allListings=allListings.filter(brand__id__in=brands).distinct()
+	if len(sizes)>0:
+		allListings=allListings.filter(listingattribute__size__id__in=sizes).distinct()
+	t=render_to_string('ajax/listing-list.html',{'data':allListings})
+	return JsonResponse({'data':t})
+
+# Load More
+def load_more_data(request):
+	offset=int(request.GET['offset'])
+	limit=int(request.GET['limit'])
+	data=Listing.objects.all().order_by('-id')[offset:offset+limit]
+	t=render_to_string('ajax/listing-list.html',{'data':data})
+	return JsonResponse({'data':t}
+)

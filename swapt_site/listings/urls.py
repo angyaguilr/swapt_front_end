@@ -1,6 +1,7 @@
 from django.urls import include, path, re_path
 from django.contrib.auth.decorators import login_required
 from rest_framework import routers
+from django.conf.urls.static import static
 
 from accounts.decorators import swapt_user_required, Swapt_admin_required
 from . import views

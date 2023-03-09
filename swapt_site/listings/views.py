@@ -1127,12 +1127,12 @@ def filter_data(request):
 	if len(colors)>0:
 		allListings=allListings.filter(listingattribute__color__id__in=colors).distinct()
 	if len(categories)>0:
-		allListings=allListings.filter(category__id__in=categories).distinct()
+		allListings=allListings.filter(categoryV3__id__in=categories).distinct()
 	if len(brands)>0:
 		allListings=allListings.filter(brand__id__in=brands).distinct()
 	if len(sizes)>0:
 		allListings=allListings.filter(listingattribute__size__id__in=sizes).distinct()
-	t=render_to_string('listings/listing-list.html',{'data':allListings})
+	t=render_to_string('ajax/listing-list.html',{'data':allListings})
 	return JsonResponse({'data':t})
 
 # Load More
@@ -1140,6 +1140,6 @@ def load_more_data(request):
 	offset=int(request.GET['offset'])
 	limit=int(request.GET['limit'])
 	data=Listing.objects.all().order_by('-id')[offset:offset+limit]
-	t=render_to_string('listings/listing-list.html',{'data':data})
+	t=render_to_string('ajax/listing-list.html',{'data':data})
 	return JsonResponse({'data':t}
 )

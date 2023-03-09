@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'listings/base.html' %}
 {% load static %}
 {% block content %}
 <main class="container my-4">
-	<!-- Featured Products -->
+	<!-- Featured Listings -->
 	<h3 class="my-4 border-bottom pb-1">{{data.title}}</h3>
 	<div class="row">
 		<!-- Images -->
@@ -58,7 +58,7 @@
 				</tr>
 				<tr>
 					<th>Category</th>
-					<td><a href="/category-listing-list/{{data.category.id}}">{{data.category.title}}</a></td>
+					<td><a href="/category-listing-list/{{data.categoryV3.id}}">{{data.categoryV3.title}}</a></td>
 				</tr>
 				<tr>
 					<th>Specification</th>
@@ -76,12 +76,12 @@
 				{% endif %}
 			</h3>
 	{% if user.is_authenticated %}
-	<!-- Product Review -->
+	<!-- Listing Review -->
 	<div class="modal fade" id="listingReview" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
 	      <div class="modal-header">
-	        <h5 class="modal-title" id="exampleModalLabel">Add Product Review</h5>
+	        <h5 class="modal-title" id="exampleModalLabel">Add Listing Review</h5>
 	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 	          <span aria-hidden="true">&times;</span>
 	        </button>
@@ -104,7 +104,7 @@
 	    </div>
 	  </div>
 	</div>
-	<!-- Product Review End -->
+	<!-- Listing Review End -->
 	{% endif %}
 			</h3>
 			<div class="card">
@@ -131,8 +131,8 @@
 			</div>
 		</div>
 	</div>
-	<!-- Related Products -->
-	<h3 class="mt-4 mb-3 border-bottom pb-1">Related Products</h3>
+	<!-- Related Listings -->
+	<h3 class="mt-4 mb-3 border-bottom pb-1">Related Listings</h3>
 	<div class="row">
 		{% for listing in related %}
 		<div class="col-lg-3 col-sm-4 mb-4">

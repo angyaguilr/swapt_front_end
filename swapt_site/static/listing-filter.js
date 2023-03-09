@@ -1,7 +1,7 @@
 $(document).ready(function(){
 	$(".ajaxLoader").hide();
 	// Listing Filter Start
-	$(".filter-checkbox,#priceFilterBtn").on('click',function(){
+	$(".filter-checkbox,#priceFilterBtn").on('click',function(e){
 		var _filterObj={};
 		var _minPrice=$('#maxPrice').attr('min');
 		var _maxPrice=$('#maxPrice').val();
@@ -17,18 +17,21 @@ $(document).ready(function(){
 
 		// Run Ajax
 		$.ajax({
-			url:'/filter-data',
+			type:'GET',
+			url:'/listings/filter-data',
+			dataType: 'json',
 			data:_filterObj,
-			dataType:'json',
 			beforeSend:function(){
 				$(".ajaxLoader").show();
 			},
 			success:function(res){
-				console.log(res);
+				console.log('success',res);
 				$("#filteredListings").html(res.data);
 				$(".ajaxLoader").hide();
-			}
+			},
+			error:function(exception){alert('Exeption:'+exception);}
 		});
+		e.preventDefault();
 	});
 	// End
 

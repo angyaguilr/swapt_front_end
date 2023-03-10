@@ -15,7 +15,7 @@ urlpatterns = [
     #testing:
     path('', views.home,name='home'),
     path('search',views.search,name='search'),
-    path('category-list',views.category_list,name='category-list'),
+    path('category-list',views.category_list,name='category-list'), #working
     path('brand-list',views.brand_list,name='brand-list'),
     path('listing-list',views.listing_list,name='listing-list'),
     path('category-listing-list/<int:cat_id>',views.category_listing_list,name='category-listing-list'),

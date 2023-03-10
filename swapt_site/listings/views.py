@@ -1059,7 +1059,7 @@ def home(request):
 
 # Category
 def category_list(request):
-    data=Category.objects.all().order_by('-id')
+    data=CmntyListingsCategory.objects.all().order_by('-id')
     return render(request,'listings/cmnty_category_list.html',{'data':data})
 
 # Brand
@@ -1085,7 +1085,7 @@ def listing_list(request):
 # Listing List According to Category
 def category_listing_list(request,cat_id):
 	category=CmntyListingsCategory.objects.get(id=cat_id)
-	data=Listing.objects.filter(category=category).order_by('-id')
+	data=Listing.objects.filter(categoryV3=category).order_by('-id')
 	return render(request,'listings/category_listing_list.html',{
 			'data':data,
 			})

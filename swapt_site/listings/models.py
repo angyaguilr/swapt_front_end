@@ -176,6 +176,7 @@ class Listing(models.Model):
         ('ColumbiaMD', 'ColumbiaMD')
     ]
     name = models.CharField(max_length=200, default='any_name')
+    slug=models.CharField(max_length=400)
     tags = models.ManyToManyField(ListingTag, blank=True)
     desc = models.TextField(_("Description"), blank=True)
     thumbnail = models.ImageField(upload_to=get_image_filename, blank=True)

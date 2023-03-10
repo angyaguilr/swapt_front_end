@@ -19,7 +19,6 @@ $(document).ready(function(){
 		$.ajax({
 			type:'GET',
 			url:'/listings/filter-data',
-			dataType: 'json',
 			data:_filterObj,
 			beforeSend:function(){
 				$(".ajaxLoader").show();

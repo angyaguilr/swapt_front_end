@@ -2,6 +2,7 @@ from django.urls import include, path, re_path
 from django.contrib.auth.decorators import login_required
 from rest_framework import routers
 from django.conf.urls.static import static
+from django.conf import settings
 
 from accounts.decorators import swapt_user_required, Swapt_admin_required
 from . import views
@@ -64,3 +65,6 @@ urlpatterns = [
     path('swapt-confirmation/<int:pk>', views.SwaptListingConfirmation.as_view(), name='swapt_confirmation'),
     path('swapt-pay-confirmation/', views.SwaptListingPayConfirmation.as_view(),name='payment-confirmation'),
     ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

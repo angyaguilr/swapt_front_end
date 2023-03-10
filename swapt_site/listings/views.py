@@ -1094,7 +1094,7 @@ def category_listing_list(request,cat_id):
 def brand_listing_list(request,brand_id):
 	brand=Brand.objects.get(id=brand_id)
 	data=Listing.objects.filter(brand=brand).order_by('-id')
-	return render(request,'listings/category_listing_list.html',{
+	return render(request,'cmnty_brand_listing_list.html',{
 			'data':data,
 			})
 

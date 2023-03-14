@@ -1059,7 +1059,7 @@ def home(request):
 
 # Category
 def category_list(request):
-    data=CmntyListingsCategory.objects.all().order_by('-id')
+    data=Category.objects.all().order_by('-id')
     return render(request,'listings/cmnty_category_list.html',{'data':data})
 
 # Brand
@@ -1085,7 +1085,7 @@ def listing_list(request):
 # Listing List According to Category
 def category_listing_list(request,cat_id):
 	category=CmntyListingsCategory.objects.get(id=cat_id)
-	data=Listing.objects.filter(categoryV3=category).order_by('-id')
+	data=Listing.objects.filter(category=category).order_by('-id')
 	return render(request,'listings/category_listing_list.html',{
 			'data':data,
 			})
@@ -1094,7 +1094,7 @@ def category_listing_list(request,cat_id):
 def brand_listing_list(request,brand_id):
 	brand=Brand.objects.get(id=brand_id)
 	data=Listing.objects.filter(brand=brand).order_by('-id')
-	return render(request,'cmnty_brand_listing_list.html',{
+	return render(request,'listings/category_listing_list.html',{
 			'data':data,
 			})
 
@@ -1127,12 +1127,12 @@ def filter_data(request):
 	if len(colors)>0:
 		allListings=allListings.filter(listingattribute__color__id__in=colors).distinct()
 	if len(categories)>0:
-		allListings=allListings.filter(categoryV3__id__in=categories).distinct()
+		allListings=allListings.filter(category__id__in=categories).distinct()
 	if len(brands)>0:
 		allListings=allListings.filter(brand__id__in=brands).distinct()
 	if len(sizes)>0:
 		allListings=allListings.filter(listingattribute__size__id__in=sizes).distinct()
-	t=render_to_string('ajax/listing-list.html',{'data':allListings})
+	t=render_to_string('listings/listing-list.html',{'data':allListings})
 	return JsonResponse({'data':t})
 
 # Load More
@@ -1140,6 +1140,6 @@ def load_more_data(request):
 	offset=int(request.GET['offset'])
 	limit=int(request.GET['limit'])
 	data=Listing.objects.all().order_by('-id')[offset:offset+limit]
-	t=render_to_string('ajax/listing-list.html',{'data':data})
+	t=render_to_string('listings/listing-list.html',{'data':data})
 	return JsonResponse({'data':t}
 )

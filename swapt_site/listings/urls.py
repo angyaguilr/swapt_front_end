@@ -10,7 +10,8 @@ from . import views
 # Setting up the reivew flashcards page API
 router = routers.DefaultRouter()
 router.register(r'review', views.SwaptReviewListingsAPI)
-router.register(r'cmnty_listings_review', views.CmntyReviewListingsAPI) 
+router.register(r'cmnty_listings_review', views.CmntyReviewListingsAPI)
+router.register(r'cmnty_listings_review', views.CmntyReviewListingsAPI)
 
 urlpatterns = [
     #testing:

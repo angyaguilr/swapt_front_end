@@ -208,6 +208,7 @@ class Listing(models.Model):
         choices=CATEGORY_CHOICES,
         null=True
     )
+    categoryV2 = models.ManyToManyField('Category', related_name='item')
     categoryV3 = models.ForeignKey(CmntyListingsCategory,on_delete=models.CASCADE)
     condition = models.PositiveSmallIntegerField(choices=CONDITION_CHOICES , null=True)
     confirmed = models.BooleanField(default=False)

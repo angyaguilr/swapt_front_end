@@ -5,13 +5,13 @@
         <button class="nav-link active" id="nav-cmntyreview-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyreview" type="button" role="tab" aria-controls="nav-cmntyreview" aria-selected="true">Awaiting Review</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-cmntycmnty-approved-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyapproved" type="button" role="tab" aria-controls="nav-cmntyapproved" aria-selected="false">Approved</button>
+        <button class="nav-link" id="nav-cmnty-approved-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyapproved" type="button" role="tab" aria-controls="nav-cmntyapproved" aria-selected="false">Approved</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-cmntycmnty-reported-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyreported" type="button" role="tab" aria-controls="nav-cmntyreported" aria-selected="false">Reported</button>
+        <button class="nav-link" id="nav-cmnty-reported-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyreported" type="button" role="tab" aria-controls="nav-cmntyreported" aria-selected="false">Reported</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="nav-cmntycmnty-rejected-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyrejected" type="button" role="tab" aria-controls="nav-cmntyrejected" aria-selected="false">Rejected</button>
+        <button class="nav-link" id="nav-cmnty-rejected-tab" data-bs-toggle="tab" data-bs-target="#nav-cmntyrejected" type="button" role="tab" aria-controls="nav-cmntyrejected" aria-selected="false">Rejected</button>
     </li>
 </ul>
 <div class="form-check form-check-inline">
@@ -147,7 +147,7 @@
         {% endfor %}
         </div>
     </div>
-    <div class="tab-pane fade" id="nav-cmntyapproved" role="tabpanel" aria-labelledby="nav-cmntycmnty-approved-tab">
+    <div class="tab-pane fade" id="nav-cmntyapproved" role="tabpanel" aria-labelledby="nav-cmnty-approved-tab">
         <table id="cmnty-approved-table" class="table table-bordered">
             <thead>
                 <tr>
@@ -166,7 +166,8 @@
             </thead>
         </table>
     </div>
-    <div class="tab-pane fade" id="nav-cmntyreported" role="tabpanel" aria-labelledby="nav-cmntycmnty-reported-tab">
+    <div class="tab-pane fade" id="nav-cmntyreported" role="tabpanel" aria-labelledby="nav-
+    cmnty-reported-tab">
         <table id="cmnty-reported-table" class="table table-bordered">
             <thead>
                 <tr>
@@ -186,7 +187,7 @@
             </thead>
         </table>
     </div> 
-    <div class="tab-pane fade" id="nav-cmntyrejected" role="tabpanel" aria-labelledby="nav-cmntycmnty-rejected-tab">
+    <div class="tab-pane fade" id="nav-cmntyrejected" role="tabpanel" aria-labelledby="nav-cmnty-rejected-tab">
         <table id="cmnty-rejected-table" class="table table-bordered">
             <thead>
                 <tr>
@@ -228,7 +229,7 @@ $(document).ready(function () {
         for(let i = 0; i < params.length; i ++) {
             param = params[i];
             
-            if(param.startsWith("location") || param.startsWith("propertyname")) {
+            if(param.startsWith("location") || param.startsWith("propertyname") || param.startsWith("campus")) {
                 $("#" + param.split("=")[1]).prop("checked", true);
             } else if(param.startsWith("lowItemsSold")) {
                 $("#low-itemsSold").val(parseFloat(param.split("=")[1]))
@@ -300,8 +301,7 @@ $(document).ready(function () {
                     return '<div class="d-inline"> <form action="" method="POST"> {% csrf_token %} <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button> <input type="hidden" class="card-id" name="id" value="' + data["id"] + '"> </form> </div> <div class="d-inline"> <a class="btn btn-primary" role="button">Edit</a> </div>';
                 },
                 "targets": -1,
-               
-            }
+            },
         ],
     });
  
@@ -310,7 +310,7 @@ $(document).ready(function () {
 
     $('#cmnty-approved-table tbody').on('click', 'a', function () {
         var data = approvedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmntycmnty-approved-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmnty-approved-tab";
     } );
 
     var reportedTable = $('#cmnty-reported-table').DataTable({
@@ -336,11 +336,11 @@ $(document).ready(function () {
             {"data": "issue"},
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.campus'
+                "data": 'campuspropertynamepair_set.0.campus',
             },
             {
-                "searchable": false,
-                "data": 'campuspropertynamepair_set.0.propertyname'
+                "searchable": true,
+                "data": 'campuspropertynamepair_set.0.propertyname',
             },
             {
                 "searchable": false,
@@ -375,7 +375,7 @@ $(document).ready(function () {
     $('#cmnty-reported-table tbody').on('click', 'a', function () {
         console.log("Test");
         var data = reportedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmntycmnty-reported-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmnty-reported-tab";
     } );
 
     var rejectedTable = $('#cmnty-rejected-table').DataTable({
@@ -439,7 +439,7 @@ $(document).ready(function () {
 
     $('#cmnty-rejected-table tbody').on('click', 'a', function () {
         var data = rejectedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmntycmnty-rejected-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmnty-rejected-tab";
     } );
 
     var cmntyTable = $('#cmnty-table').DataTable({
@@ -480,6 +480,7 @@ function submit(e){
     $(".propertyname").each(function () {
         if ($(this).is(":checked")) { propertynames.push($(this).attr('id').toString()); }
     });
+
     $(".campus").each(function () {
         if ($(this).is(":checked")) { campuses.push($(this).attr('id').toString()); }
     });
@@ -498,6 +499,9 @@ function submit(e){
         } else {
             href += locations[i];
         }
+    }
+    for(let i = 0; i < campuses.length; i++) {
+        href += "&campus=" + campuses[i];
     }
     for(let i = 0; i < propertynames.length; i++) {
         href += "&propertyname=" + propertynames[i];

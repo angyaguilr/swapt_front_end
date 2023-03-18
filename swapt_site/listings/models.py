@@ -17,6 +17,15 @@ def get_image_filename(instance, filename):
     slug = slugify(name)
     return f"listings/{slug}-{filename}"
 
+class PropertyManager(models.Model):
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField()
+    propertyname = models.CharField(max_length=30)
+
+    def __str__(self):
+        return "%s %s" % (self.first_name, self.last_name)
+
 class ListingTag(models.Model):
     name = models.CharField(
         max_length=100, help_text=_("Designates the name of the tag.")
@@ -392,6 +401,7 @@ class SwaptListingModel(models.Model):
     ]
     listings = models.ManyToManyField(
         'Listing', related_name='order', blank=True)
+    propertymanager = models.ForeignKey(PropertyManager, on_delete=models.CASCADE, default=1)
     name = models.CharField(max_length=200, default='any_name')
     tags = models.ManyToManyField(ListingTag, blank=True)
     desc = models.TextField(_("Description"), blank=True)

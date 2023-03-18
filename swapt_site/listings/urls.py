@@ -10,8 +10,7 @@ from . import views
 # Setting up the reivew flashcards page API
 router = routers.DefaultRouter()
 router.register(r'review', views.SwaptReviewListingsAPI)
-router.register(r'cmnty_listings_review', views.CmntyReviewListingsAPI)
-router.register(r'cmnty_listings_review', views.CmntyReviewListingsAPI)
+router.register(r'cmnty-review', views.CmntyReviewListingsAPI)
 
 urlpatterns = [
     #testing:
@@ -40,9 +39,7 @@ urlpatterns = [
     path('cmnty-edit/<int:pk>/', login_required()(views.CmntyListingEditView.as_view()), name="cmnty_edit"),
     path('cmnty-reject/<int:pk>/', Swapt_admin_required()(views.CmntyListingRejectView.as_view()), name="cmnty_reject"),
     path('cmnty-list/', views.CmntyListingListAPIView.as_view(), name="cmnty_list"),
-    re_path('^api/', include(router.urls)),
     path('cmnty-report/', views.CmntyReportListingView.as_view(), name="cmnty_report"),
-    path('cmnty-update-percent-itemssold/', views.CmntyUpdatePercentItemsSoldListingView.as_view(), name="cmnty_update_percent_itemssold"),
     path('cmnty-Listings/', views.CmntyListingsUploaded.as_view(), name='cmnty_listings'),
     path('cmnty-Listings/search/', views.CmntyListingsUploadedSearch.as_view(), name='cmnty_listings_search'),
     path("cmnty-listing", views.CmntyListingListView.as_view(), name="cmnty_listing_list"),
@@ -57,7 +54,6 @@ urlpatterns = [
     re_path('^api/', include(router.urls)),
     #TBD: url('^api/', include(router.urls)),
     path('swapt-report/', views.SwaptReportListingView.as_view(), name="swapt_report"),
-    path('swapt-update-percent-itemssold/', views.SwaptUpdatePercentItemsSoldListingView.as_view(), name="swapt_update_percent_itemssold"),
     path('swapt-Listings/', views.SwaptListingsUploaded.as_view(), name='swapt_listings'),
     path('swapt-Listings/search/', views.SwaptListingsUploadedSearch.as_view(), name='swapt_listings_search'),
     path('swapt-create-listing/', views.SwaptListingCreation.as_view(), name='swapt_create'),

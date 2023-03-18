@@ -2,18 +2,17 @@ from django import forms
 from django.db.models.base import Model
 from django.forms import ModelForm
 
-from .models import Listing,  SwaptCampusPropertyNamePair, Price, SwaptListingModel, CampusPropertyNamePair
-
+from .models import Banner, CmntyListingsCategory, Brand, Color, Dimensions, CmntyListingPrice, CmntyListingTag, CmntyListing, CmntyCampusPropertyNamePair, CmntyListingAttribute, Swapt_Prices, SwaptCampusPropertyNamePair, SwaptListingModel, SwaptListingTag, SwaptPropertyManager, SwaptPaymentHistory, SwaptListingTransactionRef
 # For Swapt admin to create commMkt listings
 class ListingCreationForm(ModelForm):
     
     # Instead of creating a new model, just using listing model with arbitrary data for required fields
     # Specifically, using title field for commMkt and stage=5 is for commMkt listings
-    title = forms.CharField(max_length=250, label="Listing Title")
+    title = forms.CharField(max_length=250, label="CmntyListing Title")
 
     class Meta:
         model = SwaptListingModel
-        fields = ("title", "description", "location", "category", "condition", "itemPrice")
+        fields = ("title", "desc", "condition",)
     
     def save(self, commit=True):
         self.full_clean() # calls clean function
@@ -29,34 +28,21 @@ class CmntyListingCreationForm(ModelForm):
     
     # Instead of creating a new model, just using listing model with arbitrary data for required fields
     # Specifically, using title field for commMkt and stage=5 is for commMkt listings
-    title = forms.CharField(max_length=250, label="Listing Title")
+    title = forms.CharField(max_length=250, label="CmntyListing Title")
 
     class Meta:
-        model = Listing
-        fields = ("name", "tags", "desc", "thumbnail", "itemPrice", "url", "quantity", "title", "description", "color",
-                   "location", "category", "condition", "itemsSold", "itemsUnSold")
+        model = CmntyListing
+        fields = ("title", "desc", "condition",)
     
     def save(self, commit=True):
         self.full_clean() # calls clean function
-        listing = Listing(stage=2)
+        listing = CmntyListing(stage=2)
         
         if commit:
             fields = self.cleaned_data
-            listing.name = fields['name']
-            listing.thumbnail = fields['thumbnail']
-            listing.tags = fields['tags']
             listing.desc = fields['desc']
-            listing.description = fields['description']
             listing.title = fields['title']
-            listing.quantity = fields['quantity']
-            listing.itemPrice = fields['itemPrice']
-            listing.color = fields['color']
-            listing.itemsSold = fields['itemsSold']
-            listing.itemsUnSold =fields['itemsUnSold']
-            listing.location =fields['location']
-            listing.category =fields['category']
             listing.condition = fields['condition']
-            listing.url = fields['url']
         
         return listing
 
@@ -64,15 +50,15 @@ class CmntyListingPriceCreationForm(ModelForm):
     
     # Instead of creating a new model, just using listing model with arbitrary data for required fields
     # Specifically, using title field for commMkt and stage=5 is for commMkt listings
-    #title = forms.CharField(max_length=250, label="Listing Title")
+    #title = forms.CharField(max_length=250, label="CmntyListing Title")
 
     class Meta:
-        model = Price
+        model = CmntyListingPrice
         fields = ( "listing", "price",)
     
     def save(self, commit=True):
         self.full_clean() # calls clean function
-        price = Price
+        price = CmntyListingPrice
         
         if commit:
             fields = self.cleaned_data
@@ -105,7 +91,7 @@ class ListingEditForm(ModelForm):
    
     stage = forms.ChoiceField(choices=APPROVAL_STAGES, label="Stage", required=False)
 
-    # Added the campus and propertyname fields separately since they are part of a related object instead of the Listing object itself
+    # Added the campus and propertyname fields separately since they are part of a related object instead of the CmntyListing object itself
     campusOne = forms.ChoiceField(choices=CAMPUS_CHOICES, label="Campus Level 1", required=True)
     propertynameOne = forms.ChoiceField(choices=PROPERTYNAME_CHOICES, label="Propertyname Level 1", required=True)
 
@@ -117,7 +103,7 @@ class ListingEditForm(ModelForm):
     
     class Meta:
         model = SwaptListingModel
-        fields = ("title", "description", "location")
+        fields = ("title", "desc", "location")
 
     def clean(self):
         data = self.cleaned_data
@@ -183,7 +169,7 @@ class ListingEditForm(ModelForm):
                 secondPair[0].listings.add(listing)
 
             if fields['campusThree'] != None and fields['propertynameThree'] != "":
-                thirdPair = CampusPropertyNamePair.objects.get_or_create(
+                thirdPair = SwaptCampusPropertyNamePair.objects.get_or_create(
                     campus=fields['campusThree'],
                     propertyname=fields['propertynameThree']
                 )
@@ -227,7 +213,7 @@ class CmntyListingEditForm(ModelForm):
    
     stage = forms.ChoiceField(choices=APPROVAL_STAGES, label="Stage", required=False)
 
-    # Added the campus and propertyname fields separately since they are part of a related object instead of the Listing object itself
+    # Added the campus and propertyname fields separately since they are part of a related object instead of the CmntyListing object itself
     campusOne = forms.ChoiceField(choices=CAMPUS_CHOICES, label="Campus Level 1", required=True)
     propertynameOne = forms.ChoiceField(choices=PROPERTYNAME_CHOICES, label="Propertyname Level 1", required=True)
 
@@ -238,8 +224,8 @@ class CmntyListingEditForm(ModelForm):
     propertynameThree = forms.ChoiceField(choices=PROPERTYNAME_CHOICES, label="Propertyname Level 3", required=False)
     
     class Meta:
-        model = Listing
-        fields = ("title", "description", "location")
+        model = CmntyListing
+        fields = ("title", "desc", "location")
 
     def clean(self):
         data = self.cleaned_data
@@ -278,7 +264,7 @@ class CmntyListingEditForm(ModelForm):
     def save(self, commit=True):
         self.full_clean() # calls clean function
         listing = super().save(commit=False)
-        pairs = listing.campuspropertynamepair_set.all()
+        pairs = listing.cmntycampuspropertynamepair_set.all()
         
         if commit:
             fields = self.cleaned_data
@@ -290,7 +276,7 @@ class CmntyListingEditForm(ModelForm):
             # Add new pairs
             # NOTE: if first pair and third pair are filled in, but second isn't, then when displayed on the site, the third pair filled in on 
             # the form will act like the second pair
-            firstPair = CampusPropertyNamePair.objects.get_or_create(
+            firstPair = CmntyCampusPropertyNamePair.objects.get_or_create(
                 campus=fields['campusOne'],
                 propertyname=fields['propertynameOne']
             )
@@ -298,14 +284,14 @@ class CmntyListingEditForm(ModelForm):
             
             # Need to make sure these fields are filled in before adding a pair since they're optional (same goes for pair 3)
             if fields['campusTwo'] != None and fields['propertynameTwo'] != "":
-                secondPair = CampusPropertyNamePair.objects.get_or_create(
+                secondPair = CmntyCampusPropertyNamePair.objects.get_or_create(
                     campus=fields['campusTwo'],
                     propertyname=fields['propertynameTwo']
                 )
                 secondPair[0].listings.add(listing)
 
             if fields['campusThree'] != None and fields['propertynameThree'] != "":
-                thirdPair = CampusPropertyNamePair.objects.get_or_create(
+                thirdPair = CmntyCampusPropertyNamePair.objects.get_or_create(
                     campus=fields['campusThree'],
                     propertyname=fields['propertynameThree']
                 )
@@ -316,7 +302,7 @@ class CmntyListingEditForm(ModelForm):
 # Only field is issue (to show Swapt User what's wrong)
 class CmntyListingRejectForm(ModelForm):
     class Meta:
-        model = Listing
+        model = CmntyListing
         fields = ("issue", )
 
     def save(self, commit=True):

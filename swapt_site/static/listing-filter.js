@@ -1,6 +1,6 @@
 $(document).ready(function(){
 	$(".ajaxLoader").hide();
-	// Listing Filter Start
+	// CmntyListing Filter Start
 	$(".filter-checkbox,#priceFilterBtn").on('click',function(e){
 		var _filterObj={};
 		var _minPrice=$('#maxPrice').attr('min');
@@ -35,7 +35,7 @@ $(document).ready(function(){
 	});
 	// End
 
-	// Filter Listing According to the price
+	// Filter CmntyListing According to the price
 	$("#maxPrice").on('blur',function(){
 		var _min=$(this).attr('min');
 		var _max=$(this).attr('max');

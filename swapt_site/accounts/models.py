@@ -37,7 +37,7 @@ class PropNameSignUp(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.name
+        return self.propertyName
     
 # Code model for sign up codes
 class Code(models.Model):

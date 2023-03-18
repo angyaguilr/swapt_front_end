@@ -77,22 +77,6 @@
     </label>
 </div>
 
-
-<form class="form-inline">
-    <input type="number" class="itemsSold filter" id="low-itemsSold" value="0" min="0" max="100" step="0.1">
-    <label class="form-label" for="low-itemsSold">
-        Lower bound itemsSold %
-    </label>
-    <input type="number" class="itemsSold filter" id="high-itemsSold" value="100" min="0" max="100" step="0.1">
-    <label class="form-label" for="high-itemsSold">
-        Upper bound itemsSold %
-    </label>
-    <input class="form-check-input itemsSold-na filter" type="checkbox" id="na">
-    <label class="form-check-label" for="na">
-        Include N/A
-    </label>
-    
-</form>
 <button class="btn btn-success apply-filter">Filter</button>
 <div class="tab-content" id="nav-tabContent">   
     <div class="tab-pane fade show active" id="nav-cmntyreview" role="tabpanel" aria-labelledby="nav-cmntyreview-tab">
@@ -108,18 +92,13 @@
                     <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                     </div>
                     <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Name: {{ listing.name }}</li>
-                    <li class="list-group-item">Description: {{ listing.description }}</li>
+                    <li class="list-group-item">Name: {{ listing.title }}</li>
+                    <li class="list-group-item">Description: {{ listing.desc }}</li>
                     <li class="list-group-item card-location">Location: {{listing.location}}</li>
                     {% if listing.issue != None %}
                     <li class="list-group-item">Reported/rejected issue: {{ listing.issue }}</li>
                     {% endif %}
-                    {% if listing.itemsSold != 0 or listing.itemsUnSold != 0%}
-                    <li class="list-group-item card-itemsSold">% ItemsSold: {{ listing.percent_itemsSold }}</li>
-                    {% else %}
-                    <li class="list-group-item card-itemsSold">% ItemsSold: N/A</li>
-                    {% endif %}
-                    {% for pair in listing.campuspropertynamepair_set.all %}
+                    {% for pair in listing.cmntycampuspropertynamepair_set.all %}
                     <li class="list-group-item card-propertyname">Campus/propertyname pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
                     {% endfor %}
                     </ul>
@@ -154,7 +133,6 @@
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Location</th>
-                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Campus Level 1</th>
                     <th scope="col">Propertyname Level 1</th>
                     <th scope="col">Campus Level 2</th>
@@ -174,7 +152,6 @@
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Location</th>
-                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Campus Level 1</th>
                     <th scope="col">Propertyname Level 1</th>
@@ -194,7 +171,6 @@
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Location</th>
-                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Campus Level 1</th>
                     <th scope="col">Propertyname Level 1</th>
@@ -231,10 +207,6 @@ $(document).ready(function () {
             
             if(param.startsWith("location") || param.startsWith("propertyname") || param.startsWith("campus")) {
                 $("#" + param.split("=")[1]).prop("checked", true);
-            } else if(param.startsWith("lowItemsSold")) {
-                $("#low-itemsSold").val(parseFloat(param.split("=")[1]))
-            } else if(param.startsWith("highItemsSold")) {
-                $("#high-itemsSold").val(parseFloat(param.split("=")[1]))
             } else if(param.startsWith("showNA")) {
                 stringBool = param.split("=")[1] == "true"
                 $("#na").prop("checked", stringBool);
@@ -252,47 +224,43 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=2" + filter,
+            "url": "/listings/api/cmnty-review/?format=datatables&stage=2" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
-            {"data": "description"},
+            {"data": "title"},
+            {"data": "desc"},
             {
                 "searchable": false,
                 "data": "location"
             },
             {
                 "searchable": false,
-                "data": "percent_itemsSold"
+                "data": 'cmntycampuspropertynamepair_set.0.campus'
             },
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.campus'
-            },
-            {
-                "searchable": false,
-                "data": 'campuspropertynamepair_set.0.propertyname'
+                "data": 'cmntycampuspropertynamepair_set.0.propertyname'
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.campus',
+                "data": 'cmntycampuspropertynamepair_set.1.campus',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.propertyname',
+                "data": 'cmntycampuspropertynamepair_set.1.propertyname',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.campus',
+                "data": 'cmntycampuspropertynamepair_set.2.campus',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.propertyname',
+                "data": 'cmntycampuspropertynamepair_set.2.propertyname',
             },
             {
                 "searchable": false,
@@ -310,7 +278,7 @@ $(document).ready(function () {
 
     $('#cmnty-approved-table tbody').on('click', 'a', function () {
         var data = approvedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmnty-approved-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/cmnty-review/#nav-cmnty-approved-tab";
     } );
 
     var reportedTable = $('#cmnty-reported-table').DataTable({
@@ -319,48 +287,44 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=4" + filter,
+            "url": "/listings/api/cmnty-review/?format=datatables&stage=4" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
-            {"data": "description"},
+            {"data": "title"},
+            {"data": "desc"},
             {
                 "searchable": false,
                 "data": "location"
             },
-            {
-                "searchable": false,
-                "data": "percent_itemsSold"
-            },
             {"data": "issue"},
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.campus',
+                "data": 'cmntycampuspropertynamepair_set.0.campus',
             },
             {
                 "searchable": true,
-                "data": 'campuspropertynamepair_set.0.propertyname',
+                "data": 'cmntycampuspropertynamepair_set.0.propertyname',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.campus',
+                "data": 'cmntycampuspropertynamepair_set.1.campus',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.propertyname',
+                "data": 'cmntycampuspropertynamepair_set.1.propertyname',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.campus',
+                "data": 'cmntycampuspropertynamepair_set.2.campus',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.propertyname',
+                "data": 'cmntycampuspropertynamepair_set.2.propertyname',
             },
             {
                 "data": null,
@@ -375,7 +339,7 @@ $(document).ready(function () {
     $('#cmnty-reported-table tbody').on('click', 'a', function () {
         console.log("Test");
         var data = reportedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmnty-reported-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/cmnty-review/#nav-cmnty-reported-tab";
     } );
 
     var rejectedTable = $('#cmnty-rejected-table').DataTable({
@@ -384,48 +348,44 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=3" + filter,
+            "url": "/listings/api/cmnty-review/?format=datatables&stage=3" + filter,
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
-            {"data": "description"},
+            {"data": "title"},
+            {"data": "desc"},
             {
                 "searchable": false,
                 "data": "location"
             },
-            {
-                "searchable": false,
-                "data": "percent_itemsSold"
-            },
             {"data": "issue"},
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.campus'
+                "data": 'cmntycampuspropertynamepair_set.0.campus'
             },
             {
                 "searchable": false,
-                "data": 'campuspropertynamepair_set.0.propertyname'
-            },
-            {
-                "searchable": false,
-                "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.campus',
+                "data": 'cmntycampuspropertynamepair_set.0.propertyname'
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.1.propertyname',
+                "data": 'cmntycampuspropertynamepair_set.1.campus',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.campus',
+                "data": 'cmntycampuspropertynamepair_set.1.propertyname',
             },
             {
                 "searchable": false,
                 "defaultContent": "",
-                "data": 'campuspropertynamepair_set.2.propertyname',
+                "data": 'cmntycampuspropertynamepair_set.2.campus',
+            },
+            {
+                "searchable": false,
+                "defaultContent": "",
+                "data": 'cmntycampuspropertynamepair_set.2.propertyname',
             },
             {
                 "data": null,
@@ -439,7 +399,7 @@ $(document).ready(function () {
 
     $('#cmnty-rejected-table tbody').on('click', 'a', function () {
         var data = rejectedTable.row( $(this).parents('tr') ).data();
-        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/review/#nav-cmnty-rejected-tab";
+        window.location.href = window.location.origin + "/listings/edit/" + data["id"] + "?next=/listings/cmnty-review/#nav-cmnty-rejected-tab";
     } );
 
     var cmntyTable = $('#cmnty-table').DataTable({
@@ -448,11 +408,11 @@ $(document).ready(function () {
         "autoWidth": false,
         "stateSave": true,
         "ajax": {
-            "url": "/listings/api/review/?format=datatables&stage=5",
+            "url": "/listings/api/cmnty-review/?format=datatables&stage=5",
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
+            {"data": "title"},
             {
                 "data": null,
                 render:function(data, type, row) {
@@ -486,10 +446,6 @@ function submit(e){
     });
 
 
-
-    var lowItemsSold= $('#low-itemsSold').val().toString();
-    var highItemsSold = $('#high-itemsSold').val().toString();
-
     var showNA = $('#na').is(":checked").toString();
 
     var href = "?location=";
@@ -506,8 +462,7 @@ function submit(e){
     for(let i = 0; i < propertynames.length; i++) {
         href += "&propertyname=" + propertynames[i];
     }
-    href += "&lowItemsSold=" + lowItemsSold
-        + "&highItemsSold=" + highItemsSold + "&showNA=" + showNA;
+    href += "&showNA=" + showNA;
     window.location.href = href + location.hash;
 }
 

@@ -30,17 +30,17 @@ $(document).ready(function(){
 	});
 
 	// Product Variation
-	$(".choose-size").hide();
+	$(".choose-dimensions").hide();
 
-	// Show size according to selected color
+	// Show dimensions according to selected color
 	$(".choose-color").on('click',function(){
-		$(".choose-size").removeClass('active');
+		$(".choose-dimensions").removeClass('active');
 		$(".choose-color").removeClass('focused');
 		$(this).addClass('focused');
 
 		var _color=$(this).attr('data-color');
 
-		$(".choose-size").hide();
+		$(".choose-dimensions").hide();
 		$(".color"+_color).show();
 		$(".color"+_color).first().addClass('active');
 
@@ -50,9 +50,9 @@ $(document).ready(function(){
 	});
 	// End
 
-	// Show the price according to selected size
-	$(".choose-size").on('click',function(){
-		$(".choose-size").removeClass('active');
+	// Show the price according to selected dimensions
+	$(".choose-dimensions").on('click',function(){
+		$(".choose-dimensions").removeClass('active');
 		$(this).addClass('active');
 
 		var _price=$(this).attr('data-price');
@@ -63,7 +63,7 @@ $(document).ready(function(){
 	// Show the first selected color
 	$(".choose-color").first().addClass('focused');
 	var _color=$(".choose-color").first().attr('data-color');
-	var _price=$(".choose-size").first().attr('data-price');
+	var _price=$(".choose-dimensions").first().attr('data-price');
 
 	$(".color"+_color).show();
 	$(".color"+_color).first().addClass('active');

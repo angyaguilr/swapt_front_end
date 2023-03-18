@@ -9,60 +9,14 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
 UserPending = settings.AUTH_USER_MODEL
-#build a simple product model. A product can have tags. In addition, we also want to create a 
-# price model so that we can track the changing prices of a product over time. Go to the models.py 
-# file of the products app and add the following code:
 def get_image_filename(instance, filename):
-    name = instance.name
-    slug = slugify(name)
+    title = instance.title
+    slug = slugify(title)
     return f"listings/{slug}-{filename}"
 
-class PropertyManager(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    email = models.EmailField()
-    propertyname = models.CharField(max_length=30)
-
-    def __str__(self):
-        return "%s %s" % (self.first_name, self.last_name)
-
-class ListingTag(models.Model):
-    name = models.CharField(
-        max_length=100, help_text=_("Designates the name of the tag.")
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self) -> str:
-        return self.name
-
-# class Product(models.Model):
-#     name = models.CharField(max_length=200)
-#     tags = models.ManyToManyField(ProductTag, blank=True)
-#     desc = models.TextField(_("Description"), blank=True)
-#     thumbnail = models.ImageField(upload_to=get_image_filename, blank=True)
-#     url = models.URLField()
-#     quantity = models.IntegerField(default=1)
-
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-
-#     class Meta:
-#         ordering = ("-created_at",)
-
-#     def __str__(self):
-#         return self.name
-
-class ListingManager(models.Manager):
-    # Only shows the user rejected listings within last 30 days or listings from other stages
-    # This is so that when listings are >= 30 days old, but daily cleansing hasn't run yet,
-    # user still can't see those listings
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            publishing_date__gte=timezone.now()-timezone.timedelta(days=30), stage=3
-        ) | super().get_queryset().filter(
-            stage__in=[1,2,4,5]
-        )
+#COMMUNITYLISTINGS
+#build a simple listing model. A listing can have tags. In addition, we also want to create a 
+# price model so that we can track the changing prices of a listing over time. 
 # Banner
 class Banner(models.Model):
     img=models.ImageField(upload_to="banner_imgs/")
@@ -77,9 +31,10 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.alt_text
+
 # Category
 class CmntyListingsCategory(models.Model):
-    title=models.CharField(max_length=100)
+    name=models.CharField(max_length=100)
     image=models.ImageField(upload_to="cat_imgs/")
 
     class Meta:
@@ -89,8 +44,8 @@ class CmntyListingsCategory(models.Model):
         return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
 
     def __str__(self):
-        return self.title
-
+        return self.name
+    
 # Brand
 class Brand(models.Model):
     title=models.CharField(max_length=100)
@@ -116,25 +71,49 @@ class Color(models.Model):
     def __str__(self):
         return self.title
 
-# Size
-class Size(models.Model):
+# Dimensions
+class Dimensions(models.Model):
     title=models.CharField(max_length=100)
 
     class Meta:
-        verbose_name_plural='5. Sizes'
+        verbose_name_plural='5. Dimensions'
 
     def __str__(self):
         return self.title
 
+# CmntyListing Tags
+class CmntyListingTag(models.Model):
+    name = models.CharField(
+        max_length=100, help_text=_("Designates the name of the tag.")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-class Listing(models.Model):
+    def __str__(self) -> str:
+        return self.name
+    
+class CmntyListingManager(models.Manager):
+    # Only shows the user rejected listings within last 30 days or listings from other stages
+    # This is so that when listings are >= 30 days old, but daily cleansing hasn't run yet,
+    # user still can't see those listings
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            publishing_date__gte=timezone.now()-timezone.timedelta(days=30), stage=3
+        ) | super().get_queryset().filter(
+            stage__in=[1,2,4,5]
+        )
+
+class CmntyListing(models.Model):
+    PICKUP_CHOICES = [
+        (1, 'Public Pickup'),
+        (2, 'Door Pickup'),
+    ]
     APPROVAL_STAGES = [
         (1, 'Under Review'),
         (2, 'Approved'),
         (3, 'Rejected'),
         (4, 'Reported'),
         (5, 'Closed'),
-
     ]
     SELLING_STAGES = [
         (1, 'Available'),
@@ -143,17 +122,17 @@ class Listing(models.Model):
     ]
     CATEGORY_CHOICES = [
         ('Bedroom Furniture', 'Bedroom Furniture'),
-        ( 'Dining Room Furniture', 'Dining Room Furniture'),
-        ( 'Living Room Furniture', 'Living Room Furniture'),
+        ('Dining Room Furniture', 'Dining Room Furniture'),
+        ('Living Room Furniture', 'Living Room Furniture'),
         ('Office Furniture', 'Office Furniture'),
+        ('Bathroom Furniture', 'Bathroom Furniture'),
         ('Outdoor Furniture', 'Outdoor Furniture'),
         ('Other Furniture', 'Other Furniture'),
-
     ]
     CONDITION_CHOICES = [
         (1, 'New'),
         (2, 'Used - Like New'),
-        (3, 'Used - Good'),
+        (3, 'Used - Decent'),
         (4, 'Used - Fair'),
     ]
     DELIVERYMETHOD_CHOICES = [
@@ -177,110 +156,65 @@ class Listing(models.Model):
         ('Silver', 'Silver'),
         ('White', 'White'),
         ('Yellow', 'Yellow'),
+        ('Wood', 'Wood'),
     ]
     LOCATION_CHOICES = [
         ('ElonNC', 'ElonNC'),
-        ('CollegeParkMD', 'CollegeParkMD'),
         ('BurlingtonNC', 'BurlingtonNC'),
-        ('ColumbiaMD', 'ColumbiaMD')
     ]
-    name = models.CharField(max_length=200, default='any_name')
-    slug=models.CharField(max_length=400)
-    tags = models.ManyToManyField(ListingTag, blank=True)
-    desc = models.TextField(_("Description"), blank=True)
-    thumbnail = models.ImageField(upload_to=get_image_filename, blank=True)
-    url = models.URLField()
-    quantity = models.IntegerField(default=1)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ("-created_at",)
+    #field identifying seller who posted listing
+    swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
+    #mandatory fields required with user input
     title = models.CharField(max_length=250)
-    description = models.CharField(max_length=250, null=True)
-    color = models.CharField(
-        max_length=30,
-        choices= COLOR_CHOICES,
+    desc = models.TextField(_("desc"), blank=True)
+    thumbnail = models.ImageField(upload_to=get_image_filename, blank=True)
+    preloaded_category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
         null=True
     )
+    condition = models.PositiveSmallIntegerField(choices=CONDITION_CHOICES , null=True)
+    category = models.ForeignKey(CmntyListingsCategory,on_delete=models.CASCADE, related_name='item')
+    #mandatory location details
     location = models.CharField(
         max_length=30,
         choices=LOCATION_CHOICES,
         null=True
     )
     delivery = models.PositiveSmallIntegerField(choices=DELIVERYMETHOD_CHOICES, null=True)
+    pickupmethod = models.PositiveSmallIntegerField(choices= PICKUP_CHOICES, null=True)
+    #fields used to review listings
     stage = models.PositiveSmallIntegerField(choices=APPROVAL_STAGES, null=True)
     selling_stage = models.PositiveSmallIntegerField(choices=SELLING_STAGES, null=True)
-    category = models.CharField(
-        max_length=50,
-        choices=CATEGORY_CHOICES,
-        null=True
-    )
-    categoryV2 = models.ManyToManyField('Category', related_name='item')
-    categoryV3 = models.ForeignKey(CmntyListingsCategory,on_delete=models.CASCADE)
-    condition = models.PositiveSmallIntegerField(choices=CONDITION_CHOICES , null=True)
     confirmed = models.BooleanField(default=False)
-    swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
     issue = models.CharField(max_length=250, blank=True, null=True) # Currently only using one field for both rejected and reported issues
-    itemsSold = models.IntegerField(default=0)
-    itemsUnSold = models.IntegerField(default=0)
-    percent_itemsSold = models.DecimalField(default=None, blank=True, null=True, max_digits=5, decimal_places=2) # Max digits 5 instead of 4 because
-    itemPrice = models.DecimalField(decimal_places=2, max_digits=10, default=0.00) # Max digits 5 instead of 4 because
-    cover = models.ImageField(upload_to='images/')
-    brand=models.ForeignKey(Brand,on_delete=models.CASCADE)
-    specs=models.TextField()
+    #optional
+    quantity = models.IntegerField(default=1)
+    tags = models.ManyToManyField(CmntyListingTag, blank=True)
+    
+    #field to display listings in featured page 
     is_featured=models.BooleanField(default=False)
+
+    #date/time fields
     publishing_date = models.DateTimeField(
         default=timezone.now,
         blank=True,
     )
-    objects = ListingManager() # Using manager above for reasons in comment
-
-    # Updates percent_itemsSold field on save
-    # def __str__(self):
-    #     return self.name
-    def save(self, *args, **kwargs):
-        if(not (self.itemsSold == 0 and self.itemsUnSold == 0)):
-            self.percent_itemsSold = round(100 * self.itemsSold/(self.itemsSold + self.itemsUnSold), 2)
-        super(Listing, self).save(*args, **kwargs) # Call the "real" save() method.
-# Listing Attribute
-class ListingAttribute(models.Model):
-    listing=models.ForeignKey(Listing,on_delete=models.CASCADE)
-    color=models.ForeignKey(Color,on_delete=models.CASCADE)
-    size=models.ForeignKey(Size,on_delete=models.CASCADE)
-    price=models.PositiveIntegerField(default=0)
-    image=models.ImageField(upload_to="listing_imgs/",null=True)
-
-    class Meta:
-        verbose_name_plural='7. ListingAttributes'
-
-    def __str__(self):
-        return self.listing.title
-
-    def image_tag(self):
-        return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
-class Price(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    price = models.DecimalField(decimal_places=2, max_digits=10)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self) -> str:
-        return f"{self.listing.name} {self.price}"  
+    class Meta:
+        ordering = ("-created_at",)
+  
+    objects = CmntyListingManager() # Using manager above for reasons in comment
 
-#save customer order for future reference #TBD
-class SwaptListing(models.Model):
-    email = models.EmailField(max_length=254)
-    paid = models.BooleanField(default="False")
-    amount = models.IntegerField(default=0)
-    description = models.CharField(default=None,max_length=800)
-    def __str__(self):
-        return self.email
+    # def __str__(self):
+    #     return self.name
+    def save(self, *args, **kwargs):
+        super(CmntyListing, self).save(*args, **kwargs) 
 
-class CampusPropertyNamePair(models.Model):
-    listings = models.ManyToManyField('Listing')
+class CmntyCampusPropertyNamePair(models.Model):
+    listings = models.ManyToManyField('CmntyListing')
     CAMPUS_CHOICES = [
         ('Elon', 'Elon'),
         ('UMD', 'UMD'),
@@ -300,9 +234,62 @@ class CampusPropertyNamePair(models.Model):
         max_length=30,
         choices=PROPERTYNAME_CHOICES,
     )
-    confirmed = models.BooleanField(default=False)   
+    confirmed = models.BooleanField(default=False)  
 
-class PaymentHistory(models.Model):
+# CmntyListing Attribute
+class CmntyListingAttribute(models.Model):
+    listing=models.ForeignKey(CmntyListing,on_delete=models.CASCADE)
+    color=models.ForeignKey(Color,on_delete=models.CASCADE)
+    brand=models.ForeignKey(Brand,on_delete=models.CASCADE)
+    dimensions=models.ForeignKey(Dimensions,on_delete=models.CASCADE)
+    class Meta:
+        verbose_name_plural='7. ListingAttributes'
+
+    def __str__(self):
+        return self.listing.title
+
+    def image_tag(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % (self.image.url))
+
+class CmntyListingPrice(models.Model):
+    listing = models.ForeignKey(CmntyListing, on_delete=models.CASCADE)
+    price = models.DecimalField(decimal_places=2, max_digits=10)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.listing.title} {self.price}"  
+
+#SWAPTLISTINGS
+class SwaptListingTag(models.Model):
+    name = models.CharField(
+        max_length=100, help_text=_("Designates the name of the tag.")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.name
+class SwaptPropertyManager(models.Model):
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField(unique= True)
+    propertyname = models.CharField(max_length=30)
+
+    def __str__(self):
+        return "%s %s" % (self.first_name, self.last_name)
+
+#save customer order for future reference #TBD
+class SwaptListingTransactionRef(models.Model):
+    email = models.EmailField(max_length=254)
+    paid = models.BooleanField(default="False")
+    amount = models.IntegerField(default=0)
+    description = models.CharField(default=None,max_length=800)
+    def __str__(self):
+        return self.email 
+
+class SwaptPaymentHistory(models.Model):
     PENDING = "P"
     COMPLETED = "C"
     FAILED = "F"
@@ -314,7 +301,7 @@ class PaymentHistory(models.Model):
     )
 
     email = models.EmailField(unique=True)
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    listing = models.ForeignKey(CmntyListing, on_delete=models.CASCADE)
     payment_status = models.CharField(
         max_length=1, choices=STATUS_CHOICES, default=PENDING
     )
@@ -322,26 +309,18 @@ class PaymentHistory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.listing.name
-
-# class MenuItem(models.Model):
-#     name = models.CharField(max_length=100)
-#     description = models.TextField()
-#     image = models.ImageField(upload_to='menu_images/')
-#     price = models.DecimalField(max_digits=5, decimal_places=2)
-#     category = models.ManyToManyField('Category', related_name='item')
-
-#     def __str__(self):
-#         return self.name
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
+        return self.listing.title
+    
+class SwaptListingManager(models.Manager):
+    # Only shows the user rejected listings within last 30 days or listings from other stages
+    # This is so that when listings are >= 30 days old, but daily cleansing hasn't run yet,
+    # user still can't see those listings
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            publishing_date__gte=timezone.now()-timezone.timedelta(days=30), stage=3
+        ) | super().get_queryset().filter(
+            stage__in=[1,2,4,5]
+        )
 class SwaptListingModel(models.Model):
     APPROVAL_STAGES = [
         (1, 'Under Review'),
@@ -349,7 +328,6 @@ class SwaptListingModel(models.Model):
         (3, 'Rejected'),
         (4, 'Reported'),
         (5, 'Closed'),
-
     ]
     SELLING_STAGES = [
         (1, 'Available'),
@@ -358,17 +336,17 @@ class SwaptListingModel(models.Model):
     ]
     CATEGORY_CHOICES = [
         ('Bedroom Furniture', 'Bedroom Furniture'),
-        ( 'Dining Room Furniture', 'Dining Room Furniture'),
-        ( 'Living Room Furniture', 'Living Room Furniture'),
+        ('Dining Room Furniture', 'Dining Room Furniture'),
+        ('Living Room Furniture', 'Living Room Furniture'),
         ('Office Furniture', 'Office Furniture'),
+        ('Bathroom Furniture', 'Bathroom Furniture'),
         ('Outdoor Furniture', 'Outdoor Furniture'),
         ('Other Furniture', 'Other Furniture'),
-
     ]
     CONDITION_CHOICES = [
         (1, 'New'),
         (2, 'Used - Like New'),
-        (3, 'Used - Good'),
+        (3, 'Used - Decent'),
         (4, 'Used - Fair'),
     ]
     DELIVERYMETHOD_CHOICES = [
@@ -392,75 +370,66 @@ class SwaptListingModel(models.Model):
         ('Silver', 'Silver'),
         ('White', 'White'),
         ('Yellow', 'Yellow'),
+        ('Wood', 'Wood'),
     ]
     LOCATION_CHOICES = [
         ('ElonNC', 'ElonNC'),
-        ('CollegeParkMD', 'CollegeParkMD'),
         ('BurlingtonNC', 'BurlingtonNC'),
-        ('ColumbiaMD', 'ColumbiaMD')
     ]
-    listings = models.ManyToManyField(
-        'Listing', related_name='order', blank=True)
-    propertymanager = models.ForeignKey(PropertyManager, on_delete=models.CASCADE, default=1)
-    name = models.CharField(max_length=200, default='any_name')
-    tags = models.ManyToManyField(ListingTag, blank=True)
-    desc = models.TextField(_("Description"), blank=True)
+    #unique fields for swaptlistingsmodel
+    propertymanager = models.ForeignKey(SwaptPropertyManager, on_delete=models.CASCADE )
+    #field identifying seller who posted listing
+    swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
+    
+    #mandatory fields required with user input
+    title = models.CharField(max_length=250)
+    desc = models.TextField(_("desc"), blank=True)
     thumbnail = models.ImageField(upload_to=get_image_filename, blank=True)
-    url = models.URLField(default='anyurl.com')
-    quantity = models.IntegerField(default=1)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ("-created_at",)
-    title = models.CharField(max_length=250, default='any_name')
-    description = models.CharField(max_length=250, null=True)
-    color = models.CharField(
-        max_length=30,
-        choices= COLOR_CHOICES,
+    preloaded_category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
         null=True
     )
+    condition = models.PositiveSmallIntegerField(choices=CONDITION_CHOICES , null=True)
+    #mandatory location details
     location = models.CharField(
         max_length=30,
         choices=LOCATION_CHOICES,
         null=True
     )
     delivery = models.PositiveSmallIntegerField(choices=DELIVERYMETHOD_CHOICES, null=True)
+    
+    #fields used to review listings
     stage = models.PositiveSmallIntegerField(choices=APPROVAL_STAGES, null=True)
     selling_stage = models.PositiveSmallIntegerField(choices=SELLING_STAGES, null=True)
-    category = models.CharField(
-        max_length=50,
-        choices=CATEGORY_CHOICES,
-        null=True
-    )
-    categoryV2 = models.ManyToManyField('Category', related_name='swapt_item')
-    condition = models.PositiveSmallIntegerField(choices=CONDITION_CHOICES , null=True)
     confirmed = models.BooleanField(default=False)
-    swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
     issue = models.CharField(max_length=250, blank=True, null=True) # Currently only using one field for both rejected and reported issues
-    itemsSold = models.IntegerField(default=0)
-    itemsUnSold = models.IntegerField(default=0)
-    percent_itemsSold = models.DecimalField(default=None, blank=True, null=True, max_digits=5, decimal_places=2) # Max digits 5 instead of 4 because
-    itemPrice = models.DecimalField(decimal_places=2, max_digits=10, default=0.00) # Max digits 5 instead of 4 because
+    #optional
+    quantity = models.IntegerField(default=1)
+    tags = models.ManyToManyField(SwaptListingTag, blank=True)
     
-    
+    #field to display listings in featured page 
+    is_featured=models.BooleanField(default=False)
+
+    #date/time fields
     publishing_date = models.DateTimeField(
         default=timezone.now,
         blank=True,
     )
-    objects = ListingManager() # Using manager above for reasons in comment
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    # Updates percent_itemsSold field on save
+    class Meta:
+        ordering = ("-created_at",)
+  
+    objects = CmntyListingManager() # Using manager above for reasons in comment
+
     # def __str__(self):
     #     return self.name
     def save(self, *args, **kwargs):
-        if(not (self.itemsSold == 0 and self.itemsUnSold == 0)):
-            self.percent_itemsSold = round(100 * self.itemsSold/(self.itemsSold + self.itemsUnSold), 2)
-        super(SwaptListingModel, self).save(*args, **kwargs) # Call the "real" save() method.
+        super(SwaptListingModel, self).save(*args, **kwargs) 
 
-
-class Swapt_Bundle_Price(models.Model):
+class Swapt_Prices(models.Model):
     swapt_bundle_listing = models.ForeignKey(SwaptListingModel, on_delete=models.CASCADE)
     price = models.DecimalField(decimal_places=2, max_digits=10)
 
@@ -468,8 +437,7 @@ class Swapt_Bundle_Price(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"{self.swapt_bundle_listing.name} {self.price}" 
-
+        return f"{self.swapt_bundle_listing.title} {self.price}" 
 
 class SwaptCampusPropertyNamePair(models.Model):
     listings = models.ManyToManyField('SwaptListingModel')

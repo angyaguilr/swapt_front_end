@@ -1,16 +1,16 @@
-from .models import Listing, ListingAttribute
+from .models import CmntyListing, CmntyListingAttribute, CmntyListingPrice
 from django.db.models import Min,Max
 def get_filters(request):
-	cats=Listing.objects.distinct().values('categoryV3__title','categoryV3__id')
-	brands=Listing.objects.distinct().values('brand__title','brand__id')
-	colors=ListingAttribute.objects.distinct().values('color__title','color__id','color__color_code')
-	sizes=ListingAttribute.objects.distinct().values('size__title','size__id')
-	minMaxPrice=ListingAttribute.objects.aggregate(Min('price'),Max('price'))
+	cats=CmntyListing.objects.distinct().values('category__name','category__id')
+	brands=CmntyListingAttribute.objects.distinct().values('brand__title','brand__id')
+	colors=CmntyListingAttribute.objects.distinct().values('color__title','color__id','color__color_code')
+	alldimensions=CmntyListingAttribute.objects.distinct().values('dimensions__title','dimensions__id')
+	#minMaxPrice=CmntyListingPrice.objects.aggregate(Min('price'),Max('price'))
 	data={
 		'cats':cats,
 		'brands':brands,
 		'colors':colors,
-		'sizes':sizes,
-		'minMaxPrice':minMaxPrice,
+		'alldimensions':alldimensions,
+		#'minMaxPrice':minMaxPrice,
 	}
 	return data

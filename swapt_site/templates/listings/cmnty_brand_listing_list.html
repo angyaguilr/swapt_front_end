@@ -16,17 +16,17 @@
 				{% for listing in data %}
 				<div class="col-md-4 mb-4">
 					<div class="card shadow">
-					  <a href="/{{listing.slug}}/{{listing.id}}"><img src="/media/{{categoryV3.categoryV3attribute_set.first.image}}" class="card-img-top" alt="{{categoryV3.title}}"></a>
+					  <a href="/{{listing.slug}}/{{listing.id}}"><img src="/media/{{category.categoryattribute_set.first.image}}" class="card-img-top" alt="{{category.title}}"></a>
 					  <div class="card-body">
-					    <h5 class="card-text"><a href="/listing/{{categoryV3.slug}}/{{listing.id}}">{{categoryV3.title}}</a></h5>
-					    <h6>$ <span class="listing-price-{{listing.id}}">{{listing.listingattribute_set.first.price}}</span></h6>
+					    <h5 class="card-text"><a href="/listing/{{category.slug}}/{{listing.id}}">{{category.title}}</a></h5>
+					    <h6>$ <span class="listing-price-{{listing.id}}">{{listing.cmntylistingattribute_set.first.price}}</span></h6>
 					  </div>
 					  	<div class="card-footer">
-				          <input type="hidden" value="1" class="form-control categoryV3-qty-{{categoryV3.id}}" id="categoryV3Qty" />
-				          <input type="hidden" class="categoryV3-image-{{categoryV3.id}}" value="{{categoryV3.categoryV3attribute_set.first.image}}" />
-				          <input type="hidden" class="categoryV3-id-{{categoryV3.id}}" value="{{categoryV3.id}}" />
-				          <input type="hidden" class="categoryV3-title-{{categoryV3.id}}" value="{{categoryV3.title}}" />
-						  	<button class="btn btn-sm btn-primary add-to-cart" data-index="{{categoryV3.id}}"><i class="fa fa-shopping-cart"></i></button>
+				          <input type="hidden" value="1" class="form-control category-qty-{{category.id}}" id="categoryQty" />
+				          <input type="hidden" class="category-image-{{category.id}}" value="{{category.categoryattribute_set.first.image}}" />
+				          <input type="hidden" class="category-id-{{category.id}}" value="{{category.id}}" />
+				          <input type="hidden" class="category-title-{{category.id}}" value="{{category.title}}" />
+						  	<button class="btn btn-sm btn-primary add-to-cart" data-index="{{category.id}}"><i class="fa fa-shopping-cart"></i></button>
 						  	<button class="btn btn-sm btn-danger"><i class="fa fa-heart"></i></button>
 						  	<span class="float-right">
 						  		4.5/5
@@ -37,7 +37,7 @@
 				</div>
 				{% endfor %}
 			</div>
-			<p class="my-4 text-center"><a href="categoryV3s.php" class="btn btn-dark btn-sm">Load More <i class="fa fa-sync"></i></a></p>
+			<p class="my-4 text-center"><a href="categorys.php" class="btn btn-dark btn-sm">Load More <i class="fa fa-sync"></i></a></p>
 		</div>
 	</div>
 </main>

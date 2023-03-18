@@ -21,10 +21,10 @@
                     </div>
                 <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                     <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Name: {{ listing.name }}</li>
+                    <li class="list-group-item">Name: {{ listing.title }}</li>
                     <li class="list-group-item">Description: {{ listing.desc }}</li>
                     <li class="list-group-item">Tags: {{ listing.tags }}</li>
-                    {% for pair in listing.campuspropertynamepair_set.all %}
+                    {% for pair in listing.cmntycampuspropertynamepair_set.all %}
                     <li class="list-group-item">Campus/Property Name pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
                     {% endfor %}
                     </ul>

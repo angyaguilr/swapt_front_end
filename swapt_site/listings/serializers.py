@@ -1,45 +1,42 @@
 from rest_framework import serializers 
-from .models import SwaptListingModel, Listing, CampusPropertyNamePair, SwaptCampusPropertyNamePair
+from .models import Banner, CmntyListingsCategory, Brand, Color, Dimensions, CmntyListingPrice, CmntyListingTag, CmntyListing, CmntyCampusPropertyNamePair, CmntyListingAttribute, Swapt_Prices, SwaptCampusPropertyNamePair, SwaptListingModel, SwaptListingTag, SwaptPropertyManager, SwaptPaymentHistory, SwaptListingTransactionRef
 import random
  
 
 class CampusPropertyNamePairSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CampusPropertyNamePair
+        model = CmntyCampusPropertyNamePair
         fields = ('campus',
                   'propertyname',
                   )
 class CmntyListingSerializer(serializers.ModelSerializer):
     
     # Added fields up here to specify attributes (read_only or write_only)
-    name = serializers.CharField(read_only=True)
-    description = serializers.CharField(read_only=True)
+    title = serializers.CharField(read_only=True)
+    desc = serializers.CharField(read_only=True)
     location = serializers.CharField(read_only=True)
     propertyname = serializers.SerializerMethodField(read_only=True)
     stage = serializers.IntegerField(write_only=True)
     issue = serializers.CharField(write_only=True)
     
     class Meta:
-        model = Listing
+        model = CmntyListing
         fields = ('id',
-                  'name',
+                  'title',
                   'tags',
                   'desc',
                   'thumbnail',
                   'url',
                   'quantity',
                   'title',
-                  'description',
+                  'desc',
                   'color',
                   'delivery',
                   'category',
                   'condition',
                   'cover',
                   'itemPrice',
-                  'percent_itemsSold',
-                  'itemsUnSold',
-                  'itemsSold',
                   'location',
                   'propertyname',
                   'stage',
@@ -77,29 +74,18 @@ class CmntyListingSerializer(serializers.ModelSerializer):
             return "+3"
 class CmntyListingReviewSerializer(serializers.ModelSerializer):
 
-    percent_itemsSold = serializers.SerializerMethodField(read_only=True)
-
     class Meta:
-        model = Listing
-        fields = ('name',
-                  'description',
+        model = CmntyListing
+        fields = ('title',
+                  'desc',
                   'location',
-                  'percent_itemsSold',
                   'id',
-                  'campuspropertynamepair_set',
+                  'cmntycampuspropertynamepair_set',
                   'issue'
                   )
         depth=1 # Allows user to see campus and propertyname pairs from the set
 
         datatables_always_serialize = ('id')
-
-    def get_percent_itemsSold(self, obj):
-        percent_itemsSold = obj.percent_itemsSold
-        # Returns N/A instead of blank for aesthetic purposes
-        if(percent_itemsSold == None):
-            return "N/A" 
-        else:
-            return percent_itemsSold
 
 
 class SwaptCampusPropertyNamePairSerializer(serializers.ModelSerializer):
@@ -112,8 +98,8 @@ class SwaptCampusPropertyNamePairSerializer(serializers.ModelSerializer):
 class SwaptListingSerializer(serializers.ModelSerializer):
     
     # Added fields up here to specify attributes (read_only or write_only)
-    name = serializers.CharField(read_only=True)
-    description = serializers.CharField(read_only=True)
+    title = serializers.CharField(read_only=True)
+    desc = serializers.CharField(read_only=True)
     location = serializers.CharField(read_only=True)
     propertyname = serializers.SerializerMethodField(read_only=True)
     stage = serializers.IntegerField(write_only=True)
@@ -122,24 +108,20 @@ class SwaptListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = SwaptListingModel
         fields = ('id',
-                  'name',
+                  'title',
                   'tags',
                   'desc',
                   'thumbnail',
                   'url',
                   'quantity',
                   'title',
-                  'description',
+                  'desc',
                   'color',
                   'delivery',
                   'category',
-                  'categoryV2',
                   'condition',
                   'cover',
                   'itemPrice',
-                  'percent_itemsSold',
-                  'itemsUnSold',
-                  'itemsSold',
                   'location',
                   'propertyname',
                   'stage',
@@ -177,14 +159,11 @@ class SwaptListingSerializer(serializers.ModelSerializer):
             return "+3"
 class SwaptListingReviewSerializer(serializers.ModelSerializer):
 
-    percent_itemsSold = serializers.SerializerMethodField(read_only=True)
-
     class Meta:
         model = SwaptListingModel
-        fields = ('name',
-                  'description',
+        fields = ('title',
+                  'desc',
                   'location',
-                  'percent_itemsSold',
                   'id',
                   'swaptcampuspropertynamepair_set',
                   'issue'
@@ -192,11 +171,3 @@ class SwaptListingReviewSerializer(serializers.ModelSerializer):
         depth=1 # Allows user to see campus and propertyname pairs from the set
 
         datatables_always_serialize = ('id')
-
-    def get_percent_itemsSold(self, obj):
-        percent_itemsSold = obj.percent_itemsSold
-        # Returns N/A instead of blank for aesthetic purposes
-        if(percent_itemsSold == None):
-            return "N/A" 
-        else:
-            return percent_itemsSold

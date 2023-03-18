@@ -8,7 +8,7 @@
     {% for listing in data %}
 		<div class="col-md-3 mb-4">
 			<div class="card shadow">
-			  <a href="/listing/{{listing.slug}}/{{listing.id}}"><img src="/media/{{listing.listingattribute_set.first.image}}" class="card-img-top" alt="{{listing.title}}"></a>
+			  <a href="/listing/{{listing.slug}}/{{listing.id}}"><img src="/media/{{listing.cmntylistingattribute_set.first.image}}" class="card-img-top" alt="{{listing.title}}"></a>
 			  <div class="card-body">
 			    <h6 class="card-text"><a href="/listing/{{listing.slug}}/{{listing.id}}">{{listing.title}}</a></h6>
 			  </div>

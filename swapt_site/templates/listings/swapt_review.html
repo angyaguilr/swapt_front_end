@@ -77,22 +77,6 @@
     </label>
 </div>
 
-
-<form class="form-inline">
-    <input type="number" class="itemsSold filter" id="low-itemsSold" value="0" min="0" max="100" step="0.1">
-    <label class="form-label" for="low-itemsSold">
-        Lower bound itemsSold %
-    </label>
-    <input type="number" class="itemsSold filter" id="high-itemsSold" value="100" min="0" max="100" step="0.1">
-    <label class="form-label" for="high-itemsSold">
-        Upper bound itemsSold %
-    </label>
-    <input class="form-check-input itemsSold-na filter" type="checkbox" id="na">
-    <label class="form-check-label" for="na">
-        Include N/A
-    </label>
-    
-</form>
 <button class="btn btn-success apply-filter">Filter</button>
 <div class="tab-content" id="nav-tabContent">   
     <div class="tab-pane fade show active" id="nav-swaptreview" role="tabpanel" aria-labelledby="nav-swaptreview-tab">
@@ -108,16 +92,11 @@
                     <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                     </div>
                     <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Name: {{ listing.name }}</li>
-                    <li class="list-group-item">Description: {{ listing.description }}</li>
+                    <li class="list-group-item">Name: {{ listing.title }}</li>
+                    <li class="list-group-item">Description: {{ listing.desc }}</li>
                     <li class="list-group-item card-location">Location: {{listing.location}}</li>
                     {% if listing.issue != None %}
                     <li class="list-group-item">Reported/rejected issue: {{ listing.issue }}</li>
-                    {% endif %}
-                    {% if listing.itemsSold != 0 or listing.itemsUnSold != 0%}
-                    <li class="list-group-item card-itemsSold">% ItemsSold: {{ listing.percent_itemsSold }}</li>
-                    {% else %}
-                    <li class="list-group-item card-itemsSold">% ItemsSold: N/A</li>
                     {% endif %}
                     {% for pair in listing.swaptcampuspropertynamepair_set.all %}
                     <li class="list-group-item card-propertyname">Campus/propertyname pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
@@ -154,7 +133,6 @@
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Location</th>
-                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Campus Level 1</th>
                     <th scope="col">Propertyname Level 1</th>
                     <th scope="col">Campus Level 2</th>
@@ -173,7 +151,6 @@
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Location</th>
-                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Campus Level 1</th>
                     <th scope="col">Propertyname Level 1</th>
@@ -193,7 +170,6 @@
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Location</th>
-                    <th scope="col">% ItemsSold</th>
                     <th scope="col">Issue</th>
                     <th scope="col">Campus Level 1</th>
                     <th scope="col">Propertyname Level 1</th>
@@ -230,10 +206,6 @@ $(document).ready(function () {
             
             if(param.startsWith("location") || param.startsWith("propertyname")) {
                 $("#" + param.split("=")[1]).prop("checked", true);
-            } else if(param.startsWith("lowItemsSold")) {
-                $("#low-itemsSold").val(parseFloat(param.split("=")[1]))
-            } else if(param.startsWith("highItemsSold")) {
-                $("#high-itemsSold").val(parseFloat(param.split("=")[1]))
             } else if(param.startsWith("showNA")) {
                 stringBool = param.split("=")[1] == "true"
                 $("#na").prop("checked", stringBool);
@@ -255,15 +227,11 @@ $(document).ready(function () {
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
-            {"data": "description"},
+            {"data": "title"},
+            {"data": "desc"},
             {
                 "searchable": false,
                 "data": "location"
-            },
-            {
-                "searchable": false,
-                "data": "percent_itemsSold"
             },
             {
                 "searchable": false,
@@ -323,15 +291,11 @@ $(document).ready(function () {
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
-            {"data": "description"},
+            {"data": "title"},
+            {"data": "desc"},
             {
                 "searchable": false,
                 "data": "location"
-            },
-            {
-                "searchable": false,
-                "data": "percent_itemsSold"
             },
             {"data": "issue"},
             {
@@ -388,15 +352,11 @@ $(document).ready(function () {
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
-            {"data": "description"},
+            {"data": "title"},
+            {"data": "desc"},
             {
                 "searchable": false,
                 "data": "location"
-            },
-            {
-                "searchable": false,
-                "data": "percent_itemsSold"
             },
             {"data": "issue"},
             {
@@ -452,7 +412,7 @@ $(document).ready(function () {
             "credentials": 'include',
         },
         "columns": [
-            {"data": "name"},
+            {"data": "title"},
             {
                 "data": null,
                 render:function(data, type, row) {
@@ -486,8 +446,7 @@ function submit(e){
 
 
 
-    var lowItemsSold= $('#low-itemsSold').val().toString();
-    var highItemsSold = $('#high-itemsSold').val().toString();
+    
 
     var showNA = $('#na').is(":checked").toString();
 
@@ -502,8 +461,7 @@ function submit(e){
     for(let i = 0; i < propertynames.length; i++) {
         href += "&propertyname=" + propertynames[i];
     }
-    href += "&lowItemsSold=" + lowItemsSold
-        + "&highItemsSold=" + highItemsSold + "&showNA=" + showNA;
+    href += "&showNA=" + showNA;
     window.location.href = href + location.hash;
 }
 

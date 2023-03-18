@@ -16,14 +16,14 @@
 				{% for listing in data %}
 				<div class="col-md-4 mb-4">
 					<div class="card shadow">
-					  <a href="/listing/{{listing.slug}}/{{listing.id}}"><img src="/media/{{listing.listingattribute_set.first.image}}" class="card-img-top" alt="{{listing.title}}"></a>
+					  <a href="/listing/{{listing.slug}}/{{listing.id}}"><img src="/media/{{listing.cmntylistingattribute_set.first.image}}" class="card-img-top" alt="{{listing.title}}"></a>
 					  <div class="card-body">
 					    <h5 class="card-text"><a href="/listing/{{listing.slug}}/{{listing.id}}">{{listing.title}}</a></h5>
-					    <h6>$ <span class="listing-price-{{listing.id}}">{{listing.listingattribute_set.first.price}}</span></h6>
+					    <h6>$ <span class="listing-price-{{listing.id}}">{{listing.cmntylistingattribute_set.first.price}}</span></h6>
 					  </div>
 					  	<div class="card-footer">
 				          <input type="hidden" value="1" class="form-control listing-qty-{{listing.id}}" id="listingQty" />
-				          <input type="hidden" class="listing-image-{{listing.id}}" value="{{listing.listingattribute_set.first.image}}" />
+				          <input type="hidden" class="listing-image-{{listing.id}}" value="{{listing.cmntylistingattribute_set.first.image}}" />
 				          <input type="hidden" class="listing-id-{{listing.id}}" value="{{listing.id}}" />
 				          <input type="hidden" class="listing-title-{{listing.id}}" value="{{listing.title}}" />
 							  	<button class="btn btn-sm btn-primary add-to-cart" data-index="{{listing.id}}"><i class="fa fa-shopping-cart"></i></button>

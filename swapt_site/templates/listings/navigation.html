@@ -4,7 +4,7 @@
       <!-- Required meta tags -->
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title> Listing Web Portal</title>
+      <title> CmntyListing Web Portal</title>
    </head>
    <body>
       <nav class="navbar navbar-expand-lg navbar-dark indigo">
@@ -41,7 +41,7 @@
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                      {% if user.is_swapt_user %}
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_listings' %}">Shop Campus Swapts</a></li>
-                     <li><a class="dropdown-item" href="{% url 'listings:swapt_create' %}">Create a Swapt Listing</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_create' %}">Create a Swapt CmntyListing</a></li>
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_listing_list' %}">Old Shop Campus Swapts</a></li>
                      {% elif user.is_admin %}
                      <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">Upload</a></li>
@@ -93,7 +93,7 @@
          </ul>
          <ul class="navbar-nav">
             <li class="nav-item">
-               <a class="nav-link" href="{% url 'listings:swapt_create' %}">Create A Swapt Listing!</a>
+               <a class="nav-link" href="{% url 'listings:swapt_create' %}">Create A Swapt CmntyListing!</a>
             </li>
          </ul>
          </div>

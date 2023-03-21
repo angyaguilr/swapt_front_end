@@ -32,15 +32,22 @@ class CmntyListingCreationForm(ModelForm):
 
     class Meta:
         model = CmntyListing
-        fields = ("title", "desc", "condition",)
+        fields = ("thumbnail", "title", "desc", "preloaded_category", "condition", "category", "location", "delivery", "pickupmethod", )
     
     def save(self, commit=True):
         self.full_clean() # calls clean function
-        listing = CmntyListing(stage=2)
-        
+        listing = CmntyListing(stage=2, confirmed=True, )
+        exclude = ["swaptuser"]
+
         if commit:
             fields = self.cleaned_data
             listing.desc = fields['desc']
+            listing.thumbnail = fields['thumbnail']
+            listing.preloaded_category = fields['preloaded_category']
+            listing.category = fields['category']
+            listing.location = fields['location']
+            listing.pickupmethod = fields['pickupmethod']
+            listing.delivery = fields['delivery']
             listing.title = fields['title']
             listing.condition = fields['condition']
         

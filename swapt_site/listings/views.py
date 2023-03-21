@@ -22,8 +22,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse,HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-
-from .models import Banner, CmntyListingsCategory, Brand, Color, Dimensions, CmntyListingPrice, CmntyListingTag, CmntyListing, CmntyCampusPropertyNamePair, CmntyListingAttribute, Swapt_Prices, SwaptCampusPropertyNamePair, SwaptListingModel, SwaptListingTag, SwaptPropertyManager, SwaptPaymentHistory, SwaptListingTransactionRef
+from accounts.models import SwaptUser
+from .models import  Banner, CmntyListingsCategory, Brand, Color, Dimensions, CmntyListingPrice, CmntyListingTag, CmntyListing, CmntyCampusPropertyNamePair, CmntyListingAttribute, Swapt_Prices, SwaptCampusPropertyNamePair, SwaptListingModel, SwaptListingTag, SwaptPropertyManager, SwaptPaymentHistory, SwaptListingTransactionRef
 from .forms import ListingEditForm, ListingRejectForm, CmntyListingCreationForm, ListingCreationForm, CmntyListingPriceCreationForm
 from .serializers import CmntyListingSerializer, SwaptListingSerializer, SwaptCampusPropertyNamePairSerializer, CampusPropertyNamePairSerializer, CampusPropertyNamePairSerializer, CmntyListingReviewSerializer, SwaptListingReviewSerializer
 
@@ -175,110 +175,7 @@ class SwaptReviewListingsAPI(viewsets.ModelViewSet):
             return queryset.filter(swaptuser=self.request._request.user.swaptuser)
         else:
             return queryset
-        
-# class SwaptListingsCreationView(View):
-    
-#     # Shows the swapt_user the upload form for listings
-#     def get(self, request):
-#         # Deletes any unconfirmed listings
-#         listings = SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)
-#         listings.delete()
-#         template = "listings/swapt_upload_form.html"
-#         return render(request, template)
 
-#     def post(self, request):
-#         template = "listings/swapt_upload_form.html"
-#         csv_file = request.FILES['file']
-#         # Checks if uploaded file is a CSV file
-#         if not csv_file.name.endswith('.csv'):
-#             messages.error(request, 'This is not a CSV file.')
-#             return render(request, template)
-#         data_set = csv_file.read().decode('UTF-8')
-#         # setup a stream which is when we loop through each line we are able to handle a data in a stream
-#         io_string = io.StringIO(data_set)
-#         next(io_string)
-#         # Keeps track of row number
-#         counter = 1
-
-#         # First loop through is for error checking
-#         # Checks formatting guidelines that are laid out on the upload form page
-#         for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-#             if column[0] == "" or len(column[0]) > 250: 
-#                 messages.error(request, 'Name field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[1] == "" or len(column[1]) > 250:
-#                 messages.error(request, 'Description field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[2] == "" or (column[2] != "ColumbiaMD" and column[2] != "BurlingtonNC" and column[2] != "ElonNC" and column[2] != "CollegeParkMD"):
-#                 messages.error(request, 'Location field on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[3] == "" or int(column[3]) < 1 or int(column[3]) > 12:
-#                 messages.error(request, 'Grade field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[4] == "" or (column[4] != "Easy" and column[4] != "Medium" and column[4] != "Hard"):
-#                 messages.error(request, 'Difficulty field 1 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[5] != "":
-#                 if int(column[5]) < 1 or int(column[5]) > 12:
-#                     messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#                 if column[6] == "" or (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-#                     messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[6] != "" and (column[6] != "Easy" and column[6] != "Medium" and column[6] != "Hard"):
-#                 messages.error(request, 'Difficulty field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             elif column[6] == "Easy" or column[6] == "Medium" or column[6] == "Hard":
-#                 if column[5] == "" or int(column[5]) < 1 or int(column[5]) > 12:
-#                     messages.error(request, 'Grade field 2 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[7] != "":
-#                 if int(column[7]) < 1 or int(column[7]) > 12:
-#                     messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#                 if column[8] == "" or (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-#                     messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             if column[8] != "" and (column[8] != "Easy" and column[8] != "Medium" and column[8] != "Hard"):
-#                 messages.error(request, 'Difficulty field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-#             elif column[8] == "Easy" or column[8] == "Medium" or column[8] == "Hard":
-#                 if column[7] == "" or int(column[7]) < 1 or int(column[7]) > 12:
-#                     messages.error(request, 'Grade field 3 on line ' + str(counter) + ' does not follow formatting guidelines. Please check the input against the guidelines.')
-                    
-#             counter += 1
-
-#         # If there are any errors, render the upload page with those errors so user can fix them
-#         if len(list(messages.get_messages(request))) != 0:
-#             return render(request, template)
-
-#         io_string = io.StringIO(data_set)
-#         next(io_string)
-
-#         # Second loop through is for adding cards to database
-#         for column in csv.reader(io_string, delimiter=',', quotechar="|"):
-
-#             listing = SwaptListingModel.objects.create(
-#                 name=column[0],
-#                 description=column[1],
-#                 location=column[2],
-#                 stage=1,
-#                 swaptuser=request.user.swaptuser
-#             )
-
-#             firstPair = GradeDifficultyPair.objects.get_or_create(
-#                 grade=int(column[3]),
-#                 difficulty=column[4]
-#             )
-#             firstPair[0].listings.add(listing)
-
-#             # Second and third pairs are optional
-#             # Also, error checking makes sure that if the grade is filled in, then the difficulty must be filled in too
-#             # So, don't need to check both here
-#             if column[5] != "":
-#                 secondPair = GradeDifficultyPair.objects.get_or_create(
-#                     grade=int(column[5]),
-#                     difficulty=column[6]
-#                 )
-#                 secondPair[0].listings.add(listing)
-
-#             if column[7] != "":
-#                 thirdPair = GradeDifficultyPair.objects.get_or_create(
-#                     grade=int(column[7]),
-#                     difficulty=column[8]
-#                 )
-#                 thirdPair[0].listings.add(listing)
-
-#         return redirect("listings:swapt_confirm")
-        
 class SwaptListingsConfirmationView(View):
 
     # Returns view of swapt_user's unconfirmed listings (this page is redirected to right after the upload page if successful)
@@ -693,6 +590,8 @@ class CmntyListingCreationView(CreateView):
 
     def form_valid(self, form):
         listing = form.save()
+        listing.swaptuser = SwaptUser.objects.get(user=self.request.user) 
+        listing.save()
         if self.request.user.is_swapt_user:
             listing.save()
 

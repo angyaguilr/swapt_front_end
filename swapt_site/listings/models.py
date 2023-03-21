@@ -165,7 +165,7 @@ class CmntyListing(models.Model):
     #field identifying seller who posted listing
     swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
     #mandatory fields required with user input
-    title = models.CharField(max_length=250)
+    title = models.CharField(max_length=250, null=True)
     desc = models.TextField(_("desc"), blank=True)
     thumbnail = models.ImageField(upload_to=get_image_filename, blank=True)
     preloaded_category = models.CharField(
@@ -189,7 +189,7 @@ class CmntyListing(models.Model):
     confirmed = models.BooleanField(default=False)
     issue = models.CharField(max_length=250, blank=True, null=True) # Currently only using one field for both rejected and reported issues
     #optional
-    quantity = models.IntegerField(default=1)
+    quantity = models.IntegerField(default=1, null=True)
     tags = models.ManyToManyField(CmntyListingTag, blank=True)
     
     #field to display listings in featured page 

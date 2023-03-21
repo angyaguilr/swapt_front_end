@@ -521,8 +521,7 @@ class SwaptListingsUploadedSearch(View):
         query = self.request.GET.get("q")
 
         swapt_bundle_items = SwaptListingModel.objects.filter(
-            Q(name__icontains=query) |
-            Q(price__icontains=query) |
+            Q(title__icontains=query) |
             Q(desc__icontains=query)
         )
 
@@ -959,8 +958,7 @@ class CmntyListingsUploadedSearch(View):
         query = self.request.GET.get("q")
 
         swapt_items = CmntyListing.objects.filter(
-            Q(name__icontains=query) |
-            Q(itemPrice__icontains=query) |
+            Q(title__icontains=query) |
             Q(desc__icontains=query)
         )
 

@@ -1,4 +1,4 @@
-import NextImage from 'next/image';
+import NextImage from "next/image";
 import styled from 'styled-components';
 
 interface BasicCardProps {
@@ -10,7 +10,15 @@ interface BasicCardProps {
 export default function BasicCard({ title, description, imageUrl }: BasicCardProps) {
   return (
     <Card>
-      <NextImage src={imageUrl} width={128} height={128} alt={title} />
+      <NextImage
+        src={imageUrl}
+        width={128}
+        height={128}
+        alt={title}
+        style={{
+          maxWidth: "100%",
+          height: "auto"
+        }} />
       <Title>{title}</Title>
       <Description>{description}</Description>
     </Card>

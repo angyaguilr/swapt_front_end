@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<main class="container my-4">
+	<div class="row">
+		<!-- Filters -->
+		<div class="col-md-3">
+			{% include 'listings/filters.html' %}
+		</div>
+		<div class="col-md-9">
+			<!-- Listings -->
+			<h3 class="mb-4 border-bottom pb-1">
+				Listings
+			</h3>
+			<div class="row">
+				{% for listing in data %}
+				<div class="col-md-4 mb-4">
+					<div class="card shadow">
+					  <a href="/listing/{{listing.slug}}/{{listing.id}}"><img src="/media/{{listing.cmntylistingattribute_set.first.image}}" class="card-img-top" alt="{{listing.title}}"></a>
+					  <div class="card-body">
+					    <h5 class="card-text"><a href="/listing/{{listing.slug}}/{{listing.id}}">{{listing.title}}</a></h5>
+					    <h6>$ <span class="listing-price-{{listing.id}}">{{listing.cmntylistingattribute_set.first.price}}</span></h6>
+					  </div>
+					  	<div class="card-footer">
+				          <input type="hidden" value="1" class="form-control listing-qty-{{listing.id}}" id="listingQty" />
+				          <input type="hidden" class="listing-image-{{listing.id}}" value="{{listing.cmntylistingattribute_set.first.image}}" />
+				          <input type="hidden" class="listing-id-{{listing.id}}" value="{{listing.id}}" />
+				          <input type="hidden" class="listing-title-{{listing.id}}" value="{{listing.title}}" />
+							  	<button class="btn btn-sm btn-primary add-to-cart" data-index="{{listing.id}}"><i class="fa fa-shopping-cart"></i></button>
+							  	<button class="btn btn-sm btn-danger"><i class="fa fa-heart"></i></button>
+							  	<span class="float-right">
+							  		4.5/5
+							  		<i class="fa fa-star text-warning"></i>
+							  	</span>
+					  	</div>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+			<p class="my-4 text-center"><a href="listings.php" class="btn btn-dark btn-sm">Load More <i class="fa fa-sync"></i></a></p>
+		</div>
+	</div>
+</main>
+{% endblock %}
+

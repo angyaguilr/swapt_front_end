@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title> CmntyListing Web Portal</title>
+   </head>
+   <body>
+      <nav class="navbar navbar-expand-lg navbar-dark indigo">
+         <a class="navbar-brand" href="{% url 'listings:index' %}">Swapt</a>
+         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+               <li class="nav-item">
+                  <a class="nav-link" href="{% url 'listings:about' %}">About Us</span></a>
+               </li>
+               {% if user.is_authenticated %}
+               <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Community Listings
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                     {% if user.is_swapt_user %}
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listing_list' %}">Old Shop Community Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_listings' %}">Shop Community Listings</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create' %}">Create a Community Swapt</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_create_price' %}">Create a Community Swapt</a></li>
+                     {% elif user.is_admin %}
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_review' %}">Upload</a></li>
+                     {% endif %}
+                     <li><a class="dropdown-item" href="{% url 'listings:cmnty_review' %}">My Community Listings</a></li>
+                  </ul>
+               </li>
+               <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Campus Listings
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                     {% if user.is_swapt_user %}
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_listings' %}">Shop Campus Swapts</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_create' %}">Create a Swapt CmntyListing</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_listing_list' %}">Old Shop Campus Swapts</a></li>
+                     {% elif user.is_admin %}
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">Upload</a></li>
+                     {% endif %}
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">My Swapt Listings</a></li>
+                  </ul>
+               </li>
+               {% if user.is_admin %}
+               <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Codes
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                     <li><a class="dropdown-item" href="{% url 'accounts:code_creation' %}">Create</a></li>
+                     <li><a class="dropdown-item" href="{% url 'accounts:code_review' %}">Review</a></li>
+                  </ul>
+               </li>
+               {% endif %} 
+               {% endif %}              
+            </ul>
+         </div>
+         {% if user.is_authenticated %}
+         <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+               <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {{ user.username }}
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                     <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
+                     <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Log out</a></li>
+                     <li><a class="dropdown-item" href="{% url 'listings:swapt_review' %}">My Listings</a></li>
+                  </ul>
+               </li>
+            </ul>
+         </div>
+         {% else %}
+         <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+               <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{% url 'accounts:login' %}">Sign in</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{% url 'accounts:signup' %}">Sign up</a>
+               </li>
+            </ul>
+         </div>
+         {% endif %}
+         </ul>
+         <ul class="navbar-nav">
+            <li class="nav-item">
+               <a class="nav-link" href="{% url 'listings:swapt_create' %}">Create A Swapt CmntyListing!</a>
+            </li>
+         </ul>
+         </div>
+      </nav>
+      <!-- Bootstrap Bundle with Popper -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+   </body>
+</html>

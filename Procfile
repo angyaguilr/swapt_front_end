@@ -1,1 +1,0 @@
-web: gunicorn bottleShop.wsgi

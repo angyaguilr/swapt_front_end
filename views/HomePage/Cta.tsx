@@ -13,7 +13,7 @@ export default function Cta() {
     <CtaWrapper>
       <Container>
         <Stack>
-          <OverTitle>Lorem ipsum dolor sit amet</OverTitle>
+          <OverTitle>Swapt Marketplace</OverTitle>
           <SectionTitle>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Temporibus delectus?</SectionTitle>
           <Description>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda beatae accusamus deleniti nihil quas tempora numquam, vitae
@@ -22,12 +22,12 @@ export default function Cta() {
           <ButtonGroup>
             <NextLink href="#early-access" passHref>
               <Button>
-                Subscribe to the newsletter <span>&rarr;</span>
+                Sign Up <span>&rarr;</span>
               </Button>
             </NextLink>
             <NextLink href="#whitepaper" passHref>
               <OutlinedButton transparent>
-                Features <span>&rarr;</span>
+                HOW IT WORKS <span>&rarr;</span>
               </OutlinedButton>
             </NextLink>
           </ButtonGroup>
@@ -74,3 +74,4 @@ const OutlinedButton = styled(Button)`
 const CtaWrapper = styled.div`
   background: rgb(var(--secondary));
 `;
+

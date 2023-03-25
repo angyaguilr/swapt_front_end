@@ -8,7 +8,7 @@ from django.utils.html import mark_safe
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
-UserPending = settings.AUTH_USER_MODEL
+User = settings.AUTH_USER_MODEL
 def get_image_filename(instance, filename):
     title = instance.title
     slug = slugify(title)

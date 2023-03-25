@@ -164,6 +164,11 @@ PAYPAL_TEST = True
 JET_SIDE_MENU_COMPACT = True
 
 
+#for testing purposes (in seconds)
+# PASSWORD_RESET_TIMEOUT = 2
+
+LOGIN_URL = '/accounts/login'
+
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 django_on_heroku.settings(locals())

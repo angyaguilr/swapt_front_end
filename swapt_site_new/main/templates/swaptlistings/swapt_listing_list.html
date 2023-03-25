@@ -1,7 +1,7 @@
-{% extends 'listings/base.html' %}
+{% extends "listings/base.html" %} 
 {% block title %} Listings {% endblock title%} 
 {% block content %} 
-{% for listing in listings %}
+{% for listing in swapt_bundle_listings %}
 <div class="card" style="width: 18rem">
   <img
     class="card-img-top"
@@ -12,7 +12,7 @@
     <h5 class="card-title">{{listing.title}}</h5>
     <p class="card-text">{{listing.desc}}</p>
     <a
-      href="{% url 'listings:cmnty_listing_detail' listing.id %}"
+      href="{% url 'swapt_listing_detail' listing.id %}"
       class="btn btn-primary"
       >View Detail</a
     >

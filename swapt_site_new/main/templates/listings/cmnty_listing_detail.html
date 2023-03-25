@@ -16,7 +16,7 @@
       <div class="card-text">
         <h5 class="card-text">${{ price.price }}</h5>
         <form
-          action="{% url 'listings:create-checkout-session' price.id %}"
+          action="{% url 'create-checkout-session' price.id %}"
           method="POST"
         >
           {% csrf_token %}

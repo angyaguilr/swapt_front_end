@@ -20,6 +20,7 @@ urlpatterns = [
     path('jet/', include('jet.urls')),
     path('jet/dashboard/', include('jet.dashboard.urls','jet-dashboard')),
     path('admin/', admin.site.urls),
+    path('accounts/', include('accounts.urls')),
     path('',include('main.urls')),
     path('accounts/',include('django.contrib.auth.urls')),
     path("", include("django_nextjs.urls")),

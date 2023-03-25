@@ -10,7 +10,7 @@
 
     <div class="row justify-content-center mt-5">
         <div class="col-md-8 col-sm-12 text-center">
-            <form method="GET" action="{% url 'listings:swapt_listings_search' %}">
+            <form method="GET" action="{% url 'swapt_listings_search' %}">
                 <div class="md-form mt-0 active-cyan-2">
                     <input class="form-control" name="q" type="text" placeholder="Search Our Campus Swapts" aria-label="Search" value="{{ request.GET.q }}">
                 </div>
@@ -36,7 +36,7 @@
               <h5 class="card-title">{{item.name}}</h5>
               <p class="card-text">{{item.desc}}</p>
               <a
-                href="{% url 'listings:swapt_listing_detail' item.id %}"
+                href="{% url 'swapt_listing_detail' item.id %}"
                 class="btn btn-primary"
                 >View Detail</a
               >

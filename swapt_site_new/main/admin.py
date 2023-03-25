@@ -1,11 +1,20 @@
 from django.contrib import admin
-from .models import Banner,Category,Brand,Color,Dimension,CmntyListing,ProductAttribute,CartOrder,CartOrderItems,ProductReview,Wishlist,UserAddressBook, Swapt_Prices, SwaptCampusPropertyNamePair, SwaptListingModel, SwaptListingTag, SwaptPropertyManager, SwaptListingTransactionRef, SwaptPaymentHistory
+from .models import CmntyCampusPropertyNamePair, Banner,Category,Brand,Color,Dimension,CmntyListing,ProductAttribute,CartOrder,CartOrderItems,ProductReview,Wishlist,UserAddressBook, Swapt_Prices, SwaptCampusPropertyNamePair, SwaptListingModel, SwaptListingTag, SwaptPropertyManager, SwaptListingTransactionRef, SwaptPaymentHistory, CmntyListingTag, CmntyListingPrice
 
 # admin.site.register(Banner)
 admin.site.register(Brand)
 admin.site.register(Dimension)
+#swapt
 admin.site.register(Swapt_Prices)
 admin.site.register(SwaptListingModel)
+admin.site.register(SwaptListingTag)
+admin.site.register(SwaptListingTransactionRef)
+admin.site.register(SwaptPaymentHistory)
+admin.site.register(SwaptCampusPropertyNamePair)
+admin.site.register(SwaptPropertyManager)
+#community listings
+admin.site.register(CmntyListingTag)
+admin.site.register(CmntyCampusPropertyNamePair)
 
 
 class BannerAdmin(admin.ModelAdmin):
@@ -52,3 +61,12 @@ admin.site.register(Wishlist)
 class UserAddressBookAdmin(admin.ModelAdmin):
 	list_display=('user','address','status')
 admin.site.register(UserAddressBook,UserAddressBookAdmin)
+
+class PriceAdmin(admin.StackedInline):
+    model = CmntyListingPrice
+
+class ListingAdmin(admin.ModelAdmin):
+    inlines = (PriceAdmin,)
+
+    class Meta:
+        model = CmntyListing

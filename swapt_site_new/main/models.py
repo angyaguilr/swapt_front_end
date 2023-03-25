@@ -2,10 +2,12 @@ from django.db import models
 from django.db.models.deletion import CASCADE
 from django.utils.html import mark_safe
 from django.utils import timezone
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
+from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
+User = settings.AUTH_USER_MODEL
 def get_image_filename(instance, filename):
     title = instance.title
     slug = slugify(title)
@@ -21,6 +23,7 @@ class CmntyListingTag(models.Model):
 
     def __str__(self) -> str:
         return self.name
+    
 class CmntyListingManager(models.Manager):
     # Only shows the user rejected listings within last 30 days or listings from other stages
     # This is so that when listings are >= 30 days old, but daily cleansing hasn't run yet,
@@ -180,7 +183,7 @@ class CmntyListing(models.Model):
     )
     delivery = models.PositiveSmallIntegerField(choices=DELIVERYMETHOD_CHOICES, null=True)
     pickupmethod = models.PositiveSmallIntegerField(choices= PICKUP_CHOICES, null=True)
-    #fields used to review listings
+    #fields used to review listingscts
     stage = models.PositiveSmallIntegerField(choices=APPROVAL_STAGES, null=True)
     selling_stage = models.PositiveSmallIntegerField(choices=SELLING_STAGES, null=True)
     confirmed = models.BooleanField(default=False)
@@ -195,7 +198,7 @@ class CmntyListing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
-        verbose_name_plural='6. Products'
+        verbose_name_plural='6. Listings'
 
     def __str__(self):
         return self.title
@@ -209,7 +212,7 @@ class ProductAttribute(models.Model):
     image=models.ImageField(upload_to="product_imgs/",null=True)
 
     class Meta:
-        verbose_name_plural='7. ProductAttributes'
+        verbose_name_plural='7. Listing Attributes'
 
     def __str__(self):
         return self.product.title

@@ -10,7 +10,7 @@
     <div class="row justify-content-center mt-1">
         <div class="card col-md-5 col-sm-12 offset-md-1 p-4 text-center">
             <h2>Create a Swapt CmntyListing</h2>
-            <a href="{% url 'listings:swapt_create' %}" class="btn btn-outline-primary">Create Swapt CmntyListing</a>
+            <a href="{% url 'swapt_create' %}" class="btn btn-outline-primary">Create Swapt CmntyListing</a>
         </div>
     </div>
 </div>
@@ -47,6 +47,6 @@
 		</div>
     {% endfor %}
 	</div>
-	<p class="my-4 text-center"><a href="{% url 'listings:listing-list' %}" class="btn btn-dark btn-sm">All Listings <i class="fa fa-long-arrow-alt-right"></i></a></p>
+	<p class="my-4 text-center"><a href="{% url 'listing-list' %}" class="btn btn-dark btn-sm">All Listings <i class="fa fa-long-arrow-alt-right"></i></a></p>
 </main>
 {% endblock %}

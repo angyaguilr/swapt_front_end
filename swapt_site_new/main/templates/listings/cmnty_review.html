@@ -109,13 +109,13 @@
                             {% endif %}
                             {% if listing.stage == 1 %}
                             {% comment %} <button type="submit" value="3" class="btn btn-danger" name="status">Reject</button> {% endcomment %}
-                            <a class="btn btn-danger" href="{% url 'listings:cmnty_reject' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-cmntyreview-tab" role="button">Reject</a>
+                            <a class="btn btn-danger" href="{% url 'cmnty_reject' listing.id %}?next={% url 'cmnty_review'%}#nav-cmntyreview-tab" role="button">Reject</a>
                             {% else %}
                             <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                             {% endif %}
-                        <a class="btn btn-primary" href="{% url 'listings:cmnty_edit' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-cmntyreview-tab" role="button">Edit</a>
+                        <a class="btn btn-primary" href="{% url 'cmnty_edit' listing.id %}?next={% url 'cmnty_review'%}#nav-cmntyreview-tab" role="button">Edit</a>
                         {% elif listing.stage != 2 and user.is_swapt_user %}
-                        <a class="btn btn-primary" href="{% url 'listings:cmnty_edit' listing.id %}?next={% url 'listings:cmnty_review'%}#nav-cmntyreview-tab" role="button">Edit</a>
+                        <a class="btn btn-primary" href="{% url 'cmnty_edit' listing.id %}?next={% url 'cmnty_review'%}#nav-cmntyreview-tab" role="button">Edit</a>
                         <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
                         {% endif %}
                         <input type="hidden" name="id" value={{ listing.id }}>

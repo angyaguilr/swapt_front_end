@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.deletion import CASCADE
 from django.utils.html import mark_safe
+from accounts.models import SwaptUser
 from django.utils import timezone
 #from django.contrib.auth.models import User
 from django.conf import settings
@@ -159,7 +160,7 @@ class CmntyListing(models.Model):
         ('ElonNC', 'ElonNC'),
         ('BurlingtonNC', 'BurlingtonNC'),
     ]
-    
+    swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
     title=models.CharField(max_length=200)
     slug=models.CharField(max_length=400)
     detail=models.TextField()
@@ -440,8 +441,17 @@ class SwaptListingModel(models.Model):
     #unique fields for swaptlistingsmodel
     propertymanager = models.ForeignKey(SwaptPropertyManager, on_delete=models.CASCADE )
     #field identifying seller who posted listing
-    #swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
-    
+    swaptuser = models.ForeignKey(SwaptUser, on_delete=CASCADE, null=True)
+    listings = models.ManyToManyField(
+        'CmntyListing', blank=True)
+    name = models.CharField(max_length=50, blank=True)
+    email = models.CharField(max_length=50, blank=True)
+    street = models.CharField(max_length=50, blank=True)
+    city = models.CharField(max_length=50, blank=True)
+    state = models.CharField(max_length=15, blank=True)
+    zip_code = models.IntegerField(blank=True, null=True)
+    is_paid = models.BooleanField(default=False)
+    is_shipped = models.BooleanField(default=False)
     #mandatory fields required with user input
     title = models.CharField(max_length=250)
     desc = models.TextField(_("desc"), blank=True)
@@ -483,7 +493,7 @@ class SwaptListingModel(models.Model):
     class Meta:
         ordering = ("-created_at",)
   
-    objects = CmntyListingManager() # Using manager above for reasons in comment
+    objects = SwaptListingManager() # Using manager above for reasons in comment
 
     # def __str__(self):
     #     return self.name

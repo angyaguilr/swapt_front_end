@@ -542,7 +542,7 @@ class SwaptListingsConfirmationView(View):
         if not listings:
             return redirect("listings:swapt_create")
 
-        template = "listings/swapt_confirm.html"
+        template = "swaptlistings/swapt_confirm.html"
         context = {"listings": SwaptListingModel.objects.filter(swaptuser=request.user.swaptuser, confirmed=False)}
         return render(request, template, context)
      def post(self, request):
@@ -574,7 +574,7 @@ class SwaptListingsConfirmationView(View):
 class SwaptListingsReviewView(View):
 
     def get(self, request):
-        template = "listings/swapt_review.html"
+        template = "swaptlistings/swapt_review.html"
     
         # Gets different attributes from the query string, but by default will be the most expansive possible
         locations = self.request.GET.getlist('location', ['ElonNC', 'CollegeParkMD', 'BurlingtonNC', 'ColumbiaMD'])
@@ -619,7 +619,7 @@ class SwaptListingsReviewView(View):
 class SwaptListingEditView(UpdateView):
     form_class = ListingEditForm
     model = SwaptListingModel
-    template_name = 'listings/swapt_edit_form.html'
+    template_name = 'swaptlistings/swapt_edit_form.html'
 
     def get(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
@@ -685,7 +685,7 @@ class SwaptListingEditView(UpdateView):
 class SwaptListingRejectView(UpdateView):
     form_class = ListingRejectForm
     model = SwaptListingModel
-    template_name = 'listings/swapt_reject.html'
+    template_name = 'swaptlistings/swapt_reject.html'
 
     def form_valid(self, form):
         listing = form.save()
@@ -765,7 +765,7 @@ class SwaptListingsUploaded(View):
             'swapt_bundle_items': swapt_bundle_items
         }
 
-        return render(request, 'listings/swapt_listings.html', context)
+        return render(request, 'swaptlistings/swapt_listings.html', context)
 
 class SwaptListingsUploadedSearch(View):
     def get(self, request, *args, **kwargs):
@@ -780,16 +780,16 @@ class SwaptListingsUploadedSearch(View):
             'swapt_bundle_items': swapt_bundle_items
         }
 
-        return render(request, 'listings/swapt_listings.html', context)
+        return render(request, 'swaptlistings/swapt_listings.html', context)
 
 class SwaptListingCreation(View):
     def get(self, request, *args, **kwargs):
         # get every item from each category
         DiningFurnitureSets = CmntyListing.objects.filter(swaptuser=request.user.swaptuser, 
-            category__name__contains='DiningFurniture')
-        BedroomFurnitureSets = CmntyListing.objects.filter(swaptuser=request.user.swaptuser, category__name__contains='BedroomFurniture')
-        OutdoorFurnituresSets = CmntyListing.objects.filter(swaptuser=request.user.swaptuser, category__name__contains='OutdoorFurniture')
-        LivingRmFurnitureSets = CmntyListing.objects.filter(swaptuser=request.user.swaptuser, category__name__contains='LivingRmFurniture')
+            category__title__contains='DiningFurniture')
+        BedroomFurnitureSets = CmntyListing.objects.filter(swaptuser=request.user.swaptuser, category__title__contains='BedroomFurniture')
+        OutdoorFurnituresSets = CmntyListing.objects.filter(swaptuser=request.user.swaptuser, category__title__contains='OutdoorFurniture')
+        LivingRmFurnitureSets = CmntyListing.objects.filter(swaptuser=request.user.swaptuser, category__title__contains='LivingRmFurniture')
 
         # pass into context
         context = {
@@ -800,7 +800,7 @@ class SwaptListingCreation(View):
         }
 
         # render the template
-        return render(request, 'listings/swapt_create_form.html', context)
+        return render(request, 'swaptlistings/swapt_create_form.html', context)
 
     def post(self, request, *args, **kwargs):
         name = request.POST.get('title')
@@ -867,12 +867,12 @@ class SwaptListingCreation(View):
 class SwaptListingListView(ListView):
     model = SwaptListingModel
     context_object_name = "swapt_bundle_listings"
-    template_name = "listings/swapt_listing_list.html"
+    template_name = "swaptlistings/swapt_listing_list.html"
 
 class SwaptListingDetailView(DetailView):
     model = SwaptListingModel
     context_object_name = "swapt_bundle_listing"
-    template_name = "listings/swapt_listing_detail.html"
+    template_name = "swaptlistings/swapt_listing_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super( SwaptListingDetailView, self).get_context_data()
@@ -889,7 +889,7 @@ class SwaptListingConfirmation(View):
             'price': order.price,
         }
 
-        return render(request, 'listings/swapt_create_confirmation.html', context)
+        return render(request, 'swaptlistings/swapt_create_confirmation.html', context)
 
     def post(self, request, pk, *args, **kwargs):
         data = json.loads(request.body)
@@ -903,7 +903,7 @@ class SwaptListingConfirmation(View):
 
 class SwaptListingPayConfirmation(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'listings/swapt_pay_confirmation.html')
+        return render(request, 'swaptlistings/swapt_pay_confirmation.html')
 
 #Community Listings
 class CmntyReviewListingsAPI(viewsets.ModelViewSet):

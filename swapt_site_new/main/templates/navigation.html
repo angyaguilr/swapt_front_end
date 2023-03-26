@@ -27,7 +27,6 @@
                      <li><a class="dropdown-item" href="{% url 'cmnty_listing_list' %}">Old Shop Community Listings</a></li>
                      <li><a class="dropdown-item" href="{% url 'cmnty_listings' %}">Shop Community Listings</a></li>
                      <li><a class="dropdown-item" href="{% url 'cmnty_create' %}">Create a Community Swapt</a></li>
-                     <li><a class="dropdown-item" href="{% url 'cmnty_create_price' %}">Create a Community Swapt</a></li>
                      {% elif user.is_admin %}
                      <li><a class="dropdown-item" href="{% url 'cmnty_review' %}">Upload</a></li>
                      {% endif %}

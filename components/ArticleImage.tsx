@@ -1,4 +1,4 @@
-import NextImage, { ImageProps } from "next/image";
+import NextImage, { ImageProps } from 'next/image';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -16,12 +16,10 @@ export default function ArticleImage({ src, caption, ...rest }: ArticleImageProp
           alt={caption || 'Article Image'}
           placeholder="blur"
           blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mPkj6+vBwAC4AFuNSmtGAAAAABJRU5ErkJggg=="
+          layout="fill"
+          objectFit="cover"
           {...rest}
-          fill
-          sizes="100vw"
-          style={{
-            objectFit: "cover"
-          }} />
+        />
       </ImageWrapper>
       <Caption>{caption}</Caption>
     </Wrapper>
@@ -33,13 +31,11 @@ const ImageWrapper = styled.div`
   max-width: 90rem;
   border-radius: 0.6rem;
   overflow: hidden;
-
   &::before {
     float: left;
     padding-top: 56.25%;
     content: '';
   }
-
   &::after {
     display: block;
     content: '';
@@ -51,7 +47,6 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-
   &:not(:last-child) {
     margin-bottom: 3rem;
   }

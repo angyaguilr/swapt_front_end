@@ -57,9 +57,9 @@ function MyApp({ Component, pageProps }: AppProps) {
               query={pageProps.query}
               variables={pageProps.variables}
               data={pageProps.data}
-              isLocalClient={!process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
-              branch={process.env.NEXT_PUBLIC_EDIT_BRANCH}
-              clientId={process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
+              //isLocalClient={!process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
+              //branch={process.env.NEXT_PUBLIC_EDIT_BRANCH}
+              //clientId={process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
               {...pageProps}
             >
               {(livePageProps: any) => <Component {...livePageProps} />}

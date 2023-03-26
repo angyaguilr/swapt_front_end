@@ -23,7 +23,7 @@ const navItems: NavItems = [
   { title: 'Swapt Marketplace', href: '/features' },
   { title: 'About Us', href: '/pricing' },
   { title: 'Contact', href: '/contact' },
-  { title: 'Sign up', href: '/sign-up', outlined: true },
+  { title: 'Sign up', href: '/accounts/signup', outlined: true },
 ];
 
 const TinaCMS = dynamic(() => import('tinacms'), { ssr: false });

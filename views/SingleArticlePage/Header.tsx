@@ -13,7 +13,7 @@ interface HeaderProps {
 export default function Header({ title, formattedDate, imageUrl, readTime }: HeaderProps) {
   return (
     <HeaderContainer>
-      <ArticleImage src={imageUrl} />
+      <ArticleImage src={imageUrl} alt={'img'} />
       <Title>{title}</Title>
       <DetailsContainer>
         {formattedDate} <MidDot /> {readTime}

@@ -3,19 +3,21 @@
   "version": "0.1.0",
   "engines": {
     "node": "18.x"
-  }, 
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p $PORT",
-    "lint": "next lint"
+    "check-types": "tsc --noemit",
+    "lint": "check-types && next lint"
   },
   "dependencies": {
     "@accessible/drawer": "^3.0.2",
     "@n8tb1t/use-scroll-position": "^2.0.3",
     "@sendgrid/mail": "^7.4.7",
     "@svgr/webpack": "^6.5.1",
+    "check-types": "^11.2.2",
     "css-in-js-media": "^2.0.1",
     "date-fns": "^2.24.0",
     "gray-matter": "^4.0.3",

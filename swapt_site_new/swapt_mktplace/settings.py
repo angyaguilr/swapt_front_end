@@ -13,32 +13,35 @@ import os
 from pathlib import Path
 from decouple import config
 import django_on_heroku
+import dj_database_url
+from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Stripe
-STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-BACKEND_DOMAIN = config("BACKEND_DOMAIN")
-PAYMENT_SUCCESS_URL = config("PAYMENT_SUCCESS_URL")
-PAYMENT_CANCEL_URL = config("PAYMENT_CANCEL_URL")
+BACKEND_DOMAIN = os.getenv("BACKEND_DOMAIN")
+PAYMENT_SUCCESS_URL = os.getenv("PAYMENT_SUCCESS_URL")
+PAYMENT_CANCEL_URL = os.getenv("PAYMENT_CANCEL_URL")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'pggni(t+5rj@%zzmpw#orp_pmx2r%xo9v8_q_t#6wo@pf+n3sp'
-#SECRET_KEY = 'django-insecure-08-5_347)0)^mcryuoc4=z_%diez$1(y+v3_i9!4bkorhxu=4c'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -68,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

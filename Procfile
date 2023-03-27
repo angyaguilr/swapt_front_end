@@ -1,1 +1,1 @@
-web: gunicorn /Users/angyaguilar/Desktop/swapt_front_end/swapt_site/swapt_mktplace.wsgi
+web: gunicorn swapt_front_end/swapt_site/swapt_mktplace.wsgi

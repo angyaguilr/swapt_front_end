@@ -11,7 +11,9 @@
     "build": "next build",
     "start": "next start -p $PORT",
     "check-types": "tsc --noemit",
-    "lint": "check-types && next lint"
+    "lint": "check-types && next lint",
+    "heroku-postbuild": "yarn run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@accessible/drawer": "^3.0.2",

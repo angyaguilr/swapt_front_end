@@ -1,0 +1,54 @@
+{% extends 'listings/base.html' %}
+{% block header %}
+
+
+
+    <form action="" method="POST">
+    {% csrf_token %}
+    <button type="submit" value="confirm" class="btn btn-primary" name="status">Submit</button>
+    <button type="submit" value="cancel" class="btn btn-danger" name="status">Cancel</button>
+    </form>
+    <br></br>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for listing in listings %}
+        <form action="" method="POST">
+        {% csrf_token %}
+        <div class="col">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <div class="card-body">
+                        <h1> Card {{ forloop.counter }}</h1>
+                    </div>
+                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                    <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Name: {{ listing.title }}</li>
+                    <li class="list-group-item">Description: {{ listing.desc }}</li>
+                    <li class="list-group-item">Tags: {{ listing.tags }}</li>
+                    {% for pair in listing.cmntycampuspropertynamepair_set.all %}
+                    <li class="list-group-item">Campus/Property Name pair {{ forloop.counter }}: {{ pair.campus }}/{{ pair.propertyname }}</li>
+                    {% endfor %}
+                    </ul>
+                    <div class="card-body">
+                        <a class="btn btn-primary" href="{% url 'cmnty_edit' listing.id %}" role="button">Edit</a>
+                        {% comment %} <form action="" method="POST"> {% endcomment %}
+                        <button type="submit" value="delete" class="btn btn-danger" name="status">Delete</button>
+                        <input type="hidden" name="id" value={{ listing.id }}>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+        {% endfor %}
+    </div>
+      
+
+
+<!-- <script>
+    function deleteListingsq(){
+        
+    }
+    window.onunload = function() {
+        myfun();
+    }
+</script> -->
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "header.html" %}
+{% block header %}
+
+<h1>Edit Profile</h1>
+<br/><br/>
+
+<div class="form-group">
+    <form method="post">
+        {% csrf_token %}
+          <p align="left">
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">{{ form.username.label }}</label>
+              <div class="col-sm-9"> {{ form.username }} </div>
+            </div>
+            {% if form.username.help_text %}
+              <small style="display: none">{{ form.username.help_text }}</small>
+            {% endif %}
+            {% for error in form.username.errors %}
+              <p style="color: red">{{ error }}</p>
+            {% endfor %}
+          </p>
+          <p align="left">
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">{{ form.email.label }}</label>
+              <div class="col-sm-9"> {{ form.email }} </div>
+            </div>
+            {% if form.email.help_text %}
+              <small style="display: none">{{ form.email.help_text }}</small>
+            {% endif %}
+            {% for error in form.email.errors %}
+              <p style="color: red">{{ error }}</p>
+            {% endfor %}
+          </p>
+          <button class="btn btn-primary" type="submit">Update Profile</button>
+
+      </form>
+</div>
+
+{% endblock %}

@@ -1,9 +1,0 @@
-{% extends "header.html" %}
-
-{% block header %}
-  <h2>Sign up for a free account</h2>
-  <p class="lead">Select below the type of account you want to create</p>
-  <a href="{% url 'accounts:swaptuser_signup' %}" class="btn btn-primary">I'm a SWAPT User</a>
-  <a href="{% url 'accounts:Swapt_admin_signup' %}" class="btn btn-primary">I'm a SWAPT Admin</a>
-  <a href="{% url 'accounts:propertymanager_signup' %}" class="btn btn-primary">I'm a Property Manager</a>
-{% endblock %}

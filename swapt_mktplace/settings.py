@@ -104,8 +104,17 @@ WSGI_APPLICATION = 'swapt_mktplace.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.getenv('NAME'),
+
+        'USER': os.getenv('USER'),
+
+        'PASSWORD': os.getenv('PASSWORD'),
+
+        'HOST': os.getenv('HOST'),
+
+        'PORT': os.getenv('PORT')
     }
 }
 AUTH_USER_MODEL = "accounts.User" 

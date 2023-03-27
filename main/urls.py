@@ -11,8 +11,8 @@ router.register(r'review', views.SwaptReviewListingsAPI)
 router.register(r'cmnty-review', views.CmntyReviewListingsAPI)
 
 urlpatterns=[
-    path('home',views.home,name='home'),
-    path('', views.index, name="index"),
+    path('',views.home,name='home'),
+    #path('', views.index, name="index"),
     path('search',views.search,name='search'),
     path('category-list',views.category_list,name='category-list'),
     path('brand-list',views.brand_list,name='brand-list'),

@@ -1,0 +1,1 @@
+web: gunicorn swapt_mktplace.wsgi

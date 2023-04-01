@@ -1,6 +1,6 @@
 import { PropsWithChildren, useState } from 'react';
 import styled from 'styled-components';
-import { media } from 'frontend/utils/media';
+import { media } from 'utils/media';
 import Collapse from './Collapse';
 import RichText from './RichText';
 

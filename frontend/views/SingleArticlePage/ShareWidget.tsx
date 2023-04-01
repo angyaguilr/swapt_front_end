@@ -1,7 +1,7 @@
 import { FacebookIcon, FacebookShareButton, LinkedinIcon, LinkedinShareButton, TwitterIcon, TwitterShareButton } from 'react-share';
 import styled from 'styled-components';
-import { EnvVars } from 'frontend/env';
-import { media } from 'frontend/utils/media';
+import { EnvVars } from 'env';
+import { media } from 'utils/media';
 
 interface ShareWidgetProps {
   title: string;

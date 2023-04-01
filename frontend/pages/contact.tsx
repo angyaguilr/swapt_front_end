@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import Page from 'frontend/components/Page';
-import { media } from 'frontend/utils/media';
-import FormSection from 'frontend/views/ContactPage/FormSection';
-import InformationSection from 'frontend/views/ContactPage/InformationSection';
+import Page from 'components/Page';
+import { media } from 'utils/media';
+import FormSection from 'views/ContactPage/FormSection';
+import InformationSection from 'views/ContactPage/InformationSection';
 
 export default function ContactPage() {
   return (

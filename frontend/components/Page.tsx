@@ -1,8 +1,8 @@
 import Head from 'next/head';
 import { PropsWithChildren } from 'react';
 import styled from 'styled-components';
-import { EnvVars } from 'frontend/env';
-import { media } from 'frontend/utils/media';
+import { EnvVars } from 'env';
+import { media } from 'utils/media';
 import Container from './Container';
 import SectionTitle from './SectionTitle';
 

@@ -3,8 +3,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { Autoplay } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import Container from 'frontend/components/Container';
-import { media } from 'frontend/utils/media';
+import Container from 'components/Container';
+import { media } from 'utils/media';
 
 const PARTNER_LOGOS = [
   'logoipsum-logo-1.svg',

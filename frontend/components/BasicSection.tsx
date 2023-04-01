@@ -1,7 +1,7 @@
 import NextImage from 'next/image';
 import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
-import { media } from 'frontend/utils/media';
+import { media } from 'utils/media';
 import Container from './Container';
 import OverTitle from './OverTitle';
 import RichText from './RichText';

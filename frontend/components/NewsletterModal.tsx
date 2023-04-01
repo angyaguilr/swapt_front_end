@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import MailchimpSubscribe, { DefaultFormFields } from 'react-mailchimp-subscribe';
 import styled from 'styled-components';
-import { EnvVars } from 'frontend/env';
-import useEscClose from 'frontend/hooks/useEscKey';
-import { media } from 'frontend/utils/media';
+import { EnvVars } from 'env';
+import useEscClose from 'hooks/useEscKey';
+import { media } from 'utils/media';
 import Button from './Button';
 import CloseIcon from './CloseIcon';
 import Container from './Container';

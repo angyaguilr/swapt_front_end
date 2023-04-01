@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Components, TinaMarkdown, TinaMarkdownContent } from 'tinacms/dist/rich-text';
-import { media } from 'frontend/utils/media';
+import { media } from 'utils/media';
 import ArticleImage from './ArticleImage';
 import Code from './Code';
 import Link from './Link';

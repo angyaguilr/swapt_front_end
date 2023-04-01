@@ -4,9 +4,9 @@ import styled from 'styled-components';
 
 import { A11y, Autoplay, Navigation } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import Container from 'frontend/components/Container';
-import Separator from 'frontend/components/Separator';
-import { media } from 'frontend/utils/media';
+import Container from 'components/Container';
+import Separator from 'components/Separator';
+import { media } from 'utils/media';
 
 const TESTIMONIALS = [
   {

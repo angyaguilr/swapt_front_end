@@ -1,8 +1,8 @@
 import NextLink from 'next/link';
 import { FacebookIcon, LinkedinIcon, TwitterIcon } from 'react-share';
 import styled from 'styled-components';
-import Container from 'frontend/components/Container';
-import { media } from 'frontend/utils/media';
+import Container from 'components/Container';
+import { media } from 'utils/media';
 
 type SingleFooterListItem = { title: string; href: string };
 type FooterListItems = SingleFooterListItem[];

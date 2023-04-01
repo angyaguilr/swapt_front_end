@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import React from 'react';
-import { EnvVars } from 'frontend/env';
+import { EnvVars } from 'env';
 
 interface MetadataHeadProps {
   title: string;

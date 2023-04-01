@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import AutofitGrid from 'frontend/components/AutofitGrid';
-import BasicCard from 'frontend/components/BasicCard';
-import Container from 'frontend/components/Container';
-import { media } from 'frontend/utils/media';
+import AutofitGrid from 'components/AutofitGrid';
+import BasicCard from 'components/BasicCard';
+import Container from 'components/Container';
+import { media } from 'utils/media';
 
 const FEATURES = [
   {

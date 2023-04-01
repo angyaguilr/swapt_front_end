@@ -1,7 +1,7 @@
 import NextImage from 'next/image';
 import NextLink from 'next/link';
 import styled from 'styled-components';
-import { media } from 'frontend/utils/media';
+import { media } from 'utils/media';
 
 export interface ArticleCardProps {
   title: string;

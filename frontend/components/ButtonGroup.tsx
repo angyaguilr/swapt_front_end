@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { media } from 'frontend/utils/media';
+import { media } from 'utils/media';
 
 const ButtonGroup = styled.div`
   display: flex;

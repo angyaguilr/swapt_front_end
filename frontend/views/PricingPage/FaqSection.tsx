@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import Accordion from 'frontend/components/Accordion';
-import SectionTitle from 'frontend/components/SectionTitle';
+import Accordion from 's/Accordion';
+import SectionTitle from 'components/SectionTitle';
 
 export default function FaqSection() {
   return (

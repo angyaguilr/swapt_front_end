@@ -3,17 +3,17 @@ import Head from 'next/head';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { staticRequest } from 'tinacms';
-import Container from 'frontend/components/Container';
-import MDXRichText from 'frontend/components/MDXRichText';
+import Container from 'components/Container';
+import MDXRichText from 'components/MDXRichText';
 import { NonNullableChildrenDeep } from 'types';
-import { formatDate } from 'frontend/utils/formatDate';
-import { media } from 'frontend/utils/media';
-import { getReadTime } from 'frontend/utils/readTime';
-import Header from 'frontend/views/SingleArticlePage/Header';
-import MetadataHead from 'frontend/views/SingleArticlePage/MetadataHead';
-import OpenGraphHead from 'frontend/views/SingleArticlePage/OpenGraphHead';
-import ShareWidget from 'frontend/views/SingleArticlePage/ShareWidget';
-import StructuredDataHead from 'frontend/views/SingleArticlePage/StructuredDataHead';
+import { formatDate } from 'utils/formatDate';
+import { media } from 'utils/media';
+import { getReadTime } from 'utils/readTime';
+import Header from 'ePage/Header';
+import MetadataHead from 'views/SingleArticlePage/MetadataHead';
+import OpenGraphHead from 'views/SingleArticlePage/OpenGraphHead';
+import ShareWidget from 'views/SingleArticlePage/ShareWidget';
+import StructuredDataHead from 'views/SingleArticlePage/StructuredDataHead';
 import { Posts, PostsDocument, Query } from '.tina/__generated__/types';
 
 export default function SingleArticlePage(props: InferGetStaticPropsType<typeof getStaticProps>) {

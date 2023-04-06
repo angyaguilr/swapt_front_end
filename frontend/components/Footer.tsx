@@ -58,21 +58,15 @@ export default function Footer() {
         <BottomBar>
           <ShareBar>
             <NextLink href="https://www.twitter.com/my-saas-startup" passHref>
-              <a>
                 <TwitterIcon size={50} round={true} />
-              </a>
             </NextLink>
 
             <NextLink href="https://www.facebook.com/my-saas-startup" passHref>
-              <a>
                 <FacebookIcon size={50} round={true} />
-              </a>
             </NextLink>
 
             <NextLink href="https://www.linkedin.com/my-saas-startup" passHref>
-              <a>
                 <LinkedinIcon size={50} round={true} />
-              </a>
             </NextLink>
           </ShareBar>
           <Copyright>&copy; Copyright 2021 My Saas Startup</Copyright>
@@ -97,7 +91,7 @@ function ListItem({ title, href }: SingleFooterListItem) {
   return (
     <ListItemWrapper>
       <NextLink href={href} passHref>
-        <a>{title}</a>
+        {title}
       </NextLink>
     </ListItemWrapper>
   );
